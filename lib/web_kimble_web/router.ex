@@ -17,6 +17,7 @@ defmodule WebKimbleWeb.Router do
     pipe_through :browser
 
     get "/", LobbyController, :index
+    post "/create", CreateController, :create
   end
 
   # Other scopes may use custom stacks.
