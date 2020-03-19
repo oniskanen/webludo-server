@@ -16,7 +16,7 @@ defmodule WebKimbleWeb.Router do
   scope "/", WebKimbleWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", LobbyController, :index
   end
 
   # Other scopes may use custom stacks.

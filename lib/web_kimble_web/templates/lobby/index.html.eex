@@ -1,0 +1,15 @@
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Kimble" %></h1>´  
+</section>
+
+<section class="row">
+  <article class="column">
+    <h2>Join a game</h2>
+    <input type=text />
+  </article>
+  <article class="column">
+    
+    <a href="/create"><h2>Create a game</h2></button>
+    
+  </article>
+</section>

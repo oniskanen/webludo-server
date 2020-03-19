@@ -1,4 +1,4 @@
-defmodule WebKimbleWeb.PageController do
+defmodule WebKimbleWeb.LobbyController do
   use WebKimbleWeb, :controller
 
   def index(conn, _params) do
