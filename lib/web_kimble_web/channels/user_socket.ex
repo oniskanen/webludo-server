@@ -3,7 +3,8 @@ defmodule WebKimbleWeb.UserSocket do
 
   @max_age 2 * 7 * 24 * 60 * 60
   ## Channels
-  # channel "room:*", WebKimbleWeb.RoomChannel
+  channel "games:*", WebKimbleWeb.GameChannel
+  channel "lobby", WebKimbleWeb.LobbyChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
