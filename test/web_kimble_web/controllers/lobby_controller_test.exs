@@ -5,4 +5,5 @@ defmodule WebKimbleWeb.LobbyControllerTest do
     conn = get(conn, "/")
     assert html_response(conn, 200) =~ "Welcome to Kimble!"
   end
+
 end
