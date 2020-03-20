@@ -6,6 +6,8 @@ defmodule WebKimbleWeb.LobbyChannel do
     end
 
     def handle_in("create_game", params, socket) do
+        broadcast!(socket, "game_created", %{id: 123})
+
         {:reply, :ok, socket}
     end
 end

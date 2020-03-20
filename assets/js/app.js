@@ -15,3 +15,26 @@ import "phoenix_html";
 //
 // Local files can be imported directly using relative paths, for example:
 import socket from "./socket";
+
+let lobbyButton = document.getElementById("lobbyButton");
+
+if (lobbyButton) {
+  let channel = socket.channel("lobby", {});
+  channel
+    .join()
+    .receive("ok", resp => {
+      console.log("Joined successfully", resp);
+    })
+    .receive("error", resp => {
+      console.log("Unable to join", resp);
+    });
+
+  lobbyButton.addEventListener("click", e => {
+    let payload = {};
+    channel.push("create_game", payload).receive("error", e => console.log(e));
+  });
+
+  channel.on("game_created", resp => {
+    console.log(resp);
+  });
+}

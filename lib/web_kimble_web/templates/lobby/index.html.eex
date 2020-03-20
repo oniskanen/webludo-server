@@ -9,7 +9,7 @@
   </article>
   <article class="column">
     
-    <a href="/create"><h2>Create a game</h2></button>
+    <a id="lobbyButton"><h2>Create a game</h2></button>
     
   </article>
 </section>
