@@ -10,12 +10,14 @@ defmodule WebKimbleWeb.Channels.LobbyChannelTest do
 
     test "create_game replies ok" do
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
-        {status, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+        {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
         ref = push socket, "create_game", %{}
 
 
         assert_reply ref, :ok, %{}
     end
+
+        
 
 end
