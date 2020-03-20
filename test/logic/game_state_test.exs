@@ -4,16 +4,16 @@ defmodule WebKimble.Logic.GameStateTest do
     alias WebKimble.Logic.GameState
 
     test "gamestate has current player" do
-        gamestate = %GameState{current_player: "yellow"}
+        gamestate = %GameState{current_player: :yellow}
 
-        assert "yellow" = gamestate.current_player
+        assert :yellow = gamestate.current_player
     end
 
     test "gamestate has 16 pieces" do
-        gamestate = %GameState{current_player: "yellow"}
+        gamestate = %GameState{current_player: :yellow}
 
         assert 16 = length gamestate.pieces
     end
-
+    
 end
 
