@@ -8,5 +8,5 @@ defmodule WebKimble.Logic.Piece do
     # There are 5 positions between each start position, giving a total of 24 board positions
     # 0 = red start, 6 = blue start, 12 = yellow start, 18 = green start  
 
-    defstruct [:position_index, :area, :color]
+    defstruct [:position_index, :area, :player]
 end
