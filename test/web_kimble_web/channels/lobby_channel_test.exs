@@ -27,6 +27,13 @@ defmodule WebKimbleWeb.Channels.LobbyChannelTest do
         assert_reply ref, :ok, %{:code => code}
     end
 
+    test "throw returns error with payload" do
+        {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+        {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+        ref = push socket, "throw", %{myparams: "some content"}
         
+        assert_reply ref, :error, %{"myparams" => "some content"}
+    end
 
 end

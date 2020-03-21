@@ -18,4 +18,12 @@ defmodule WebKimbleWeb.LobbyChannel do
         _game = Networking.create_game(%{code: code})
         {:reply, {:ok, %{code: code}}, socket}
     end
+
+    def handle_in("throw", params, socket) do
+        {:reply, {:error, params}, socket}
+    end
+
+    def handle_in{"noreply", params, socket} do
+        {:noreply, socket}
+    end
 end
