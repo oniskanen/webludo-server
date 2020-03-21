@@ -8,23 +8,23 @@ defmodule WebKimbleWeb.Channels.LobbyChannelTest do
 
     end
 
-    test "create_game replies ok" do
+    test "create_game replies ok with game code" do
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
         {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
-        ref = push socket, "create_game", %{}
+        ref = push socket, "create_game", %{name: "game name"}
 
-
-        assert_reply ref, :ok, %{}
+        assert_reply ref, :ok, %{code: _code} = params
     end
 
-    test "create_game returns a working game id" do
+    test "create_game returns an error when no name given" do
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
         {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
         ref = push socket, "create_game", %{}
 
-        assert_reply ref, :ok, %{:code => code}
+        assert_reply ref, :error, %{details: [%{field: :name, message: "can't be blank"}], type: "ValidationError"} = params
+        
     end
 
     test "throw returns error with payload" do

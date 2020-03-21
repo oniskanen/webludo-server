@@ -13,10 +13,22 @@ defmodule WebKimbleWeb.LobbyChannel do
         to_string Enum.take_random(chars, length)
     end
 
-    def handle_in("create_game", _params, socket) do
+    defp format_errors(errors) do
+        errors
+        |> Enum.map(fn(e) -> 
+            {field, {message, _details}} = e
+            %{field: field, message: message}
+        end)
+    end
+
+
+    def handle_in("create_game", params, socket) do
         code = generate_code()
-        _game = Networking.create_game(%{code: code})
-        {:reply, {:ok, %{code: code}}, socket}
+        
+        case Networking.create_game(%{code: code, name: params["name"]}) do
+            {:ok, game} -> {:reply, {:ok, %{code: game.code}}, socket}
+            {:error, %Ecto.Changeset{} = changeset} -> {:reply, {:error, %{type: "ValidationError", details: format_errors(changeset.errors)}}, socket}
+        end
     end
 
     def handle_in("throw", params, socket) do
