@@ -64,9 +64,6 @@ defmodule WebKimble.Logic.GameStateTest do
         assert expected_index == move.target_index
     end
 
-
-
-
     
 end
 

@@ -2,14 +2,13 @@ defmodule WebKimble.Logic.GameState do
     use Ecto.Schema
     import Ecto.Changeset
 
+    @derive {Jason.Encoder, only: [:current_player, :pieces]}
     schema "game_states" do
         field :current_player, EctoAtom
         has_many :pieces, WebKimble.Logic.Piece
         belongs_to :game, WebKimble.Networking.Game
 
-
         timestamps()
-
     end
 
     @doc false

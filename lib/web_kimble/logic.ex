@@ -6,11 +6,17 @@ defmodule WebKimble.Logic do
     alias WebKimble.Logic.Constants
     alias WebKimble.Logic.Piece
 
-    def create_game_state(game, attrs) do
-        %GameState{}
+    def create_game_state(game, attrs) do        
+        {:ok, state} = %GameState{}
         |> GameState.changeset(attrs)
         |> Ecto.Changeset.put_assoc(:game, game)
         |> Repo.insert()
+
+        initial_pieces = WebKimble.Logic.Constants.initial_pieces()
+        
+        Enum.each(initial_pieces, fn(p) -> {:ok, _piece} = create_piece(state, p) end)
+
+        {:ok, state}
     end
 
     def create_game_state(attrs) do

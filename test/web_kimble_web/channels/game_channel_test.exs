@@ -8,7 +8,11 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
         assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
-        assert %{players: _players, game_state: %GameState{}} = reply
+        assert %{players: _players, game_state: %GameState{} = state} = reply
+
+        assert %{pieces: pieces} = state
+
+        assert 16 == length pieces
     end
 
     test "join replies with error for nonexistent game" do

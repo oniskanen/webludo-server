@@ -2,7 +2,7 @@ defmodule WebKimble.Networking.Game do
   use Ecto.Schema
   import Ecto.Changeset
 
-  # @derive {Jason.Encoder, only: [:code, :name, :players, :game_state]}
+  @derive {Jason.Encoder, only: [:code, :name, :players, :game_state]}
   schema "games" do
     field :code, :string
     field :name, :string
