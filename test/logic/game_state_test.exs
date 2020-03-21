@@ -1,37 +1,43 @@
 defmodule WebKimble.Logic.GameStateTest do
-    use ExUnit.Case, async: true
+    use ExUnit.Case
 
-    alias WebKimble.Logic.GameState
-    alias WebKimble.Logic.Piece
+    alias WebKimble.Logic
+    alias WebKimble.Repo
+
+    setup do
+        # Explicitly get a connection before each test
+        :ok = Ecto.Adapters.SQL.Sandbox.checkout(WebKimble.Repo)
+    end
 
     test "gamestate has current player" do
-        gamestate = %GameState{current_player: :yellow}
+        gamestate = WebKimble.TestHelpers.game_state_fixture(%{current_player: :yellow})
 
         assert :yellow = gamestate.current_player
     end
 
     test "gamestate has 16 pieces" do
-        gamestate = %GameState{current_player: :yellow}
+        gamestate = WebKimble.TestHelpers.game_state_fixture()
+        gamestate = Repo.preload(gamestate, :pieces)
 
         assert 16 = length gamestate.pieces
     end
 
     test "get_moves returns a list of possible moves" do
-        gamestate = %GameState{current_player: :yellow}
+        gamestate = WebKimble.TestHelpers.game_state_fixture(%{current_player: :yellow})
 
-        moves = GameState.get_moves(6, gamestate)
+        moves = Logic.get_moves(6, gamestate)
 
         assert 4 = length moves
 
-        assert Enum.all?(moves, fn(m) -> m.player == :yellow end)
+        assert Enum.all?(moves, fn(m) -> m.player_color == :yellow end)
         assert Enum.all?(moves, fn(m) -> m.current_area == :home end)
         assert Enum.all?(moves, fn(m) -> m.target_area == :play end)
     end
 
     test "cannot move from home without roll of 6" do
-        gamestate = %GameState{current_player: :yellow}
+        gamestate = WebKimble.TestHelpers.game_state_fixture()
 
-        moves = GameState.get_moves(1, gamestate)
+        moves = Logic.get_moves(1, gamestate)
 
         assert 0 = length moves
     end
@@ -44,9 +50,12 @@ defmodule WebKimble.Logic.GameStateTest do
     end
 
     defp test_start_index(player, expected_index) do
-        gamestate = %GameState{current_player: player, pieces: [%Piece{area: :home, position_index: 0, player: player}]}
+        attrs = %{current_player: player, pieces: [%{area: :home, position_index: 0, player_color: player}]}
+        gamestate = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        #gamestate = %GameState{current_player: player, pieces: }
         
-        moves = GameState.get_moves(6, gamestate)
+        moves = Logic.get_moves(6, gamestate)
 
         assert 1 = length moves
 

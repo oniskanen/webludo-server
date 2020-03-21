@@ -25,7 +25,7 @@ defmodule WebKimbleWeb.LobbyChannel do
     def handle_in("create_game", params, socket) do
         code = generate_code()
         
-        case Networking.create_game(%{code: code, name: params["name"]}) do
+        case Networking.create_game_with_initial_state(%{code: code, name: params["name"]}) do
             {:ok, game} -> {:reply, {:ok, %{code: game.code}}, socket}
             {:error, %Ecto.Changeset{} = changeset} -> {:reply, {:error, %{type: "ValidationError", details: format_errors(changeset.errors)}}, socket}
         end

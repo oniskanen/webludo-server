@@ -1,12 +1,14 @@
 defmodule WebKimbleWeb.Channels.GameChannelTest do
     use WebKimbleWeb.ChannelCase
 
+    alias WebKimble.Logic.GameState
+
     test "join replies with game and gamestate" do
         game = WebKimble.TestHelpers.game_fixture()
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
         assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
-        assert %{game: %{players: _players}, gamestate: %{}} = reply
+        assert %{players: _players, game_state: %GameState{}} = reply
     end
 
     test "join replies with error for nonexistent game" do

@@ -1,4 +1,7 @@
 defmodule WebKimble.Logic.Piece do
+    use Ecto.Schema
+    import Ecto.Changeset
+
 
     # Piece has a color and a area and position_index (mines, doubles etc. later on)
     # Color is a lowercase string. Area is one of :home, :play or :goal
@@ -8,5 +11,17 @@ defmodule WebKimble.Logic.Piece do
     # There are 5 positions between each start position, giving a total of 24 board positions
     # 0 = red start, 6 = blue start, 12 = yellow start, 18 = green start  
 
-    defstruct [:position_index, :area, :player]
+    schema "pieces" do
+        field :position_index, :integer
+        field :area, EctoAtom
+        field :player_color, EctoAtom
+        belongs_to :game_state, WebKimble.Logic.GameState
+
+    end
+
+    def changeset(piece, attrs) do
+        piece
+        |> cast(attrs, [:position_index, :area, :player_color])
+        |> validate_required([:position_index, :area, :player_color])
+    end
 end

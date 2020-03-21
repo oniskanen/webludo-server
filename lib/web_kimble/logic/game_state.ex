@@ -1,23 +1,21 @@
 defmodule WebKimble.Logic.GameState do
-    alias WebKimble.Logic.Constants
-    alias WebKimble.Logic.Move
+    use Ecto.Schema
+    import Ecto.Changeset
 
-    defstruct current_player: :red, pieces: Constants.initial_pieces
+    schema "game_states" do
+        field :current_player, EctoAtom
+        has_many :pieces, WebKimble.Logic.Piece
+        belongs_to :game, WebKimble.Networking.Game
 
-    def get_home_space_index(player) do
-        case player do
-            :red -> 0
-            :blue -> 6
-            :yellow -> 12
-            :green -> 18
-        end
+
+        timestamps()
+
     end
 
-    def get_moves(roll, gamestate) do
-        gamestate.pieces
-        |> Enum.filter(fn(p) -> p.player == gamestate.current_player end)
-        |> Enum.map(fn(p) -> %Move{player: p.player, current_area: p.area, current_index: p.position_index, target_area: :play, target_index: get_home_space_index(p.player)} end)
-        |> Enum.filter(fn(_m) -> roll == 6 end)        
-        # |> Enum.filter(fn(m) -> (m.current_area != :home || roll == 6) end)        
+    @doc false
+    def changeset(game_state, attrs) do
+        game_state
+        |> cast(attrs, [:current_player])
+        |> validate_required([:current_player])
     end
 end
