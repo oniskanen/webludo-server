@@ -30,11 +30,11 @@ if (lobbyButton) {
     });
 
   lobbyButton.addEventListener("click", e => {
-    let payload = {};
+    let payload = { a: "123" };
     channel
       .push("create_game", payload)
       .receive("ok", resp => console.log("got reply", resp))
-      .receive("error", e => console.log(e));
+      .receive("error", e => console.log("error", e));
   });
 
   channel.on("game_created", resp => {
