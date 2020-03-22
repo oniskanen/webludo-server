@@ -65,6 +65,10 @@ defmodule WebKimble.Networking do
         |> Repo.insert()
     end
 
+    def get_player(id) do
+        Repo.get(Player, id)
+    end
+
     def join_game(code, name) do
         {:ok, game} = get_game_by(%{code: code})
 

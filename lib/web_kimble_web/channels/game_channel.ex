@@ -10,12 +10,20 @@ defmodule WebKimbleWeb.GameChannel do
         end
     end
 
-    def handle_in("roll", _params, socket) do
-        num = :rand.uniform(6)
+    def handle_in("roll", %{"token" => token} = params, socket) do
+        {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
 
-        broadcast! socket, "roll", %{result: num}
+        {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
 
-        {:reply, {:ok, %{result: num}}, socket}
+        player = Networking.get_player(player_id)
+        current_player = game.game_state.current_player
+        case current_player == player.color do
+            false -> {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
+            true -> num = :rand.uniform(6)
+                    broadcast! socket, "roll", %{result: num}    
+                    {:reply, {:ok, %{result: num}}, socket}
+        end
+    
     end
 
     def handle_in("join_game", %{"name" => name} = params, socket) do                
