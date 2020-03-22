@@ -41,7 +41,9 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
         ref = push socket, "join_game", %{name: "Test Name"}
 
-        assert_reply ref, :ok, %{}        
+        assert_reply ref, :ok, %{}   
+        assert_broadcast "game_updated", %{players: [%{name: "Test Name"}]}
+        
     end
 
 end

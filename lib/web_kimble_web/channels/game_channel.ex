@@ -3,13 +3,12 @@ defmodule WebKimbleWeb.GameChannel do
 
     alias WebKimble.Networking
 
-    def join("games:" <> code, _params, socket) do        
+    def join("games:" <> code, _params, socket) do
         case Networking.get_game_by_code(code) do
-            nil -> {:error, "Game not found"}
-            game -> {:ok, game, socket}
+            {:error, message} -> {:error, message}
+            {:ok, game} -> {:ok, game, assign(socket, :code, code)}
         end
     end
-
 
     def handle_in("roll", _params, socket) do
         num = :rand.uniform(6)
@@ -19,8 +18,10 @@ defmodule WebKimbleWeb.GameChannel do
         {:reply, {:ok, %{result: num}}, socket}
     end
 
-    def handle_in("join_game", %{"name" => name} = params, socket) do
-        
-        {:reply, :ok, socket}
+    def handle_in("join_game", %{"name" => name} = params, socket) do                
+        {:ok, player, game} = Networking.join_game(socket.assigns.code, name)
+        token = WebKimbleWeb.Auth.get_token(player)
+        broadcast! socket, "game_updated", game
+        {:reply, {:ok, player}, socket}
     end
 end
