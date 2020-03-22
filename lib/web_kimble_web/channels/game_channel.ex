@@ -18,4 +18,9 @@ defmodule WebKimbleWeb.GameChannel do
 
         {:reply, {:ok, %{result: num}}, socket}
     end
+
+    def handle_in("join_game", %{"name" => name} = params, socket) do
+        
+        {:reply, :ok, socket}
+    end
 end

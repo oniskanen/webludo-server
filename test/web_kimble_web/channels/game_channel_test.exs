@@ -33,4 +33,15 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         assert Enum.member?(1..6, result)
     end
 
+    test "join game broadcasts game state" do
+        game = WebKimble.TestHelpers.game_fixture()
+        {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+        assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+        ref = push socket, "join_game", %{name: "Test Name"}
+
+        assert_reply ref, :ok, %{}        
+    end
+
 end
