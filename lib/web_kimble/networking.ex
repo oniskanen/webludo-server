@@ -72,8 +72,12 @@ defmodule WebKimble.Networking do
         taken_colors = game.players |> Enum.map(fn(p) -> p.color end)
         available_colors = Logic.available_colors(taken_colors)
 
-        {:ok, player} = create_player(game, %{name: name, color: Enum.random(available_colors)})
-
-        {:ok, player, preload_game(game, [force: true])}
+        case length available_colors do
+            n when n > 0 -> 
+                {:ok, player} = create_player(game, %{name: name, color: Enum.random(available_colors)})
+                {:ok, player, preload_game(game, [force: true])}
+            _ -> {:error, "Game is full"}
+        end
+        
     end
 end

@@ -93,4 +93,28 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         assert_reply ref, :ok, %{token: token}   
     end
 
+    test "5th player trying to join game receives an error" do
+        game = WebKimble.TestHelpers.game_fixture()
+        {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+        assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+        ref = push socket, "join_game", %{name: "Player 1"}
+        assert_reply ref, :ok, %{}   
+
+        ref = push socket, "join_game", %{name: "Player 2"}
+        assert_reply ref, :ok, %{}   
+
+        ref = push socket, "join_game", %{name: "Player 3"}
+        assert_reply ref, :ok, %{}   
+
+        ref = push socket, "join_game", %{name: "Player 4"}
+        assert_reply ref, :ok, %{}   
+
+        ref = push socket, "join_game", %{name: "Player 5"}
+        assert_reply ref, :error, %{error: "Game is full"}
+
+
+    end
+
 end

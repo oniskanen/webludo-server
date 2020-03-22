@@ -19,10 +19,14 @@ defmodule WebKimbleWeb.GameChannel do
     end
 
     def handle_in("join_game", %{"name" => name} = params, socket) do                
-        {:ok, player, game} = Networking.join_game(socket.assigns.code, name)
-        token = WebKimbleWeb.Auth.get_token(player)
-        broadcast! socket, "game_updated", game
-        {:reply, {:ok, %{token: token}}, socket}
+        case Networking.join_game(socket.assigns.code, name) do
+            {:ok, player, game} ->
+                token = WebKimbleWeb.Auth.get_token(player)
+                broadcast! socket, "game_updated", game
+                {:reply, {:ok, %{token: token, color: player.color}}, socket}
+            {:error, message} -> {:reply, {:error, %{error: message}}, socket}
+        end
+
     end
 
     def handle_in("game", _params, socket) do
