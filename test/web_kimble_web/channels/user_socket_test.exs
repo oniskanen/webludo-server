@@ -6,8 +6,4 @@ defmodule WebKimbleWeb.Channels.UserSocketTest do
         assert {:ok, socket} = connect(UserSocket, %{})
     end
 
-    test "socket authentication with invalid token" do
-        assert :error = connect(UserSocket, %{"token" => "123"})
-    end
-
 end

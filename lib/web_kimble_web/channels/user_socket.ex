@@ -17,21 +17,6 @@ defmodule WebKimbleWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(%{"token" => token}, socket, _connect_info) do
-    case Phoenix.Token.verify(
-          socket,
-          "user socket",
-          token,
-          max_age: @max_age
-    ) do
-        {:ok, user_id} ->
-          {:ok, assign(socket, :user_id, user_id)}
-        {:error, _reason} ->
-          :error
-    
-    end
-  end
-
   def connect(_params, socket, _connect_info) do
     {:ok, socket}
   end
