@@ -15,9 +15,12 @@ defmodule WebKimble.Networking do
     end
 
     defp preload_game(game, opts \\ []) when is_list(opts) do
-        game 
+        game = game 
         |> Repo.preload([game_state: :pieces], opts)
         |> Repo.preload(:players, opts)
+
+        sorted_players = Enum.sort_by(game.players, fn(p) -> p.inserted_at end, NaiveDateTime)
+        %Game{game | players: sorted_players}
     end
 
 
