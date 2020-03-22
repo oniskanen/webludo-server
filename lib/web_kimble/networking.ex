@@ -3,7 +3,7 @@ defmodule WebKimble.Networking do
     alias WebKimble.Repo
     alias WebKimble.Networking.Player
     alias WebKimble.Networking.Game
-
+    alias WebKimble.Logic
 
     def get_game_by(attrs) do
         game = Repo.get_by(Game, attrs)
@@ -14,10 +14,10 @@ defmodule WebKimble.Networking do
         end
     end
 
-    defp preload_game(game) do
+    defp preload_game(game, opts \\ []) when is_list(opts) do
         game 
-        |> Repo.preload(game_state: :pieces)
-        |> Repo.preload(:players)
+        |> Repo.preload([game_state: :pieces], opts)
+        |> Repo.preload(:players, opts)
     end
 
 
@@ -65,8 +65,12 @@ defmodule WebKimble.Networking do
     def join_game(code, name) do
         {:ok, game} = get_game_by(%{code: code})
 
-        {:ok, player} = create_player(game, %{name: name, color: WebKimble.Logic.random_player()})
+        game = Repo.preload(game, :players)
+        taken_colors = game.players |> Enum.map(fn(p) -> p.color end)
+        available_colors = Logic.available_colors(taken_colors)
 
-        {:ok, player, preload_game(game)}
+        {:ok, player} = create_player(game, %{name: name, color: Enum.random(available_colors)})
+
+        {:ok, player, preload_game(game, [force: true])}
     end
 end

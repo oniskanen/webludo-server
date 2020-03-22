@@ -25,6 +25,11 @@ defmodule WebKimble.Logic do
         |> Repo.insert()
     end
 
+    def available_colors(taken_colors) when is_list(taken_colors) do
+        Constants.player_colors 
+        |> Enum.filter(fn(c) -> c not in taken_colors end)
+    end
+
     def get_moves(roll, game_state) do
         game_state = Repo.preload(game_state, :pieces)
 

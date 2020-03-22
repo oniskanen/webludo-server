@@ -24,4 +24,9 @@ defmodule WebKimbleWeb.GameChannel do
         broadcast! socket, "game_updated", game
         {:reply, {:ok, player}, socket}
     end
+
+    def handle_in("game", _params, socket) do
+       {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
+       {:reply, {:ok, game}, socket} 
+    end
 end
