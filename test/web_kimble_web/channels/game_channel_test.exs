@@ -169,6 +169,6 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
         ref = push socket, "action", %{token: current.token, type: "move", move: %{}}
 
-        assert_reply ref, :ok, %{}
+        assert_reply ref, :ok, %{game_state: _game_state}
     end
 end

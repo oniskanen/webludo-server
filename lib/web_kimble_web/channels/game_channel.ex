@@ -25,7 +25,7 @@ defmodule WebKimbleWeb.GameChannel do
         end    
     end
 
-    def handle_in("action", %{"token" => token, "type" => "move", "move" => move}, socket) do
+    def handle_in("action", %{"token" => token, "type" => "move", "move" => _move}, socket) do
         {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
         {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
         player = Networking.get_player(player_id)
@@ -33,7 +33,7 @@ defmodule WebKimbleWeb.GameChannel do
 
         case current_player == player.color do
             false -> {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
-            true -> {:reply, :ok, socket}
+            true -> {:reply, {:ok, %{game_state: game.game_state}}, socket}
         end
     end
 
