@@ -105,7 +105,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     defp roll(player, socket) do
-        push socket, "roll", %{token: player.token}
+        push socket, "action", %{token: player.token, type: "roll"}
     end
 
     test "player not in turn cannot roll die" do
