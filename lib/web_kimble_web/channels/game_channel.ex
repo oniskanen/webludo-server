@@ -2,6 +2,7 @@ defmodule WebKimbleWeb.GameChannel do
     use WebKimbleWeb, :channel
 
     alias WebKimble.Networking
+    alias WebKimble.Logic
 
     def join("games:" <> code, _params, socket) do
         case Networking.get_game_by_code(code) do
@@ -17,10 +18,12 @@ defmodule WebKimbleWeb.GameChannel do
 
         player = Networking.get_player(player_id)
         current_player = game.game_state.current_player
+        
         case current_player == player.color do
             false -> {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
             true -> num = :rand.uniform(6)
-                    broadcast! socket, "roll", %{result: num}    
+                    actions = Logic.get_moves(num, game.game_state)
+                    broadcast! socket, "roll", %{result: num, actions: actions}    
                     {:reply, {:ok, %{result: num}}, socket}
         end    
     end

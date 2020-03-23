@@ -36,11 +36,11 @@ defmodule WebKimble.Logic do
         game_state.pieces
         |> Enum.filter(fn(p) -> p.player_color == game_state.current_player end)
         |> Enum.map(fn(p) -> 
-            %Move{player_color: p.player_color, 
-            current_area: p.area, 
-            current_index: p.position_index, 
-            target_area: :play, 
-            target_index: Constants.get_home_space_index(p.player_color)} 
+            %Move{current: p,
+                target: %Piece{area: :play, 
+                    position_index: Constants.get_home_space_index(p.player_color),
+                    player_color: p.player_color}
+            } 
         end)
         |> Enum.filter(fn(_m) -> roll == 6 end)
     end

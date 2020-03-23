@@ -29,9 +29,9 @@ defmodule WebKimble.Logic.GameStateTest do
 
         assert 4 = length moves
 
-        assert Enum.all?(moves, fn(m) -> m.player_color == :yellow end)
-        assert Enum.all?(moves, fn(m) -> m.current_area == :home end)
-        assert Enum.all?(moves, fn(m) -> m.target_area == :play end)
+        assert Enum.all?(moves, fn(m) -> m.current.player_color == :yellow and m.target.player_color == :yellow end)
+        assert Enum.all?(moves, fn(m) -> m.current.area == :home end)
+        assert Enum.all?(moves, fn(m) -> m.target.area == :play end)
     end
 
     test "cannot move from home without roll of 6" do
@@ -61,7 +61,7 @@ defmodule WebKimble.Logic.GameStateTest do
 
         [move | _tail] = moves
 
-        assert expected_index == move.target_index
+        assert expected_index == move.target.position_index
     end
 
     
