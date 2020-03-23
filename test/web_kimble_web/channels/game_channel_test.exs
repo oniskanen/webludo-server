@@ -144,4 +144,31 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         assert Enum.member?(1..6, result)
     end
 
+    test "move action returns new game state" do
+        game = WebKimble.TestHelpers.game_fixture()
+        {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+        game = Repo.preload(game, :game_state)
+        current_player = game.game_state.current_player
+
+        assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+        ref = push socket, "join_game", %{name: "Player 1"}
+        assert_reply ref, :ok, p1   
+
+        ref = push socket, "join_game", %{name: "Player 2"}
+        assert_reply ref, :ok, p2   
+
+        ref = push socket, "join_game", %{name: "Player 3"}
+        assert_reply ref, :ok, p3   
+
+        ref = push socket, "join_game", %{name: "Player 4"}
+        assert_reply ref, :ok, p4
+        
+        current = [p1, p2, p3, p4] |> Enum.find(fn(p) -> p.color == current_player end)
+
+        ref = push socket, "action", %{token: current.token, type: "move", move: %{}}
+
+        assert_reply ref, :ok, %{}
+    end
 end
