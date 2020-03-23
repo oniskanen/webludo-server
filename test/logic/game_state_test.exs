@@ -38,8 +38,6 @@ defmodule WebKimble.Logic.GameStateTest do
         game_state = WebKimble.TestHelpers.game_state_fixture()
         
         assert nil == Logic.get_moves(1, game_state)[game_state.current_player]
-
-        #assert 0 = length moves
     end
 
     test "moving from home to play sets correct index" do
