@@ -44,19 +44,38 @@ defmodule WebKimble.Logic do
         update_game_state(game_state, %{roll: roll})
     end
 
+    defp home_to_play_move(%Piece{} = piece) do
+        %Move{
+            piece_id: piece.id,
+            target_area: :play,
+            target_index: Constants.get_home_space_index(piece.player_color)
+        }
+    end
+
+    defp in_play_move(%Piece{} = piece, roll) do
+        %Move{
+            piece_id: piece.id,
+            target_area: :play,
+            target_index: piece.position_index + roll
+        }
+    end
+
+    defp get_piece_move(%Piece{} = piece, roll) do
+        case piece.area do
+            :home -> if roll == 6 do home_to_play_move(piece) else nil end
+            :play -> in_play_move(piece, roll)
+            _ -> nil
+        end
+    end
+
+
     def get_moves(game_state) do
         game_state = Repo.preload(game_state, :pieces)
 
         game_state.pieces
         |> Enum.filter(fn(p) -> p.player_color == game_state.current_player end)
-        |> Enum.map(fn(p) ->
-            %Move{
-                piece_id: p.id,
-                target_area: :play,
-                target_index: Constants.get_home_space_index(p.player_color)
-            } 
-        end)
-        |> Enum.filter(fn(_m) -> game_state.roll == 6 end)
+        |> Enum.map(&get_piece_move(&1, game_state.roll))
+        |> Enum.filter(fn(m) -> m != nil end)
     end
 
     def create_piece(%GameState{} = game_state, attrs) do

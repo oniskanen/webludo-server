@@ -58,6 +58,17 @@ defmodule WebKimble.Logic.GameStateTest do
         assert expected_index == move.target_index
     end
 
+    test "moving in play adds to position index" do
+        attrs = %{current_player: :red, roll: 3, pieces: [%{area: :play, position_index: 0, player_color: :red}]}
+
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        moves = Logic.get_moves(game_state)
+
+        assert [move | []] = moves
+
+        assert %{target_index: 3, target_area: :play} = move
+    end
     
 end
 
