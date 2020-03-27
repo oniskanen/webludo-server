@@ -51,14 +51,12 @@ defmodule WebKimble.Logic do
         |> Enum.filter(fn(p) -> p.player_color == game_state.current_player end)
         |> Enum.map(fn(p) ->
             %Move{
-                current: p,
-                target: %Piece{area: :play, 
-                    position_index: Constants.get_home_space_index(p.player_color),
-                    player_color: p.player_color}
+                piece_id: p.id,
+                target_area: :play,
+                target_index: Constants.get_home_space_index(p.player_color)
             } 
         end)
         |> Enum.filter(fn(_m) -> game_state.roll == 6 end)
-        |> Enum.group_by(fn(m) -> m.current.player_color end)
     end
 
     def create_piece(%GameState{} = game_state, attrs) do
@@ -66,6 +64,10 @@ defmodule WebKimble.Logic do
         |> Piece.changeset(attrs)
         |> Ecto.Changeset.put_assoc(:game_state, game_state)
         |> Repo.insert()
+    end
+
+    def get_piece(id) do
+        Repo.get(Piece, id)
     end
 
     def update_piece(%Piece{} = piece, attrs) do
@@ -79,7 +81,8 @@ defmodule WebKimble.Logic do
     end
 
     def execute_move(game_state, move) do
-        {:ok, piece} = update_piece(move.current, Map.from_struct(move.target))
+        piece = get_piece(move.piece_id)
+        {:ok, piece} = update_piece(piece, %{area: move.target_area, position_index: move.target_index})
 
         game_state = game_state |> Repo.preload(:pieces, [force: true])
 

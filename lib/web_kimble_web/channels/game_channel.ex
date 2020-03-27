@@ -37,7 +37,7 @@ defmodule WebKimbleWeb.GameChannel do
         
         case current_player == player.color do
             false -> {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
-            true -> moves = Logic.get_moves(game.game_state)[current_player]
+            true -> moves = Logic.get_moves(game.game_state)
                 case moves do
                     nil -> {:reply, {:error, %{message: "No moves available"}}, socket}
                     moves -> move = Enum.find(moves, &match?(move, &1))

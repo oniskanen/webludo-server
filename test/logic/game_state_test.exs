@@ -25,19 +25,17 @@ defmodule WebKimble.Logic.GameStateTest do
     test "get_moves returns a list of possible moves" do
         gamestate = WebKimble.TestHelpers.game_state_fixture(%{current_player: :yellow, roll: 6})
 
-        moves = Logic.get_moves(gamestate).yellow
+        moves = Logic.get_moves(gamestate)
 
         assert 4 = length moves
-
-        assert Enum.all?(moves, fn(m) -> m.current.player_color == :yellow and m.target.player_color == :yellow end)
-        assert Enum.all?(moves, fn(m) -> m.current.area == :home end)
-        assert Enum.all?(moves, fn(m) -> m.target.area == :play end)
+        
+        assert Enum.all?(moves, fn(m) -> m.target_area == :play end)
     end
 
     test "cannot move from home without roll of 6" do
         game_state = WebKimble.TestHelpers.game_state_fixture(%{roll: 1})
         
-        assert nil == Logic.get_moves(game_state)[game_state.current_player]
+        assert [] == Logic.get_moves(game_state)
     end
 
     test "moving from home to play sets correct index" do
@@ -51,13 +49,13 @@ defmodule WebKimble.Logic.GameStateTest do
         attrs = %{current_player: player, roll: 6, pieces: [%{area: :home, position_index: 0, player_color: player}]}
         gamestate = WebKimble.TestHelpers.game_state_fixture(attrs)
         
-        moves = Logic.get_moves(gamestate)[player]
+        moves = Logic.get_moves(gamestate)
 
         assert 1 = length moves
 
         [move | _tail] = moves
 
-        assert expected_index == move.target.position_index
+        assert expected_index == move.target_index
     end
 
     
