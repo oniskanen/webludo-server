@@ -23,7 +23,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     test "join game broadcasts game state" do
-        game = WebKimble.TestHelpers.game_fixture()
+        game = WebKimble.TestHelpers.game_fixture(%{players: []})
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
         assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -42,7 +42,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     test "4 players joining get different colors" do
-        game = WebKimble.TestHelpers.game_fixture()
+        game = WebKimble.TestHelpers.game_fixture(%{players: []})
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
         assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -83,22 +83,10 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     test "5th player trying to join game receives an error" do
-        game = WebKimble.TestHelpers.game_fixture()
+        game = WebKimble.TestHelpers.game_fixture(%{players: [%{color: :red, name: "Player 1"}, %{color: :blue, name: "Player 2"}, %{color: :green, name: "Player 3"}, %{color: :yellow, name: "Player 4"}]})
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
         assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
-
-        ref = push socket, "join_game", %{name: "Player 1"}
-        assert_reply ref, :ok, %{}   
-
-        ref = push socket, "join_game", %{name: "Player 2"}
-        assert_reply ref, :ok, %{}   
-
-        ref = push socket, "join_game", %{name: "Player 3"}
-        assert_reply ref, :ok, %{}   
-
-        ref = push socket, "join_game", %{name: "Player 4"}
-        assert_reply ref, :ok, %{}   
 
         ref = push socket, "join_game", %{name: "Player 5"}
         assert_reply ref, :error, %{error: "Game is full"}
@@ -109,31 +97,31 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     test "player not in turn cannot roll die" do
-        game = WebKimble.TestHelpers.game_fixture()
+        game = WebKimble.TestHelpers.game_fixture(%{current_player: :blue, players: [%{color: :blue, name: "Player 2"}, %{color: :green, name: "Player 3"}, %{color: :yellow, name: "Player 4"}]})
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
         game = Repo.preload(game, :game_state)
-        current_player = game.game_state.current_player
 
         assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
         p1 = join_game(socket, "Player 1")
-        p2 = join_game(socket, "Player 2")
-        p3 = join_game(socket, "Player 3")
-        p4 = join_game(socket, "Player 4")
-        
-        current = [p1, p2, p3, p4] |> Enum.find(fn(p) -> p.color == current_player end)
 
-        others = [p1, p2, p3, p4] |> Enum.filter(fn(p) -> p.color != current_player end)
+        assert_reply roll(p1, socket), :error, %{error: error_message}
+        assert "It is the blue player's turn" == error_message 
 
-        expected_error = "It is the #{current_player} player's turn"
-        others 
-        |> Enum.each(fn(p) -> 
-            assert_reply roll(p, socket), :error, %{error: error_message}
-            assert expected_error == error_message 
-        end)
+    end
 
-        assert_reply roll(current, socket), :ok, %{result: result}
+    test "player in turn can roll die" do
+        game = WebKimble.TestHelpers.game_fixture(%{current_player: :red, players: [%{color: :blue, name: "Player 2"}, %{color: :green, name: "Player 3"}, %{color: :yellow, name: "Player 4"}]})
+        {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+        game = Repo.preload(game, :game_state)
+
+        assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+        p1 = join_game(socket, "Player 1")
+
+        assert_reply roll(p1, socket), :ok, %{result: result}
         assert Enum.member?(1..6, result)
     end
 
@@ -144,23 +132,25 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     end
 
     test "move action returns new game state" do
-        game = WebKimble.TestHelpers.game_fixture()
+        game = WebKimble.TestHelpers.game_fixture(
+            %{current_player: :red,
+             pieces: [%{player_color: :red, area: :home, position_index: 0}],
+             players: [%{color: :blue, name: "Player 2"}, %{color: :green, name: "Player 3"}, %{color: :yellow, name: "Player 4"}],
+             roll: 6
+             })
         {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
-
-        game = Repo.preload(game, :game_state)
-        current_player = game.game_state.current_player
 
         assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
         p1 = join_game(socket, "Player 1")
-        p2 = join_game(socket, "Player 2")
-        p3 = join_game(socket, "Player 3")
-        p4 = join_game(socket, "Player 4")
 
-        current = [p1, p2, p3, p4] |> Enum.find(fn(p) -> p.color == current_player end)
+        ref = push socket, "action", %{token: p1.token, type: "move",
+            move: %{current: %{color: :red, area: :home, position_index: 0}, target: %{color: :red, area: :play, position_index: 0}}}
 
-        ref = push socket, "action", %{token: current.token, type: "move", move: %{}}
+        assert_reply ref, :ok, %{game_state: game_state}
 
-        assert_reply ref, :ok, %{game_state: _game_state}
+        pieces_in_play = game_state.pieces |> Enum.filter(fn (p) -> p.area == :play end)
+
+        assert 1 = length pieces_in_play
     end
 end

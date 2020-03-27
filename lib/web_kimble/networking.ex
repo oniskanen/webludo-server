@@ -47,7 +47,7 @@ defmodule WebKimble.Networking do
         case create_game(attrs) do
             {:ok, game} ->
                 initial_player = WebKimble.Logic.random_player()
-                {:ok, _state} = WebKimble.Logic.create_game_state(game, %{current_player: initial_player})
+                {:ok, _state} = WebKimble.Logic.create_initial_game_state(game, %{current_player: initial_player})
                 {:ok, game}
             resp -> resp
         end

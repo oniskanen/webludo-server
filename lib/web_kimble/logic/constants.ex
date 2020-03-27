@@ -6,6 +6,8 @@ defmodule WebKimble.Logic.Constants do
     # @areas [:home, :play, :goal]
     @starting_indices [0, 1, 2, 3]
 
+    @max_rolls 3
+
     def initial_pieces do
         (for p <- @player_colors, i <- @starting_indices, do: %{player_color: p, position_index: i, area: :home})
     end

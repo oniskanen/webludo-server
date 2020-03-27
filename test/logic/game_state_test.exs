@@ -23,9 +23,9 @@ defmodule WebKimble.Logic.GameStateTest do
     end
 
     test "get_moves returns a list of possible moves" do
-        gamestate = WebKimble.TestHelpers.game_state_fixture(%{current_player: :yellow})
+        gamestate = WebKimble.TestHelpers.game_state_fixture(%{current_player: :yellow, roll: 6})
 
-        moves = Logic.get_moves(6, gamestate).yellow
+        moves = Logic.get_moves(gamestate).yellow
 
         assert 4 = length moves
 
@@ -35,9 +35,9 @@ defmodule WebKimble.Logic.GameStateTest do
     end
 
     test "cannot move from home without roll of 6" do
-        game_state = WebKimble.TestHelpers.game_state_fixture()
+        game_state = WebKimble.TestHelpers.game_state_fixture(%{roll: 1})
         
-        assert nil == Logic.get_moves(1, game_state)[game_state.current_player]
+        assert nil == Logic.get_moves(game_state)[game_state.current_player]
     end
 
     test "moving from home to play sets correct index" do
@@ -48,12 +48,10 @@ defmodule WebKimble.Logic.GameStateTest do
     end
 
     defp test_start_index(player, expected_index) do
-        attrs = %{current_player: player, pieces: [%{area: :home, position_index: 0, player_color: player}]}
+        attrs = %{current_player: player, roll: 6, pieces: [%{area: :home, position_index: 0, player_color: player}]}
         gamestate = WebKimble.TestHelpers.game_state_fixture(attrs)
-
-        #gamestate = %GameState{current_player: player, pieces: }
         
-        moves = Logic.get_moves(6, gamestate)[player]
+        moves = Logic.get_moves(gamestate)[player]
 
         assert 1 = length moves
 
