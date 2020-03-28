@@ -99,6 +99,25 @@ defmodule WebKimble.Logic.GameStateTest do
 
         assert %{target_index: 0, target_area: :goal} = move
     end
+
+    test "players move in play from starting point" do
+        validate_piece_in_play(:red, 0)
+        validate_piece_in_play(:blue, 6)
+        validate_piece_in_play(:yellow, 12)
+        validate_piece_in_play(:green, 18)
+    end
+
+    defp validate_piece_in_play(player, index) do
+        attrs = %{current_player: player, roll: 1, pieces: [%{area: :play, position_index: index, player_color: player}]}
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        moves = Logic.get_moves(game_state)
+
+        assert [move | []] = moves
+
+        expected = index + 1
+        assert %{target_index: ^expected, target_area: :play} = move
+    end
     
 end
 
