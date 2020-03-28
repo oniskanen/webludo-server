@@ -56,7 +56,7 @@ defmodule WebKimble.Logic do
         home_index = Constants.get_home_space_index(piece.player_color)
         
         sum = piece.position_index + roll
-        
+
         temp_steps = piece.position_index - home_index
         
         steps_taken = 
@@ -86,10 +86,19 @@ defmodule WebKimble.Logic do
         end
     end
 
+    defp in_goal_move(%Piece{} = piece, roll) do
+        %Move{
+            piece_id: piece.id,
+            target_area: :goal,
+            target_index: piece.position_index + roll
+        }
+    end
+
     defp get_piece_move(%Piece{} = piece, roll) do
         case piece.area do
             :home -> if roll == 6 do home_to_play_move(piece) else nil end
             :play -> in_play_move(piece, roll)
+            :goal -> in_goal_move(piece, roll)
             _ -> nil
         end
     end

@@ -118,6 +118,17 @@ defmodule WebKimble.Logic.GameStateTest do
         expected = index + 1
         assert %{target_index: ^expected, target_area: :play} = move
     end
+
+    test "piece in goal can move" do
+        attrs = %{current_player: :red, roll: 1, pieces: [%{area: :goal, position_index: 0, player_color: :red}]}
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        moves = Logic.get_moves(game_state)
+
+        assert [move | []] = moves
+
+        assert %{target_index: 1, target_area: :goal} = move
+    end
     
 end
 
