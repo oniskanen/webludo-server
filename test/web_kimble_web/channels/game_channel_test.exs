@@ -121,7 +121,10 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
         p1 = join_game(socket, "Player 1")
 
-        assert_reply roll(p1, socket), :ok, %{result: result}
+        assert_reply roll(p1, socket), :ok, %{}
+
+        assert_broadcast "roll", %{result: result}
+
         assert Enum.member?(1..6, result)
     end
 
@@ -144,8 +147,17 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
         p1 = join_game(socket, "Player 1")
 
+        ref = push socket, "game_state", %{}
+
+        assert_reply ref, :ok, %{pieces: pieces}
+
+        %{id: id} = hd pieces
+        #[piece | []] = pieces
+
+        #%{id: id} = piece
+
         ref = push socket, "action", %{token: p1.token, type: "move",
-            move: %{current: %{color: :red, area: :home, position_index: 0}, target: %{color: :red, area: :play, position_index: 0}}}
+             move: %{piece_id: id, target_area: :play, target_index: 0, type: "move"}}
 
         assert_reply ref, :ok, %{game_state: game_state}
 
