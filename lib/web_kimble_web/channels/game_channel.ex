@@ -42,7 +42,8 @@ defmodule WebKimbleWeb.GameChannel do
                     moves -> validated_move = Enum.find(moves, fn(m) -> m.piece_id == move["piece_id"] end)
                         case validated_move do
                             nil -> {:reply, {:error, %{message: "Not a valid move"}}, socket}
-                            m -> state = Logic.execute_move(game.game_state, m)
+                            m -> {state, executed_move} = Logic.execute_move(game.game_state, m)
+                                    broadcast! socket, "game_state_updated", %{game_state: state, previous_move: executed_move}
                                     {:reply, {:ok, %{game_state: state}}, socket}
                         end
                 end
