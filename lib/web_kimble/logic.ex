@@ -56,7 +56,8 @@ defmodule WebKimble.Logic do
         home_index = Constants.get_home_space_index(piece.player_color)
         
         sum = piece.position_index + roll
-        temp_steps = sum - home_index
+        
+        temp_steps = piece.position_index - home_index
         
         steps_taken = 
             if temp_steps < 0 do 
@@ -68,7 +69,7 @@ defmodule WebKimble.Logic do
 
         target_index = rem(sum, Constants.play_track_length)
         
-        if steps_taken < Constants.play_track_length do
+        if steps_taken + roll < Constants.play_track_length do
             %Move{
                 piece_id: piece.id,
                 target_area: :play,
