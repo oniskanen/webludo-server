@@ -147,6 +147,21 @@ defmodule WebKimble.Logic.GameStateTest do
 
         assert [] = moves
     end
+
+    test "piece cannot move on top of another piece of the same player" do
+        attrs = %{current_player: :red, roll: 1, pieces: [
+            %{area: :play, position_index: 22, player_color: :red},
+            %{area: :play, position_index: 23, player_color: :red}
+        ]}
+        
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+        moves = Logic.get_moves(game_state)
+
+        assert [move | []] = moves
+
+        assert %{target_index: 0, target_area: :goal} = move
+
+    end
     
 end
 

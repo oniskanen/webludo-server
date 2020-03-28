@@ -107,11 +107,16 @@ defmodule WebKimble.Logic do
     def get_moves(game_state) do
         game_state = Repo.preload(game_state, :pieces)
 
-        game_state.pieces
+        current_player_pieces = game_state.pieces
         |> Enum.filter(fn(p) -> p.player_color == game_state.current_player end)
+
+        current_player_pieces
         |> Enum.map(&get_piece_move(&1, game_state.roll))
         |> Enum.filter(fn(m) -> m != nil end)
         |> Enum.filter(fn(m) -> m.target_area != :goal || m.target_index < Constants.goal_track_length end)
+        |> Enum.filter(fn(m) -> !Enum.any?(current_player_pieces,
+            fn(p) -> p.area == m.target_area && p.position_index == m.target_index end)
+        end)
     end
 
     def create_piece(%GameState{} = game_state, attrs) do
