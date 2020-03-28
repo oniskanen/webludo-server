@@ -7,6 +7,7 @@ defmodule WebKimble.Logic.Constants do
     @starting_indices [0, 1, 2, 3]
 
     @max_rolls 3
+    
 
     def initial_pieces do
         (for p <- @player_colors, i <- @starting_indices, do: %{player_color: p, position_index: i, area: :home})
@@ -14,6 +15,10 @@ defmodule WebKimble.Logic.Constants do
 
     def play_track_length do
         24
+    end
+
+    def goal_track_length do
+        4
     end
 
     def get_home_space_index(player_color) do
