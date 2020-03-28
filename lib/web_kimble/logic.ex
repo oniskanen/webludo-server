@@ -53,11 +53,36 @@ defmodule WebKimble.Logic do
     end
 
     defp in_play_move(%Piece{} = piece, roll) do
-        %Move{
-            piece_id: piece.id,
-            target_area: :play,
-            target_index: piece.position_index + roll
-        }
+        home_index = Constants.get_home_space_index(piece.player_color)
+        
+        sum = piece.position_index + roll
+        temp_steps = sum - home_index
+        
+        steps_taken = 
+            if temp_steps < 0 do 
+                temp_steps + Constants.play_track_length
+            else
+                temp_steps
+            end
+
+
+        target_index = rem(sum, Constants.play_track_length)
+        
+        if steps_taken < Constants.play_track_length do
+            %Move{
+                piece_id: piece.id,
+                target_area: :play,
+                target_index: target_index
+            }
+        else
+            diff = target_index - home_index
+
+            %Move{
+                piece_id: piece.id,
+                target_area: :goal,
+                target_index: diff
+            }
+        end
     end
 
     defp get_piece_move(%Piece{} = piece, roll) do
@@ -101,7 +126,7 @@ defmodule WebKimble.Logic do
 
     def execute_move(game_state, move) do
         piece = get_piece(move.piece_id)
-        {:ok, piece} = update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+        {:ok, _piece} = update_piece(piece, %{area: move.target_area, position_index: move.target_index})
 
         game_state = game_state |> Repo.preload(:pieces, [force: true])
 

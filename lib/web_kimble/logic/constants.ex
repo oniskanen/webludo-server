@@ -12,6 +12,10 @@ defmodule WebKimble.Logic.Constants do
         (for p <- @player_colors, i <- @starting_indices, do: %{player_color: p, position_index: i, area: :home})
     end
 
+    def play_track_length do
+        24
+    end
+
     def get_home_space_index(player_color) do
         case player_color do
             :red -> 0

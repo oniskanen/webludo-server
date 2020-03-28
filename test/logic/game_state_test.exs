@@ -69,6 +69,19 @@ defmodule WebKimble.Logic.GameStateTest do
 
         assert %{target_index: 3, target_area: :play} = move
     end
+
+    test "moving at end of play track moves to goal" do
+        attrs = %{current_player: :red, roll: 5, pieces: [%{area: :play, position_index: 20, player_color: :red}]}
+
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        moves = Logic.get_moves(game_state)
+
+        assert [move | []] = moves
+
+        assert %{target_index: 1, target_area: :goal} = move
+
+    end
     
 end
 
