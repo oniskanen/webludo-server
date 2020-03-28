@@ -136,7 +136,16 @@ defmodule WebKimble.Logic.GameStateTest do
 
         moves = Logic.get_moves(game_state)
 
-        assert [] = moves        
+        assert [] = moves
+    end
+
+    test "piece in play cannot move past goal end" do
+        attrs = %{current_player: :red, roll: 5, pieces: [%{area: :goal, position_index: 23, player_color: :red}]}
+        game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+        moves = Logic.get_moves(game_state)
+
+        assert [] = moves
     end
     
 end
