@@ -503,4 +503,39 @@ defmodule WebKimble.Logic.GameStateTest do
              }
            } = changes
   end
+
+  test "a doubled piece arriving into goal zone places matching center pieces into goal" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 27, player_color: :red, multiplier: 2},
+        %{area: :center, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{
+             move: %{start_area: :play, start_index: 27, target_area: :goal, target_index: 0},
+             doubled: %{
+               piece_id: _doubled_id,
+               multiplier: 1
+             },
+             promoted: [
+               %{
+                 start_area: :center,
+                 start_index: 0,
+                 piece_id: _id,
+                 target_area: :goal,
+                 target_index: 0
+               }
+             ]
+           } = changes
+  end
 end

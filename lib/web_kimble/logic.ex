@@ -359,18 +359,59 @@ defmodule WebKimble.Logic do
           end
         end
       else
-        {:ok, _piece} =
-          update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+        if piece.multiplier > 1 and move.target_area == :goal do
+          num_promoted_pieces = piece.multiplier - 1
 
-        %{
-          move: %{
-            piece_id: move.piece_id,
-            target_area: move.target_area,
-            target_index: move.target_index,
-            start_area: piece.area,
-            start_index: piece.position_index
+          promoted =
+            game_state.pieces
+            |> Enum.filter(fn p -> p.player_color == piece.player_color end)
+            |> Enum.filter(fn p -> p.area == :center end)
+            |> Enum.take(num_promoted_pieces)
+            |> Enum.map(fn p ->
+              %{
+                start_area: p.area,
+                start_index: p.position_index,
+                piece_id: p.id,
+                target_area: :goal,
+                target_index: 0
+              }
+            end)
+
+          {:ok, _piece} =
+            update_piece(piece, %{
+              area: move.target_area,
+              position_index: move.target_index,
+              multiplier: 1
+            })
+
+          %{
+            move: %{
+              piece_id: move.piece_id,
+              target_area: move.target_area,
+              target_index: move.target_index,
+              start_area: piece.area,
+              start_index: piece.position_index
+            },
+            doubled: %{
+              piece_id: move.piece_id,
+              multiplier: 1
+            },
+            promoted: promoted
           }
-        }
+        else
+          {:ok, _piece} =
+            update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+
+          %{
+            move: %{
+              piece_id: move.piece_id,
+              target_area: move.target_area,
+              target_index: move.target_index,
+              start_area: piece.area,
+              start_index: piece.position_index
+            }
+          }
+        end
       end
 
     next_player = get_next_player(game_state)
