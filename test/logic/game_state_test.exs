@@ -40,9 +40,9 @@ defmodule WebKimble.Logic.GameStateTest do
 
   test "moving from home to play sets correct index" do
     test_start_index(:red, 0)
-    test_start_index(:blue, 6)
-    test_start_index(:yellow, 12)
-    test_start_index(:green, 18)
+    test_start_index(:blue, 7)
+    test_start_index(:yellow, 14)
+    test_start_index(:green, 21)
   end
 
   defp test_start_index(player, expected_index) do
@@ -83,7 +83,7 @@ defmodule WebKimble.Logic.GameStateTest do
     attrs = %{
       current_player: :red,
       roll: 5,
-      pieces: [%{area: :play, position_index: 20, player_color: :red}]
+      pieces: [%{area: :play, position_index: 24, player_color: :red}]
     }
 
     game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
@@ -96,10 +96,10 @@ defmodule WebKimble.Logic.GameStateTest do
   end
 
   test "no player can move back to starting point" do
-    validate_piece_in_goal(:red, 23)
-    validate_piece_in_goal(:blue, 5)
-    validate_piece_in_goal(:yellow, 11)
-    validate_piece_in_goal(:green, 17)
+    validate_piece_in_goal(:red, 27)
+    validate_piece_in_goal(:blue, 6)
+    validate_piece_in_goal(:yellow, 13)
+    validate_piece_in_goal(:green, 20)
   end
 
   defp validate_piece_in_goal(player, index) do
@@ -120,9 +120,9 @@ defmodule WebKimble.Logic.GameStateTest do
 
   test "players move in play from starting point" do
     validate_piece_in_play(:red, 0)
-    validate_piece_in_play(:blue, 6)
-    validate_piece_in_play(:yellow, 12)
-    validate_piece_in_play(:green, 18)
+    validate_piece_in_play(:blue, 7)
+    validate_piece_in_play(:yellow, 14)
+    validate_piece_in_play(:green, 21)
   end
 
   defp validate_piece_in_play(player, index) do
@@ -201,7 +201,7 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert [move | []] = moves
 
-    assert %{target_index: 0, target_area: :goal} = move
+    assert %{target_index: 24, target_area: :play} = move
   end
 
   test "moving causes the current player to change" do

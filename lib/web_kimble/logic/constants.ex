@@ -16,7 +16,7 @@ defmodule WebKimble.Logic.Constants do
   end
 
   def play_track_length do
-    24
+    28
   end
 
   def goal_track_length do
@@ -30,9 +30,9 @@ defmodule WebKimble.Logic.Constants do
   def get_home_space_index(player_color) do
     case player_color do
       :red -> 0
-      :blue -> 6
-      :yellow -> 12
-      :green -> 18
+      :blue -> 7
+      :yellow -> 14
+      :green -> 21
     end
   end
 
