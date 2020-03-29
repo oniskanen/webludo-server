@@ -426,7 +426,7 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{eaten: []} = changes
   end
 
-  test "piece eating mine moves to first free home index" do
+  test "piece walking into mine moves to first free home index" do
     attrs = %{
       current_player: :red,
       roll: 1,
