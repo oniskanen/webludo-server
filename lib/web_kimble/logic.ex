@@ -300,14 +300,17 @@ defmodule WebKimble.Logic do
             })
           ]
         else
+          {:ok, _piece} =
+            update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+
           [handle_eaten_piece(game_state, target_piece)]
         end
       else
+        {:ok, _piece} =
+          update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+
         []
       end
-
-    {:ok, _piece} =
-      update_piece(piece, %{area: move.target_area, position_index: move.target_index})
 
     next_player = get_next_player(game_state)
 
