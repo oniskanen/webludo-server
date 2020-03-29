@@ -9,7 +9,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
     assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    assert %{players: _players, game_state: %GameState{} = state} = reply
+    assert %{game: %{players: _players, game_state: %GameState{} = state}} = reply
 
     assert %{pieces: pieces} = state
 

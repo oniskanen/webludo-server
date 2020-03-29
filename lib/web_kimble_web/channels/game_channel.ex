@@ -6,8 +6,12 @@ defmodule WebKimbleWeb.GameChannel do
 
   def join("games:" <> code, _params, socket) do
     case Networking.get_game_by_code(code) do
-      {:error, message} -> {:error, message}
-      {:ok, game} -> {:ok, game, assign(socket, :code, code)}
+      {:error, message} ->
+        {:error, message}
+
+      {:ok, game} ->
+        actions = Logic.get_moves(game.game_state)
+        {:ok, %{game: game, actions: actions}, assign(socket, :code, code)}
     end
   end
 
@@ -52,7 +56,7 @@ defmodule WebKimbleWeb.GameChannel do
         moves = Logic.get_moves(game.game_state)
 
         case moves do
-          nil ->
+          [] ->
             {:reply, {:error, %{message: "No moves available"}}, socket}
 
           moves ->
@@ -81,6 +85,7 @@ defmodule WebKimbleWeb.GameChannel do
       {:ok, player, game} ->
         token = WebKimbleWeb.Auth.get_token(player)
         broadcast!(socket, "game_updated", game)
+
         {:reply, {:ok, %{token: token, color: player.color}}, socket}
 
       {:error, message} ->
