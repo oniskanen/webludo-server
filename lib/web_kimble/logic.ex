@@ -39,8 +39,13 @@ defmodule WebKimble.Logic do
     |> Enum.filter(fn c -> c not in taken_colors end)
   end
 
-  def set_roll(game_state, roll) do
+  def set_roll(%GameState{roll: previous_roll} = game_state, roll)
+      when previous_roll == 0 or previous_roll == nil do
     update_game_state(game_state, %{roll: roll})
+  end
+
+  def set_roll(%GameState{} = _game_state, _roll) do
+    {:error, "Roll needs to be used before rolling again"}
   end
 
   defp home_to_play_move(%Piece{} = piece) do
