@@ -423,7 +423,7 @@ defmodule WebKimble.Logic.GameStateTest do
     move = hd(Logic.get_moves(game_state))
     {_game_state, changes} = Logic.execute_move(game_state, move)
 
-    assert %{eaten: []} = changes
+    refute match?(%{eaten: _eaten}, changes)
   end
 
   test "piece walking into mine moves to first free home index" do
@@ -445,5 +445,33 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{pieces: pieces} = game_state
 
     assert Enum.any?(pieces, &match?(%{position_index: 0, area: :home, player_color: :red}, &1))
+  end
+
+  test "moving a second piece to start position yields a double piece" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :home, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+    assert 2 = length(moves)
+
+    move = Enum.find(moves, &match?(%{target_area: :play, target_index: 0}, &1))
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{
+             move: %{start_area: :home, start_index: 2, target_area: :center, target_index: 0},
+             doubled: %{
+               piece_id: _id,
+               multiplier: 2
+             }
+           } = changes
   end
 end

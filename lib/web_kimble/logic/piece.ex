@@ -10,17 +10,18 @@ defmodule WebKimble.Logic.Piece do
   # There are 5 positions between each start position, giving a total of 24 board positions
   # 0 = red start, 6 = blue start, 12 = yellow start, 18 = green start
 
-  @derive {Jason.Encoder, only: [:position_index, :area, :player_color, :id]}
+  @derive {Jason.Encoder, only: [:position_index, :area, :player_color, :id, :multiplier]}
   schema "pieces" do
     field :position_index, :integer
     field :area, EctoAtom
     field :player_color, EctoAtom
+    field :multiplier, :integer, default: 1
     belongs_to :game_state, WebKimble.Logic.GameState
   end
 
   def changeset(piece, attrs) do
     piece
-    |> cast(attrs, [:position_index, :area, :player_color])
-    |> validate_required([:position_index, :area, :player_color])
+    |> cast(attrs, [:position_index, :area, :player_color, :multiplier])
+    |> validate_required([:position_index, :area, :player_color, :multiplier])
   end
 end

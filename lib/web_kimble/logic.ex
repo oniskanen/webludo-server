@@ -211,7 +211,10 @@ defmodule WebKimble.Logic do
     |> Enum.filter(fn m ->
       !Enum.any?(
         current_player_pieces,
-        fn p -> p.area == m.target_area && p.position_index == m.target_index end
+        fn p ->
+          roll != 6 && p.position_index != Constants.get_home_space_index(p.player_color) &&
+            (p.area == m.target_area && p.position_index == m.target_index)
+        end
       )
     end)
   end
@@ -287,29 +290,76 @@ defmodule WebKimble.Logic do
           p.area == :play
       end)
 
-    eaten =
+    changes =
       if target_piece != nil do
-        if target_piece.position_index ==
-             Constants.get_home_space_index(target_piece.player_color) do
-          [
-            handle_eaten_piece(game_state, %Piece{
-              id: piece.id,
-              position_index: target_piece.position_index,
-              area: piece.area,
-              player_color: piece.player_color
-            })
-          ]
-        else
-          {:ok, _piece} =
-            update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+        if target_piece.player_color == piece.player_color do
+          {:ok, doubled_piece} =
+            update_piece(target_piece, %{multiplier: target_piece.multiplier + 1})
 
-          [handle_eaten_piece(game_state, target_piece)]
+          {:ok, moved_piece} = update_piece(piece, %{area: :center, position_index: 0})
+
+          %{
+            move: %{
+              piece_id: move.piece_id,
+              target_area: moved_piece.area,
+              target_index: moved_piece.position_index,
+              start_area: piece.area,
+              start_index: piece.position_index
+            },
+            doubled: %{
+              piece_id: doubled_piece.id,
+              multiplier: doubled_piece.multiplier
+            }
+          }
+        else
+          if target_piece.position_index ==
+               Constants.get_home_space_index(target_piece.player_color) do
+            %{
+              move: %{
+                piece_id: move.piece_id,
+                target_area: move.target_area,
+                target_index: move.target_index,
+                start_area: piece.area,
+                start_index: piece.position_index
+              },
+              eaten: [
+                handle_eaten_piece(game_state, %Piece{
+                  id: piece.id,
+                  position_index: target_piece.position_index,
+                  area: piece.area,
+                  player_color: piece.player_color
+                })
+              ]
+            }
+          else
+            {:ok, _piece} =
+              update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+
+            %{
+              move: %{
+                piece_id: move.piece_id,
+                target_area: move.target_area,
+                target_index: move.target_index,
+                start_area: piece.area,
+                start_index: piece.position_index
+              },
+              eaten: [handle_eaten_piece(game_state, target_piece)]
+            }
+          end
         end
       else
         {:ok, _piece} =
           update_piece(piece, %{area: move.target_area, position_index: move.target_index})
 
-        []
+        %{
+          move: %{
+            piece_id: move.piece_id,
+            target_area: move.target_area,
+            target_index: move.target_index,
+            start_area: piece.area,
+            start_index: piece.position_index
+          }
+        }
       end
 
     next_player = get_next_player(game_state)
@@ -319,16 +369,6 @@ defmodule WebKimble.Logic do
 
     game_state = game_state |> Repo.preload(:pieces, force: true)
 
-    {game_state,
-     %{
-       move: %{
-         piece_id: move.piece_id,
-         target_area: move.target_area,
-         target_index: move.target_index,
-         start_area: piece.area,
-         start_index: piece.position_index
-       },
-       eaten: eaten
-     }}
+    {game_state, changes}
   end
 end
