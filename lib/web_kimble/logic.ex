@@ -362,11 +362,18 @@ defmodule WebKimble.Logic do
         if piece.multiplier > 1 and move.target_area == :goal do
           num_promoted_pieces = piece.multiplier - 1
 
-          promoted =
+          promoted_pieces =
             game_state.pieces
             |> Enum.filter(fn p -> p.player_color == piece.player_color end)
             |> Enum.filter(fn p -> p.area == :center end)
             |> Enum.take(num_promoted_pieces)
+
+          Enum.each(promoted_pieces, fn p ->
+            {:ok, _piece} = update_piece(p, %{area: :goal, position_index: 0})
+          end)
+
+          promoted =
+            promoted_pieces
             |> Enum.map(fn p ->
               %{
                 start_area: p.area,
