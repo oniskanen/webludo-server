@@ -311,4 +311,21 @@ defmodule WebKimble.Logic.GameStateTest do
     {:ok, game_state} = Logic.set_roll(game_state, 3)
     assert %{current_player: :blue, roll: nil, roll_count: 0} = game_state
   end
+
+  test "moving resets roll count" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {game_state, _move} = Logic.execute_move(game_state, move)
+
+    assert %{roll_count: 0} = game_state
+  end
 end

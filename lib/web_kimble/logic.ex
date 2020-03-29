@@ -229,7 +229,9 @@ defmodule WebKimble.Logic do
       update_piece(piece, %{area: move.target_area, position_index: move.target_index})
 
     next_player = get_next_player(game_state)
-    {:ok, game_state} = update_game_state(game_state, %{current_player: next_player, roll: nil})
+
+    {:ok, game_state} =
+      update_game_state(game_state, %{current_player: next_player, roll: nil, roll_count: 0})
 
     game_state = game_state |> Repo.preload(:pieces, force: true)
 
