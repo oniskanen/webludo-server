@@ -29,6 +29,7 @@ defmodule WebKimbleWeb.GameChannel do
           {:ok, game_state} ->
             actions = Logic.get_moves(game_state)
             broadcast!(socket, "roll", %{result: num, actions: actions})
+            broadcast!(socket, "game_state_updated", %{game_state: game_state})
             {:reply, :ok, socket}
 
           {:error, message} ->
