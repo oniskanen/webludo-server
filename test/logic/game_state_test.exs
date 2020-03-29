@@ -248,4 +248,23 @@ defmodule WebKimble.Logic.GameStateTest do
     assert {:ok, game_state} = Logic.set_roll(game_state, 1)
     assert {:error, message} = Logic.set_roll(game_state, 1)
   end
+
+  test "roll results do not carry between players" do
+    attrs = %{
+      current_player: :red,
+      roll: 2,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 7, player_color: :blue}
+      ]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    {game_state, _move} = Logic.execute_move(game_state, hd(moves))
+
+    assert %{roll: nil, current_player: :blue} = game_state
+  end
 end
