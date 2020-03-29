@@ -154,11 +154,18 @@ defmodule WebKimble.Logic do
     Enum.random(Constants.player_colors())
   end
 
+  defp get_next_player(%GameState{} = game_state) do
+    Constants.next_player(game_state.current_player)
+  end
+
   def execute_move(game_state, move) do
     piece = get_piece(move.piece_id)
 
     {:ok, _piece} =
       update_piece(piece, %{area: move.target_area, position_index: move.target_index})
+
+    next_player = get_next_player(game_state)
+    {:ok, game_state} = update_game_state(game_state, %{current_player: next_player})
 
     game_state = game_state |> Repo.preload(:pieces, force: true)
 

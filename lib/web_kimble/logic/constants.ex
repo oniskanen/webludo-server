@@ -1,12 +1,14 @@
 defmodule WebKimble.Logic.Constants do
-  alias WebKimble.Logic.Piece
-
   @player_colors [:red, :blue, :yellow, :green]
   # @areas [:home, :play, :goal]
   @starting_indices [0, 1, 2, 3]
 
-  @max_rolls 3
-
+  @player_order %{
+    red: :blue,
+    blue: :yellow,
+    yellow: :green,
+    green: :red
+  }
   def initial_pieces do
     for p <- @player_colors,
         i <- @starting_indices,
@@ -32,5 +34,9 @@ defmodule WebKimble.Logic.Constants do
 
   def player_colors do
     @player_colors
+  end
+
+  def next_player(color) do
+    @player_order[color]
   end
 end

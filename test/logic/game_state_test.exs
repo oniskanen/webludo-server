@@ -203,4 +203,24 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{target_index: 0, target_area: :goal} = move
   end
+
+  test "moving causes the current player to change" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    assert [move | []] = moves
+
+    assert %{target_index: 1, target_area: :goal} = move
+
+    {state, _move} = Logic.execute_move(game_state, move)
+
+    assert %{current_player: :blue} = state
+  end
 end
