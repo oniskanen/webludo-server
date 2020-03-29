@@ -84,7 +84,7 @@ defmodule WebKimble.Logic do
     end
   end
 
-  defp in_goal_move(%Piece{} = piece, roll) do
+  defp in_goal_move(%Piece{} = piece, roll) when roll in 1..6 do
     %Move{
       piece_id: piece.id,
       target_area: :goal,
@@ -92,7 +92,7 @@ defmodule WebKimble.Logic do
     }
   end
 
-  defp get_piece_move(%Piece{} = piece, roll) do
+  defp get_piece_move(%Piece{} = piece, roll) when roll in 1..6 do
     case piece.area do
       :home ->
         if roll == 6 do
@@ -112,15 +112,16 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def get_moves(game_state) do
+  def get_moves(%GameState{roll: roll, current_player: current_player} = game_state)
+      when roll in 1..6 do
     game_state = Repo.preload(game_state, :pieces)
 
     current_player_pieces =
       game_state.pieces
-      |> Enum.filter(fn p -> p.player_color == game_state.current_player end)
+      |> Enum.filter(fn p -> p.player_color == current_player end)
 
     current_player_pieces
-    |> Enum.map(&get_piece_move(&1, game_state.roll))
+    |> Enum.map(&get_piece_move(&1, roll))
     |> Enum.filter(fn m -> m != nil end)
     |> Enum.filter(fn m ->
       m.target_area != :goal || m.target_index < Constants.goal_track_length()
@@ -131,6 +132,14 @@ defmodule WebKimble.Logic do
         fn p -> p.area == m.target_area && p.position_index == m.target_index end
       )
     end)
+  end
+
+  def get_moves(%GameState{roll: nil} = _game_state) do
+    []
+  end
+
+  def get_moves(%GameState{roll: 0} = _game_state) do
+    []
   end
 
   def create_piece(%GameState{} = game_state, attrs) do

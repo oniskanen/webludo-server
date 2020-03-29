@@ -223,4 +223,17 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{current_player: :blue} = state
   end
+
+  test "player cannot move without rolling first" do
+    attrs = %{
+      current_player: :red,
+      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    assert [] = moves
+  end
 end
