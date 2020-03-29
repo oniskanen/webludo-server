@@ -3,9 +3,10 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   alias WebKimble.Logic.GameState
   alias WebKimble.Repo
+  alias WebKimble.TestHelpers
 
   test "join replies with game and gamestate" do
-    game = WebKimble.TestHelpers.game_fixture()
+    game = TestHelpers.game_fixture()
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
     assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -23,7 +24,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
   end
 
   test "join game broadcasts game state" do
-    game = WebKimble.TestHelpers.game_fixture(%{players: []})
+    game = TestHelpers.game_fixture(%{players: []})
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -34,15 +35,8 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert_broadcast "game_updated", %{players: [%{name: "Test Name"}]}
   end
 
-  defp assert_list_contents(l1, l2) do
-    set1 = MapSet.new(l1)
-    set2 = MapSet.new(l2)
-
-    assert set1 == set2
-  end
-
   test "4 players joining get different colors" do
-    game = WebKimble.TestHelpers.game_fixture(%{players: []})
+    game = TestHelpers.game_fixture(%{players: []})
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -66,17 +60,20 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
       payload.players
       |> Enum.map(fn p -> p.name end)
 
-    assert_list_contents(["Player 1", "Player 2", "Player 3", "Player 4"], player_names)
+    assert TestHelpers.list_contents_equal?(
+             ["Player 1", "Player 2", "Player 3", "Player 4"],
+             player_names
+           )
 
     player_colors =
       payload.players
       |> Enum.map(fn p -> p.color end)
 
-    assert_list_contents([:red, :blue, :green, :yellow], player_colors)
+    assert TestHelpers.list_contents_equal?([:red, :blue, :green, :yellow], player_colors)
   end
 
   test "join game responds with a player token" do
-    game = WebKimble.TestHelpers.game_fixture()
+    game = TestHelpers.game_fixture()
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -86,7 +83,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "5th player trying to join game receives an error" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      TestHelpers.game_fixture(%{
         players: [
           %{color: :red, name: "Player 1"},
           %{color: :blue, name: "Player 2"},

@@ -59,4 +59,12 @@ defmodule WebKimble.TestHelpers do
 
     state
   end
+
+  # NOTE: Doesn't account for duplicates
+  def list_contents_equal?(l1, l2) do
+    set1 = MapSet.new(l1)
+    set2 = MapSet.new(l2)
+
+    set1 == set2
+  end
 end

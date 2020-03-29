@@ -222,8 +222,29 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def execute_move(game_state, move) do
+  def execute_move(%GameState{} = game_state, move) do
     piece = get_piece(move.piece_id)
+
+    game_state = Repo.preload(game_state, :pieces)
+
+    eaten_piece =
+      Enum.find(game_state.pieces, fn p ->
+        p.position_index == move.target_index and p.area == move.target_area
+      end)
+
+    if eaten_piece != nil do
+      player_home_pieces =
+        game_state.pieces
+        |> Enum.filter(fn p ->
+          p.player_color == eaten_piece.player_color and p.area == :home
+        end)
+
+      first_free_home_index =
+        0..3
+        |> Enum.find(fn i -> !Enum.any?(player_home_pieces, fn p -> p.position_index == i end) end)
+
+      update_piece(eaten_piece, %{area: :home, position_index: first_free_home_index})
+    end
 
     {:ok, _piece} =
       update_piece(piece, %{area: move.target_area, position_index: move.target_index})
