@@ -267,4 +267,22 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{roll: nil, current_player: :blue} = game_state
   end
+
+  test "rolling a 6 gives another turn" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      pieces: [
+        %{area: :play, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    {game_state, _move} = Logic.execute_move(game_state, hd(moves))
+
+    assert %{roll: nil, current_player: :red} = game_state
+  end
 end

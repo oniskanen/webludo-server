@@ -168,8 +168,11 @@ defmodule WebKimble.Logic do
     Enum.random(Constants.player_colors())
   end
 
-  defp get_next_player(%GameState{} = game_state) do
-    Constants.next_player(game_state.current_player)
+  defp get_next_player(%GameState{roll: roll} = game_state) do
+    case roll do
+      6 -> game_state.current_player
+      _ -> Constants.next_player(game_state.current_player)
+    end
   end
 
   def execute_move(game_state, move) do
