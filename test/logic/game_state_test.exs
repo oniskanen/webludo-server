@@ -366,4 +366,23 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{current_player: :blue} = game_state
   end
+
+  test "can roll several times if pieces in goal are immobile" do
+    attrs = %{
+      current_player: :red,
+      roll: nil,
+      roll_count: 0,
+      pieces: [
+        %{area: :goal, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :home, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    {:ok, game_state} = Logic.set_roll(game_state, 5)
+
+    assert %{current_player: :red} = game_state
+  end
 end

@@ -85,7 +85,14 @@ defmodule WebKimble.Logic do
       |> Enum.filter(fn p -> p.player_color == current_player end)
       |> Enum.filter(fn p -> p.area == :goal end)
 
-    length(pieces_in_goal) > 0
+    indices = Enum.map(pieces_in_goal, fn p -> p.position_index end)
+
+    free_indices = Enum.filter(0..3, fn i -> !Enum.any?(indices, fn j -> j == i end) end)
+    max_free_index = Enum.max(free_indices)
+
+    movable_pieces = Enum.filter(pieces_in_goal, fn p -> p.position_index < max_free_index end)
+
+    length(movable_pieces) > 0
   end
 
   def set_roll(
