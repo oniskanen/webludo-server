@@ -474,4 +474,33 @@ defmodule WebKimble.Logic.GameStateTest do
              }
            } = changes
   end
+
+  test "tripling yields a different position index for the two center pieces" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 0, player_color: :red, multiplier: 2},
+        %{area: :home, position_index: 2, player_color: :red},
+        %{area: :center, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+    assert 2 = length(moves)
+
+    move = Enum.find(moves, &match?(%{target_area: :play, target_index: 0}, &1))
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{
+             move: %{start_area: :home, start_index: 2, target_area: :center, target_index: 1},
+             doubled: %{
+               piece_id: _id,
+               multiplier: 3
+             }
+           } = changes
+  end
 end

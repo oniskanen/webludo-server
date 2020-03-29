@@ -293,10 +293,21 @@ defmodule WebKimble.Logic do
     changes =
       if target_piece != nil do
         if target_piece.player_color == piece.player_color do
+          player_center_piece_indices =
+            game_state.pieces
+            |> Enum.filter(fn p -> p.player_color == piece.player_color end)
+            |> Enum.filter(fn p -> p.area == :center end)
+            |> Enum.map(fn p -> p.position_index end)
+
+          free_center_index =
+            0..2
+            |> Enum.find(fn i -> !Enum.any?(player_center_piece_indices, fn j -> i == j end) end)
+
           {:ok, doubled_piece} =
             update_piece(target_piece, %{multiplier: target_piece.multiplier + 1})
 
-          {:ok, moved_piece} = update_piece(piece, %{area: :center, position_index: 0})
+          {:ok, moved_piece} =
+            update_piece(piece, %{area: :center, position_index: free_center_index})
 
           %{
             move: %{
