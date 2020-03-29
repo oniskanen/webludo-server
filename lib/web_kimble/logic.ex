@@ -291,7 +291,14 @@ defmodule WebKimble.Logic do
       if target_piece != nil do
         if target_piece.position_index ==
              Constants.get_home_space_index(target_piece.player_color) do
-          [handle_eaten_piece(game_state, piece)]
+          [
+            handle_eaten_piece(game_state, %Piece{
+              id: piece.id,
+              position_index: target_piece.position_index,
+              area: piece.area,
+              player_color: piece.player_color
+            })
+          ]
         else
           [handle_eaten_piece(game_state, target_piece)]
         end

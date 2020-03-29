@@ -403,7 +403,7 @@ defmodule WebKimble.Logic.GameStateTest do
     move_piece_id = move.piece_id
     {_game_state, changes} = Logic.execute_move(game_state, move)
 
-    assert %{eaten: [%{piece_id: piece_id}]} = changes
+    assert %{eaten: [%{piece_id: piece_id, start_index: 7}]} = changes
     assert move_piece_id == piece_id
   end
 
