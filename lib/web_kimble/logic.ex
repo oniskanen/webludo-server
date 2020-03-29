@@ -283,7 +283,8 @@ defmodule WebKimble.Logic do
 
     target_piece =
       Enum.find(game_state.pieces, fn p ->
-        p.position_index == move.target_index and p.area == move.target_area
+        p.position_index == move.target_index and move.target_area == :play and
+          p.area == :play
       end)
 
     eaten =

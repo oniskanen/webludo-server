@@ -406,4 +406,23 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{eaten: [%{piece_id: piece_id}]} = changes
     assert move_piece_id == piece_id
   end
+
+  test "cannot eat in same coordinates in goal" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :goal, position_index: 3, player_color: :blue}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{eaten: []} = changes
+  end
 end
