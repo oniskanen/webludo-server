@@ -1,4 +1,3 @@
 defmodule WebKimbleWeb.CreateView do
-    use WebKimbleWeb, :view
-  end
-  
+  use WebKimbleWeb, :view
+end

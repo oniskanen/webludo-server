@@ -6,7 +6,7 @@ defmodule WebKimble.Networking.Game do
   schema "games" do
     field :code, :string
     field :name, :string
-    
+
     has_many :players, WebKimble.Networking.Player
     has_one :game_state, WebKimble.Logic.GameState
 

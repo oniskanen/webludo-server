@@ -1,12 +1,12 @@
 defmodule EctoAtom do
-    use Ecto.Type
-    
-    def type, do: :string
+  use Ecto.Type
 
-    def cast(value), do: {:ok, value}
+  def type, do: :string
 
-    def load(value), do: {:ok, String.to_atom(value)}
+  def cast(value), do: {:ok, value}
 
-    def dump(value) when is_atom(value), do: {:ok, Atom.to_string(value)}
-    def dump(_), do: :error
+  def load(value), do: {:ok, String.to_atom(value)}
+
+  def dump(value) when is_atom(value), do: {:ok, Atom.to_string(value)}
+  def dump(_), do: :error
 end
