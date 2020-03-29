@@ -258,11 +258,13 @@ defmodule WebKimble.Logic do
 
     {game_state,
      %{
-       piece_id: move.piece_id,
-       target_area: move.target_area,
-       target_index: move.target_index,
-       start_area: piece.area,
-       start_index: piece.position_index
+       move: %{
+         piece_id: move.piece_id,
+         target_area: move.target_area,
+         target_index: move.target_index,
+         start_area: piece.area,
+         start_index: piece.position_index
+       }
      }}
   end
 end

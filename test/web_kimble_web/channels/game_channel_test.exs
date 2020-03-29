@@ -224,4 +224,32 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert_reply roll(p1, socket), :error, %{error: error_message}
     assert "Roll needs to be used before rolling again" == error_message
   end
+
+  test "eating a piece causes a game state updated message with changes" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        current_player: :red,
+        roll: 1,
+        players: [
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ],
+        pieces: [%{id: 0, player_color: :red, area: :play, position_index: 0}]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    p1 = join_game(socket, "Player 1")
+
+    push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
+
+    assert_broadcast "game_state_updated", %{changes: changes}
+
+    assert %{move: %{target_area: :play, target_index: 1, start_area: :play, start_index: 0}} =
+             changes
+  end
 end
