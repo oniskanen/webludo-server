@@ -66,6 +66,28 @@ defmodule WebKimble.Logic do
     length(moves) > 0
   end
 
+  defp has_movable_pieces_in_play?(%GameState{current_player: current_player} = game_state) do
+    game_state = Repo.preload(game_state, :pieces)
+
+    pieces_in_play =
+      game_state.pieces
+      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.area == :play end)
+
+    length(pieces_in_play) > 0
+  end
+
+  defp has_movable_pieces_in_goal?(%GameState{current_player: current_player} = game_state) do
+    game_state = Repo.preload(game_state, :pieces)
+
+    pieces_in_goal =
+      game_state.pieces
+      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.area == :goal end)
+
+    length(pieces_in_goal) > 0
+  end
+
   def set_roll(
         %GameState{roll: previous_roll, current_player: current_player, roll_count: roll_count} =
           game_state,
@@ -75,7 +97,8 @@ defmodule WebKimble.Logic do
     if has_movable_pieces_with_roll?(game_state, roll) do
       update_game_state(game_state, %{roll: roll, roll_count: roll_count + 1})
     else
-      if roll_count + 1 < Constants.max_rolls() do
+      if roll_count + 1 < Constants.max_rolls() && !has_movable_pieces_in_play?(game_state) &&
+           !has_movable_pieces_in_goal?(game_state) do
         update_game_state(game_state, %{
           roll: nil,
           current_player: current_player,

@@ -349,4 +349,21 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert Enum.any?(pieces, &match?(%{area: :home, player_color: :blue}, &1))
   end
+
+  test "cannot roll several times if pieces in play have legal moves" do
+    attrs = %{
+      current_player: :red,
+      roll: nil,
+      roll_count: 0,
+      pieces: [
+        %{area: :play, position_index: 27, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    {:ok, game_state} = Logic.set_roll(game_state, 5)
+
+    assert %{current_player: :blue} = game_state
+  end
 end
