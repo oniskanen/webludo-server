@@ -538,4 +538,11 @@ defmodule WebKimble.Logic.GameStateTest do
              ]
            } = changes
   end
+
+  # TODO: Eating doubles, triples, quadros
+  # TODO: Doubles, triples, quadros into mine
+  # TODO: Can't walk into mine if other options
+  # TODO: Reset multiplier when doubles eaten/mine
+  # TODO: 6 should cause re-roll even if no actions available
+  # TODO: Skip turns when all pieces are in goal area
 end
