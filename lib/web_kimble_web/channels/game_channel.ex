@@ -24,10 +24,16 @@ defmodule WebKimbleWeb.GameChannel do
 
       true ->
         num = :rand.uniform(6)
-        {:ok, game_state} = Logic.set_roll(game.game_state, num)
-        actions = Logic.get_moves(game_state)
-        broadcast!(socket, "roll", %{result: num, actions: actions})
-        {:reply, :ok, socket}
+
+        case Logic.set_roll(game.game_state, num) do
+          {:ok, game_state} ->
+            actions = Logic.get_moves(game_state)
+            broadcast!(socket, "roll", %{result: num, actions: actions})
+            {:reply, :ok, socket}
+
+          {:error, message} ->
+            {:reply, {:error, %{error: message}}, socket}
+        end
     end
   end
 

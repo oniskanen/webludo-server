@@ -204,4 +204,26 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert 1 = length(pieces_in_play)
   end
+
+  test "player rolling twice in a row receives an error" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        current_player: :red,
+        players: [
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    p1 = join_game(socket, "Player 1")
+
+    assert_reply roll(p1, socket), :ok, %{}
+    assert_reply roll(p1, socket), :error, %{error: error_message}
+    assert "Roll needs to be used before rolling again" == error_message
+  end
 end
