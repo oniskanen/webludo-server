@@ -545,4 +545,9 @@ defmodule WebKimble.Logic.GameStateTest do
   # TODO: Reset multiplier when doubles eaten/mine
   # TODO: 6 should cause re-roll even if no actions available
   # TODO: Skip turns when all pieces are in goal area
+
+  # TODO: Raising
+  # TODO: Penalties
+  # TODO: Chat
+  # TODO: Jag bor i hembo
 end
