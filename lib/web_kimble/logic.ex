@@ -39,9 +39,56 @@ defmodule WebKimble.Logic do
     |> Enum.filter(fn c -> c not in taken_colors end)
   end
 
-  def set_roll(%GameState{roll: previous_roll} = game_state, roll)
+  defp has_movable_pieces_with_roll?(
+         %GameState{current_player: current_player} = game_state,
+         roll
+       ) do
+    game_state = Repo.preload(game_state, :pieces)
+
+    current_player_pieces =
+      game_state.pieces
+      |> Enum.filter(fn p -> p.player_color == current_player end)
+
+    moves =
+      current_player_pieces
+      |> Enum.map(&get_piece_move(&1, roll))
+      |> Enum.filter(fn m -> m != nil end)
+      |> Enum.filter(fn m ->
+        m.target_area != :goal || m.target_index < Constants.goal_track_length()
+      end)
+      |> Enum.filter(fn m ->
+        !Enum.any?(
+          current_player_pieces,
+          fn p -> p.area == m.target_area && p.position_index == m.target_index end
+        )
+      end)
+
+    length(moves) > 0
+  end
+
+  def set_roll(
+        %GameState{roll: previous_roll, current_player: current_player, roll_count: roll_count} =
+          game_state,
+        roll
+      )
       when previous_roll == 0 or previous_roll == nil do
-    update_game_state(game_state, %{roll: roll})
+    if has_movable_pieces_with_roll?(game_state, roll) do
+      update_game_state(game_state, %{roll: roll, roll_count: roll_count + 1})
+    else
+      if roll_count + 1 < Constants.max_rolls() do
+        update_game_state(game_state, %{
+          roll: nil,
+          current_player: current_player,
+          roll_count: roll_count + 1
+        })
+      else
+        update_game_state(game_state, %{
+          roll: nil,
+          roll_count: 0,
+          current_player: get_next_player(game_state)
+        })
+      end
+    end
   end
 
   def set_roll(%GameState{} = _game_state, _roll) do

@@ -213,7 +213,8 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
-        ]
+        ],
+        pieces: [%{player_color: :red, area: :play, position_index: 0}]
       })
 
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})

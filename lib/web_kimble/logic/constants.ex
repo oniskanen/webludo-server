@@ -23,6 +23,10 @@ defmodule WebKimble.Logic.Constants do
     4
   end
 
+  def max_rolls do
+    3
+  end
+
   def get_home_space_index(player_color) do
     case player_color do
       :red -> 0

@@ -240,6 +240,7 @@ defmodule WebKimble.Logic.GameStateTest do
   test "player cannot roll twice in a row" do
     attrs = %{
       current_player: :red,
+      roll_count: 0,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
@@ -284,5 +285,30 @@ defmodule WebKimble.Logic.GameStateTest do
     {game_state, _move} = Logic.execute_move(game_state, hd(moves))
 
     assert %{roll: nil, current_player: :red} = game_state
+  end
+
+  test "allow 3 rolls if no movable pieces" do
+    attrs = %{
+      current_player: :red,
+      roll: nil,
+      roll_count: 0,
+      pieces: [
+        %{area: :home, position_index: 0, player_color: :red},
+        %{area: :home, position_index: 1, player_color: :red},
+        %{area: :home, position_index: 2, player_color: :red},
+        %{area: :home, position_index: 3, player_color: :red}
+      ]
+    }
+
+    game_state = WebKimble.TestHelpers.game_state_fixture(attrs)
+
+    {:ok, game_state} = Logic.set_roll(game_state, 1)
+    assert %{current_player: :red, roll: nil, roll_count: 1} = game_state
+
+    {:ok, game_state} = Logic.set_roll(game_state, 2)
+    assert %{current_player: :red, roll: nil, roll_count: 2} = game_state
+
+    {:ok, game_state} = Logic.set_roll(game_state, 3)
+    assert %{current_player: :blue, roll: nil, roll_count: 0} = game_state
   end
 end
