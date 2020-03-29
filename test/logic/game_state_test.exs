@@ -385,4 +385,25 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{current_player: :red} = game_state
   end
+
+  test "moving to a piece on it's start position gets the moving piece eaten" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 6, player_color: :red},
+        %{area: :play, position_index: 7, player_color: :blue}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+    move_piece_id = move.piece_id
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{eaten: [%{piece_id: piece_id}]} = changes
+    assert move_piece_id == piece_id
+  end
 end

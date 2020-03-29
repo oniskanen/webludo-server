@@ -252,42 +252,48 @@ defmodule WebKimble.Logic do
     end
   end
 
+  defp handle_eaten_piece(game_state, piece) do
+    player_home_pieces =
+      game_state.pieces
+      |> Enum.filter(fn p ->
+        p.player_color == piece.player_color and p.area == :home
+      end)
+
+    first_free_home_index =
+      0..3
+      |> Enum.find(fn i ->
+        !Enum.any?(player_home_pieces, fn p -> p.position_index == i end)
+      end)
+
+    {:ok, _piece} = update_piece(piece, %{area: :home, position_index: first_free_home_index})
+
+    %{
+      piece_id: piece.id,
+      target_area: :home,
+      target_index: first_free_home_index,
+      start_area: piece.area,
+      start_index: piece.position_index
+    }
+  end
+
   def execute_move(%GameState{} = game_state, move) do
     piece = get_piece(move.piece_id)
 
     game_state = Repo.preload(game_state, :pieces)
 
-    eaten_piece =
+    target_piece =
       Enum.find(game_state.pieces, fn p ->
         p.position_index == move.target_index and p.area == move.target_area
       end)
 
     eaten =
-      if eaten_piece != nil do
-        player_home_pieces =
-          game_state.pieces
-          |> Enum.filter(fn p ->
-            p.player_color == eaten_piece.player_color and p.area == :home
-          end)
-
-        first_free_home_index =
-          0..3
-          |> Enum.find(fn i ->
-            !Enum.any?(player_home_pieces, fn p -> p.position_index == i end)
-          end)
-
-        {:ok, _piece} =
-          update_piece(eaten_piece, %{area: :home, position_index: first_free_home_index})
-
-        [
-          %{
-            piece_id: eaten_piece.id,
-            target_area: :home,
-            target_index: first_free_home_index,
-            start_area: eaten_piece.area,
-            start_index: eaten_piece.position_index
-          }
-        ]
+      if target_piece != nil do
+        if target_piece.position_index ==
+             Constants.get_home_space_index(target_piece.player_color) do
+          [handle_eaten_piece(game_state, piece)]
+        else
+          [handle_eaten_piece(game_state, target_piece)]
+        end
       else
         []
       end
