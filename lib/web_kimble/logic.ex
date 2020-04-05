@@ -194,6 +194,27 @@ defmodule WebKimble.Logic do
     end
   end
 
+  defp move_is_into_mine?(%Move{} = move, current_player, pieces) do
+    target_piece =
+      Enum.find(pieces, fn p ->
+        p.area == move.target_area && p.position_index == move.target_index
+      end)
+
+    case target_piece do
+      nil ->
+        false
+
+      %Piece{player_color: ^current_player} ->
+        false
+
+      %Piece{area: :play, position_index: index, player_color: color} ->
+        index == Constants.get_home_space_index(color)
+
+      _piece ->
+        false
+    end
+  end
+
   def get_moves(%GameState{roll: roll, current_player: current_player} = game_state)
       when roll in 1..6 do
     game_state = Repo.preload(game_state, :pieces)
@@ -202,21 +223,31 @@ defmodule WebKimble.Logic do
       game_state.pieces
       |> Enum.filter(fn p -> p.player_color == current_player end)
 
-    current_player_pieces
-    |> Enum.map(&get_piece_move(&1, roll))
-    |> Enum.filter(fn m -> m != nil end)
-    |> Enum.filter(fn m ->
-      m.target_area != :goal || m.target_index < Constants.goal_track_length()
-    end)
-    |> Enum.filter(fn m ->
-      !Enum.any?(
-        current_player_pieces,
-        fn p ->
-          roll != 6 && p.position_index != Constants.get_home_space_index(p.player_color) &&
-            (p.area == m.target_area && p.position_index == m.target_index)
-        end
-      )
-    end)
+    moves =
+      current_player_pieces
+      |> Enum.map(&get_piece_move(&1, roll))
+      |> Enum.filter(fn m -> m != nil end)
+      |> Enum.filter(fn m ->
+        m.target_area != :goal || m.target_index < Constants.goal_track_length()
+      end)
+      |> Enum.filter(fn m ->
+        !Enum.any?(
+          current_player_pieces,
+          fn p ->
+            roll != 6 && p.position_index != Constants.get_home_space_index(p.player_color) &&
+              (p.area == m.target_area && p.position_index == m.target_index)
+          end
+        )
+      end)
+
+    non_mine_moves =
+      moves |> Enum.filter(fn m -> !move_is_into_mine?(m, current_player, game_state.pieces) end)
+
+    if length(non_mine_moves) > 0 do
+      non_mine_moves
+    else
+      moves
+    end
   end
 
   def get_moves(%GameState{roll: nil} = _game_state) do

@@ -665,8 +665,24 @@ defmodule WebKimble.Logic.GameStateTest do
     |> Enum.each(fn p -> assert_member?(pieces, p) end)
   end
 
-  # TODO: Doubles, triples, quadros into mine
-  # TODO: Can't walk into mine if other options
+  test "walking into mine not a valid action if other moves available" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 6, player_color: :red},
+        %{area: :play, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 7, player_color: :blue}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    assert [move | []] = Logic.get_moves(game_state)
+    assert %{target_area: :play, target_index: 1} = move
+  end
+
   # TODO: Reset multiplier when doubles eaten/mine
   # TODO: 6 should cause re-roll even if no actions available
   # TODO: Skip turns when all pieces are in goal area
