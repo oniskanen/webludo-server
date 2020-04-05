@@ -384,7 +384,8 @@ defmodule WebKimble.Logic do
                   id: piece.id,
                   position_index: target_piece.position_index,
                   area: piece.area,
-                  player_color: piece.player_color
+                  player_color: piece.player_color,
+                  multiplier: piece.multiplier
                 })
             }
           else

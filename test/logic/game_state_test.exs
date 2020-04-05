@@ -602,11 +602,69 @@ defmodule WebKimble.Logic.GameStateTest do
 
     expected_pieces
     |> Enum.each(fn p -> assert_member?(pieces, p) end)
-
-    # assert TestHelpers.list_contents_equal?(pieces, expected_pieces)
   end
 
-  # TODO: Eating doubles, triples, quadros
+  test "walking a doubled piece into mine causes the center piece to go to home" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 6, player_color: :red, multiplier: 2},
+        %{area: :center, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 7, player_color: :blue}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{
+             move: %{start_area: :play, start_index: 6, target_area: :play, target_index: 7},
+             eaten: [
+               %{
+                 piece_id: _doubled_id,
+                 start_area: :play,
+                 target_area: :home,
+                 start_index: 7,
+                 target_index: 0
+               },
+               %{
+                 piece_id: _doubled_id2,
+                 start_area: :center,
+                 target_area: :home,
+                 start_index: 0,
+                 target_index: 1
+               }
+             ]
+           } = changes
+
+    assert %{pieces: pieces} = game_state
+
+    expected_pieces = [
+      %{area: :play, position_index: 7, player_color: :blue, multiplier: 1},
+      %{area: :home, position_index: 0, player_color: :red, multiplier: 1},
+      %{area: :home, position_index: 1, player_color: :red, multiplier: 1}
+    ]
+
+    pieces =
+      pieces
+      |> Enum.map(fn p ->
+        %{
+          area: p.area,
+          position_index: p.position_index,
+          player_color: p.player_color,
+          multiplier: p.multiplier
+        }
+      end)
+
+    expected_pieces
+    |> Enum.each(fn p -> assert_member?(pieces, p) end)
+  end
+
   # TODO: Doubles, triples, quadros into mine
   # TODO: Can't walk into mine if other options
   # TODO: Reset multiplier when doubles eaten/mine
