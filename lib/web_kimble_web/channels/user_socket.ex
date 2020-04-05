@@ -1,7 +1,6 @@
 defmodule WebKimbleWeb.UserSocket do
   use Phoenix.Socket
 
-  @max_age 2 * 7 * 24 * 60 * 60
   ## Channels
   channel "games:*", WebKimbleWeb.GameChannel
   channel "lobby", WebKimbleWeb.LobbyChannel

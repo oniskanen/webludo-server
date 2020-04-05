@@ -33,12 +33,4 @@ defmodule WebKimbleWeb.LobbyChannel do
          socket}
     end
   end
-
-  def handle_in("throw", params, socket) do
-    {:reply, {:error, params}, socket}
-  end
-
-  def handle_in({"noreply", params, socket}) do
-    {:noreply, socket}
-  end
 end
