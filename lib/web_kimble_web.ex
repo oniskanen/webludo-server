@@ -17,46 +17,9 @@ defmodule WebKimbleWeb do
   and import those modules here.
   """
 
-  def controller do
-    quote do
-      use Phoenix.Controller, namespace: WebKimbleWeb
-
-      import Plug.Conn
-      import WebKimbleWeb.Gettext
-      alias WebKimbleWeb.Router.Helpers, as: Routes
-    end
-  end
-
-  def view do
-    quote do
-      use Phoenix.View,
-        root: "lib/web_kimble_web/templates",
-        namespace: WebKimbleWeb
-
-      # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
-
-      # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
-
-      import WebKimbleWeb.ErrorHelpers
-      import WebKimbleWeb.Gettext
-      alias WebKimbleWeb.Router.Helpers, as: Routes
-    end
-  end
-
-  def router do
-    quote do
-      use Phoenix.Router
-      import Plug.Conn
-      import Phoenix.Controller
-    end
-  end
-
   def channel do
     quote do
       use Phoenix.Channel
-      import WebKimbleWeb.Gettext
     end
   end
 
