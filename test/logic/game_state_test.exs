@@ -699,7 +699,29 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
   end
 
-  # TODO: Skip turns when all pieces are in goal area
+  test "a player with all pieces in goal area gets skipped" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 27, player_color: :red},
+        %{area: :goal, position_index: 3, player_color: :blue},
+        %{area: :goal, position_index: 2, player_color: :blue},
+        %{area: :goal, position_index: 1, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :home, position_index: 0, player_color: :yellow}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {game_state, _changes} = Logic.execute_move(game_state, move)
+
+    assert %{current_player: :yellow, roll: nil, roll_count: 0} = game_state
+  end
 
   # TODO: Raising
   # TODO: Penalties

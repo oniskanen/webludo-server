@@ -66,6 +66,19 @@ defmodule WebKimble.Logic do
     length(moves) > 0
   end
 
+  defp has_movable_pieces?(%GameState{} = game_state, color) do
+    game_state = Repo.preload(game_state, :pieces)
+
+    goal_piece_indices =
+      game_state.pieces
+      |> Enum.filter(fn p -> p.player_color == color end)
+      |> Enum.filter(fn p -> p.area == :goal end)
+      |> Enum.map(fn p -> p.position_index end)
+      |> Enum.sort()
+
+    goal_piece_indices != Enum.to_list(0..3)
+  end
+
   defp has_movable_pieces_in_play?(%GameState{current_player: current_player} = game_state) do
     game_state = Repo.preload(game_state, :pieces)
 
@@ -288,11 +301,37 @@ defmodule WebKimble.Logic do
     Enum.random(Constants.player_colors())
   end
 
-  defp get_next_player(%GameState{roll: roll} = game_state) do
-    case roll do
-      6 -> game_state.current_player
-      _ -> Constants.next_player(game_state.current_player)
+  defp next_player_recurse(game_state, player) do
+    cond do
+      has_movable_pieces?(game_state, player) ->
+        player
+
+      true ->
+        next_player_recurse(game_state, Constants.next_player(player), player)
     end
+  end
+
+  defp next_player_recurse(game_state, player, initial_player) do
+    cond do
+      player == initial_player ->
+        :none
+
+      has_movable_pieces?(game_state, player) ->
+        player
+
+      true ->
+        next_player_recurse(game_state, Constants.next_player(player), initial_player)
+    end
+  end
+
+  defp get_next_player(%GameState{roll: roll} = game_state) do
+    next_player_candidate =
+      case roll do
+        6 -> game_state.current_player
+        _ -> Constants.next_player(game_state.current_player)
+      end
+
+    next_player_recurse(game_state, next_player_candidate)
   end
 
   defp handle_eaten_piece(game_state, piece) do
