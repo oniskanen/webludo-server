@@ -262,21 +262,67 @@ defmodule WebKimble.Logic do
         p.player_color == piece.player_color and p.area == :home
       end)
 
-    first_free_home_index =
+    free_home_indices =
       0..3
-      |> Enum.find(fn i ->
+      |> Enum.filter(fn i ->
         !Enum.any?(player_home_pieces, fn p -> p.position_index == i end)
       end)
 
-    {:ok, _piece} = update_piece(piece, %{area: :home, position_index: first_free_home_index})
+    [first_free_home_index | remaining_free_home_indices] = free_home_indices
 
-    %{
-      piece_id: piece.id,
-      target_area: :home,
-      target_index: first_free_home_index,
-      start_area: piece.area,
-      start_index: piece.position_index
-    }
+    eaten_array = [
+      %{
+        piece_id: piece.id,
+        target_area: :home,
+        target_index: first_free_home_index,
+        start_area: piece.area,
+        start_index: piece.position_index
+      }
+    ]
+
+    eaten_array =
+      if piece.multiplier > 1 do
+        center_pieces =
+          game_state.pieces
+          |> Enum.filter(fn p -> p.player_color == piece.player_color and p.area == :center end)
+
+        eaten_center_pieces =
+          1..(piece.multiplier - 1)
+          |> Enum.map(fn i -> {i, Enum.at(center_pieces, -i)} end)
+          |> Enum.map(fn {i, p} ->
+            {p,
+             %{
+               piece_id: p.id,
+               target_area: :home,
+               target_index: Enum.at(remaining_free_home_indices, i - 1),
+               start_area: p.area,
+               start_index: p.position_index
+             }}
+          end)
+
+        eaten_center_pieces
+        |> Enum.each(fn {p, eaten} ->
+          {:ok, _p} =
+            update_piece(p, %{
+              area: :home,
+              position_index: eaten.target_index,
+              multiplied: 1
+            })
+        end)
+
+        eaten_center_pieces =
+          eaten_center_pieces
+          |> Enum.map(fn {_p, eaten} -> eaten end)
+
+        eaten_array ++ eaten_center_pieces
+      else
+        eaten_array
+      end
+
+    {:ok, _piece} =
+      update_piece(piece, %{area: :home, position_index: first_free_home_index, multiplier: 1})
+
+    eaten_array
   end
 
   def execute_move(%GameState{} = game_state, move) do
@@ -333,14 +379,13 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              eaten: [
+              eaten:
                 handle_eaten_piece(game_state, %Piece{
                   id: piece.id,
                   position_index: target_piece.position_index,
                   area: piece.area,
                   player_color: piece.player_color
                 })
-              ]
             }
           else
             {:ok, _piece} =
@@ -354,7 +399,7 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              eaten: [handle_eaten_piece(game_state, target_piece)]
+              eaten: handle_eaten_piece(game_state, target_piece)
             }
           end
         end
