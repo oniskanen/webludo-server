@@ -683,8 +683,22 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{target_area: :play, target_index: 1} = move
   end
 
-  # TODO: Reset multiplier when doubles eaten/mine
-  # TODO: 6 should cause re-roll even if no actions available
+  test "rolling a 6 allows a re-roll even if no moves are available" do
+    attrs = %{
+      current_player: :red,
+      roll: nil,
+      roll_count: 0,
+      pieces: [
+        %{area: :play, position_index: 27, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    {:ok, game_state} = Logic.set_roll(game_state, 6)
+    assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
+  end
+
   # TODO: Skip turns when all pieces are in goal area
 
   # TODO: Raising

@@ -104,19 +104,28 @@ defmodule WebKimble.Logic do
     if has_movable_pieces_with_roll?(game_state, roll) do
       update_game_state(game_state, %{roll: roll, roll_count: roll_count + 1})
     else
-      if roll_count + 1 < Constants.max_rolls() && !has_movable_pieces_in_play?(game_state) &&
-           !has_movable_pieces_in_goal?(game_state) do
-        update_game_state(game_state, %{
-          roll: nil,
-          current_player: current_player,
-          roll_count: roll_count + 1
-        })
-      else
-        update_game_state(game_state, %{
-          roll: nil,
-          roll_count: 0,
-          current_player: get_next_player(game_state)
-        })
+      cond do
+        roll == 6 ->
+          update_game_state(game_state, %{
+            roll: nil,
+            current_player: current_player,
+            roll_count: 0
+          })
+
+        roll_count + 1 < Constants.max_rolls() && !has_movable_pieces_in_play?(game_state) &&
+            !has_movable_pieces_in_goal?(game_state) ->
+          update_game_state(game_state, %{
+            roll: nil,
+            current_player: current_player,
+            roll_count: roll_count + 1
+          })
+
+        true ->
+          update_game_state(game_state, %{
+            roll: nil,
+            roll_count: 0,
+            current_player: get_next_player(game_state)
+          })
       end
     end
   end
