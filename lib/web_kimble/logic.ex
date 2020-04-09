@@ -216,7 +216,11 @@ defmodule WebKimble.Logic do
     end
   end
 
-  defp move_is_into_mine?(%Move{} = move, current_player, pieces) do
+  defp move_is_into_mine?(%Move{type: "raise"}, _current_player, _pieces) do
+    false
+  end
+
+  defp move_is_into_mine?(%Move{type: "move"} = move, current_player, pieces) do
     target_piece =
       Enum.find(pieces, fn p ->
         p.area == move.target_area && p.position_index == move.target_index
@@ -235,6 +239,58 @@ defmodule WebKimble.Logic do
       _piece ->
         false
     end
+  end
+
+  defp get_goal_pieces_by_player(%GameState{pieces: pieces}) do
+    pieces
+    |> Enum.filter(fn p -> p.area == :goal end)
+    |> Enum.group_by(fn p -> p.player_color end)
+  end
+
+  defp get_first_goal_pieces(%GameState{} = game_state) do
+    get_goal_pieces_by_player(game_state)
+    |> Enum.map(fn {k, v} -> {k, Enum.sort_by(v, fn p -> p.position_index end)} end)
+    |> Enum.map(fn {k, v} -> {k, hd(v)} end)
+  end
+
+  defp get_potential_raise(
+         %GameState{roll: roll, current_player: current_player, pieces: pieces} = game_state
+       )
+       when roll == 6 do
+    current_player_home_pieces =
+      pieces
+      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.area == :home end)
+
+    goal_pieces = get_first_goal_pieces(game_state)
+    raised_piece = goal_pieces[current_player]
+
+    cond do
+      raised_piece == nil ->
+        []
+
+      length(current_player_home_pieces) > 0 ->
+        []
+
+      length(goal_pieces) < Constants.player_count() ->
+        []
+
+      true ->
+        piece = goal_pieces[current_player]
+
+        [
+          %Move{
+            piece_id: piece.id,
+            target_index: Constants.get_home_space_index(current_player),
+            target_area: :play,
+            type: "raise"
+          }
+        ]
+    end
+  end
+
+  defp get_potential_raise(%GameState{roll: roll} = _game_state) when roll != 6 do
+    []
   end
 
   def get_moves(%GameState{roll: roll, current_player: current_player} = game_state)
@@ -261,6 +317,9 @@ defmodule WebKimble.Logic do
           end
         )
       end)
+
+    potential_raise = get_potential_raise(game_state)
+    moves = moves ++ potential_raise
 
     non_mine_moves =
       moves |> Enum.filter(fn m -> !move_is_into_mine?(m, current_player, game_state.pieces) end)

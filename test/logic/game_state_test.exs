@@ -723,7 +723,37 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{current_player: :yellow, roll: nil, roll_count: 0} = game_state
   end
 
-  # TODO: Raising
+  test "a player rolling a six can raise when criteria are met" do
+    # Raising is available when a player
+    # 1) Rolls a six on their turn,
+    # 2) Has all pieces out of goal,
+    # 3) And all players have at least one piece in goal
+
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :red},
+        %{area: :play, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    assert 4 = length(moves)
+
+    assert Enum.any?(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
+  end
+
+  # TODO: Raising edge cases
   # TODO: Penalties
   # TODO: Chat
   # TODO: Jag bor i hembo

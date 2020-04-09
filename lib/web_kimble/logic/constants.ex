@@ -43,4 +43,8 @@ defmodule WebKimble.Logic.Constants do
   def next_player(color) do
     @player_order[color]
   end
+
+  def player_count do
+    length(@player_colors)
+  end
 end
