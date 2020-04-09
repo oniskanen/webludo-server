@@ -753,7 +753,7 @@ defmodule WebKimble.Logic.GameStateTest do
     assert Enum.any?(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
   end
 
-  test "a player raising has their piece move in the starting position" do
+  test "a player raising has their opponents' pieces move to first free home space" do
     # Raising is available when a player
     # 1) Rolls a six on their turn,
     # 2) Has all pieces out of goal,
