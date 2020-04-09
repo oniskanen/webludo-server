@@ -393,6 +393,43 @@ defmodule WebKimble.Logic do
     next_player_recurse(game_state, next_player_candidate)
   end
 
+  defp get_first_free_home_index(game_state, player_color) do
+    player_home_pieces =
+      game_state.pieces
+      |> Enum.filter(fn p ->
+        p.player_color == player_color and p.area == :home
+      end)
+
+    0..3
+    |> Enum.filter(fn i ->
+      !Enum.any?(player_home_pieces, fn p -> p.position_index == i end)
+    end)
+    |> Enum.take(1)
+    |> hd
+  end
+
+  defp handle_demoted_pieces(game_state, demoted_pieces) do
+    piece_index_tuples =
+      demoted_pieces
+      |> Enum.map(fn p -> {p, get_first_free_home_index(game_state, p.player_color)} end)
+
+    piece_index_tuples
+    |> Enum.each(fn {p, home_index} ->
+      {:ok, _piece} = update_piece(p, %{area: :home, position_index: home_index, multiplier: 1})
+    end)
+
+    piece_index_tuples
+    |> Enum.map(fn {p, home_index} ->
+      %{
+        piece_id: p.id,
+        target_area: :home,
+        target_index: home_index,
+        start_area: p.area,
+        start_index: p.position_index
+      }
+    end)
+  end
+
   defp handle_eaten_piece(game_state, piece) do
     player_home_pieces =
       game_state.pieces
@@ -463,7 +500,10 @@ defmodule WebKimble.Logic do
     eaten_array
   end
 
-  def execute_move(%GameState{} = game_state, move) do
+  def execute_move(
+        %GameState{current_player: current_player} = game_state,
+        %Move{type: type} = move
+      ) do
     piece = get_piece(move.piece_id)
 
     game_state = Repo.preload(game_state, :pieces)
@@ -603,6 +643,19 @@ defmodule WebKimble.Logic do
             }
           }
         end
+      end
+
+    changes =
+      if type == "raise" do
+        demoted_pieces =
+          get_first_goal_pieces(game_state)
+          |> Enum.filter(fn {c, _p} -> c != current_player end)
+          |> Enum.map(fn {_c, p} -> p end)
+
+        eaten = handle_demoted_pieces(game_state, demoted_pieces)
+        Map.put(changes, :eaten, eaten)
+      else
+        changes
       end
 
     next_player = get_next_player(game_state)
