@@ -636,7 +636,7 @@ defmodule WebKimble.Logic do
               piece_id: move.piece_id,
               multiplier: 1
             },
-            promoted: promoted
+            animated_effects: promoted
           }
         else
           {:ok, _piece} =

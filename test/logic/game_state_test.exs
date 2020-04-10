@@ -527,7 +527,7 @@ defmodule WebKimble.Logic.GameStateTest do
                piece_id: _doubled_id,
                multiplier: 1
              },
-             promoted: [
+             animated_effects: [
                %{
                  start_area: :center,
                  start_index: 0,
