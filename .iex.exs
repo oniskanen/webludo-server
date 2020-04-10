@@ -1,3 +1,2 @@
-alias WebKimble.{Repo, Networking, Logic}
-alias WebKimble.Networking.{Game, Player}
-alias WebKimble.Logic.{GameState, Move, Piece, Constants}
+alias WebKimble.{Repo, Logic}
+alias WebKimble.Logic.{Game, Move, Piece, Constants, Player}

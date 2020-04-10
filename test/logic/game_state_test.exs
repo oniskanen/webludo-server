@@ -11,20 +11,20 @@ defmodule WebKimble.Logic.GameStateTest do
   end
 
   test "gamestate has current player" do
-    gamestate = TestHelpers.game_state_fixture(%{current_player: :yellow})
+    gamestate = TestHelpers.game_fixture(%{current_player: :yellow})
 
     assert :yellow = gamestate.current_player
   end
 
   test "gamestate has 16 pieces" do
-    gamestate = TestHelpers.game_state_fixture()
+    gamestate = TestHelpers.game_fixture()
     gamestate = Repo.preload(gamestate, :pieces)
 
     assert 16 = length(gamestate.pieces)
   end
 
   test "get_moves returns a list of possible moves" do
-    gamestate = TestHelpers.game_state_fixture(%{current_player: :yellow, roll: 6})
+    gamestate = TestHelpers.game_fixture(%{current_player: :yellow, roll: 6})
 
     moves = Logic.get_moves(gamestate)
 
@@ -34,7 +34,7 @@ defmodule WebKimble.Logic.GameStateTest do
   end
 
   test "cannot move from home without roll of 6" do
-    game_state = TestHelpers.game_state_fixture(%{roll: 1})
+    game_state = TestHelpers.game_fixture(%{roll: 1})
 
     assert [] == Logic.get_moves(game_state)
   end
@@ -53,7 +53,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :home, position_index: 0, player_color: player}]
     }
 
-    gamestate = TestHelpers.game_state_fixture(attrs)
+    gamestate = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(gamestate)
 
@@ -71,7 +71,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :play, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -87,7 +87,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :play, position_index: 24, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -110,7 +110,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -133,7 +133,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -150,7 +150,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -166,7 +166,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -180,7 +180,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 23, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -197,7 +197,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
     moves = Logic.get_moves(game_state)
 
     assert [move | []] = moves
@@ -212,7 +212,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -231,7 +231,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -245,7 +245,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     assert {:ok, game_state} = Logic.set_roll(game_state, 1)
     assert {:error, message} = Logic.set_roll(game_state, 1)
@@ -261,7 +261,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -279,7 +279,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -301,7 +301,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 1)
     assert %{current_player: :red, roll: nil, roll_count: 1} = game_state
@@ -321,7 +321,7 @@ defmodule WebKimble.Logic.GameStateTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -341,7 +341,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -360,7 +360,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 5)
 
@@ -379,7 +379,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 5)
 
@@ -397,7 +397,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
     move_piece_id = move.piece_id
@@ -418,7 +418,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
     {_game_state, changes} = Logic.execute_move(game_state, move)
@@ -437,7 +437,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
     {game_state, _changes} = Logic.execute_move(game_state, move)
@@ -458,7 +458,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
     assert 2 = length(moves)
@@ -487,7 +487,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
     assert 2 = length(moves)
@@ -515,7 +515,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -555,7 +555,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -616,7 +616,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -677,7 +677,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     assert [move | []] = Logic.get_moves(game_state)
     assert %{target_area: :play, target_index: 1} = move
@@ -693,7 +693,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 6)
     assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
@@ -714,7 +714,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -744,7 +744,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -774,7 +774,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -814,7 +814,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -856,7 +856,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 
@@ -883,7 +883,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 1)
     assert %{current_player: :red, roll_count: 1} = game_state
@@ -900,7 +900,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -923,7 +923,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -946,7 +946,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     move = hd(Logic.get_moves(game_state))
 
@@ -972,7 +972,7 @@ defmodule WebKimble.Logic.GameStateTest do
       ]
     }
 
-    game_state = TestHelpers.game_state_fixture(attrs)
+    game_state = TestHelpers.game_fixture(attrs)
 
     moves = Logic.get_moves(game_state)
 

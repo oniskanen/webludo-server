@@ -1,5 +1,5 @@
 defmodule WebKimbleWeb.LobbyChannel do
-  alias WebKimble.Networking
+  alias WebKimble.Logic
 
   use WebKimbleWeb, :channel
 
@@ -21,10 +21,10 @@ defmodule WebKimbleWeb.LobbyChannel do
     end)
   end
 
-  def handle_in("create_game", params, socket) do
+  def handle_in("create_game", %{"name" => name}, socket) do
     code = generate_code()
 
-    case Networking.create_game_with_initial_state(%{code: code, name: params["name"]}) do
+    case Logic.create_game_with_initial_state(%{code: code, name: name}) do
       {:ok, game} ->
         {:reply, {:ok, %{code: game.code}}, socket}
 
@@ -32,5 +32,9 @@ defmodule WebKimbleWeb.LobbyChannel do
         {:reply, {:error, %{type: "ValidationError", details: format_errors(changeset.errors)}},
          socket}
     end
+  end
+
+  def handle_in("create_game", _params, socket) do
+    {:reply, {:error, %{message: "'name' parameter is required to create a game"}}, socket}
   end
 end

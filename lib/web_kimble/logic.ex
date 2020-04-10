@@ -1,36 +1,20 @@
 defmodule WebKimble.Logic do
   alias WebKimble.Repo
-  alias WebKimble.Logic.GameState
   alias WebKimble.Logic.Move
   alias WebKimble.Logic.Constants
   alias WebKimble.Logic.Piece
+  alias WebKimble.Logic.Game
+  alias WebKimble.Logic.Player
 
-  def create_initial_game_state(game, attrs) do
-    {:ok, state} = create_game_state(game, attrs)
-
-    initial_pieces = WebKimble.Logic.Constants.initial_pieces()
-
-    Enum.each(initial_pieces, fn p -> {:ok, _piece} = create_piece(state, p) end)
-
-    {:ok, state}
-  end
-
-  def create_game_state(game, attrs) do
-    %GameState{}
-    |> GameState.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:game, game)
+  def create_game(attrs) do
+    %Game{}
+    |> Game.changeset(attrs)
     |> Repo.insert()
   end
 
-  def create_game_state(attrs) do
-    %GameState{}
-    |> GameState.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def update_game_state(game_state, attrs) do
-    game_state
-    |> GameState.changeset(attrs)
+  def update_game(game, attrs) do
+    game
+    |> Game.changeset(attrs)
     |> Repo.update()
   end
 
@@ -40,13 +24,13 @@ defmodule WebKimble.Logic do
   end
 
   defp has_movable_pieces_with_roll?(
-         %GameState{current_player: current_player} = game_state,
+         %Game{current_player: current_player} = game,
          roll
        ) do
-    game_state = Repo.preload(game_state, :pieces)
+    game = Repo.preload(game, :pieces)
 
     current_player_pieces =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p -> p.player_color == current_player end)
 
     moves =
@@ -66,11 +50,11 @@ defmodule WebKimble.Logic do
     length(moves) > 0
   end
 
-  defp has_movable_pieces?(%GameState{} = game_state, color) do
-    game_state = Repo.preload(game_state, :pieces)
+  defp has_movable_pieces?(%Game{} = game, color) do
+    game = Repo.preload(game, :pieces)
 
     goal_piece_indices =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p -> p.player_color == color end)
       |> Enum.filter(fn p -> p.area == :goal end)
       |> Enum.map(fn p -> p.position_index end)
@@ -79,22 +63,22 @@ defmodule WebKimble.Logic do
     goal_piece_indices != Enum.to_list(0..3)
   end
 
-  defp has_movable_pieces_in_play?(%GameState{current_player: current_player} = game_state) do
-    game_state = Repo.preload(game_state, :pieces)
+  defp has_movable_pieces_in_play?(%Game{current_player: current_player} = game) do
+    game = Repo.preload(game, :pieces)
 
     pieces_in_play =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p -> p.player_color == current_player end)
       |> Enum.filter(fn p -> p.area == :play end)
 
     length(pieces_in_play) > 0
   end
 
-  defp has_movable_pieces_in_goal?(%GameState{current_player: current_player} = game_state) do
-    game_state = Repo.preload(game_state, :pieces)
+  defp has_movable_pieces_in_goal?(%Game{current_player: current_player} = game) do
+    game = Repo.preload(game, :pieces)
 
     pieces_in_goal =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p -> p.player_color == current_player end)
       |> Enum.filter(fn p -> p.area == :goal end)
 
@@ -109,50 +93,50 @@ defmodule WebKimble.Logic do
   end
 
   defp set_roll_internal(
-         %GameState{current_player: current_player, roll_count: roll_count} = game_state,
+         %Game{current_player: current_player, roll_count: roll_count} = game,
          roll
        ) do
-    if has_movable_pieces_with_roll?(game_state, roll) do
-      update_game_state(game_state, %{roll: roll, roll_count: roll_count + 1})
+    if has_movable_pieces_with_roll?(game, roll) do
+      update_game(game, %{roll: roll, roll_count: roll_count + 1})
     else
       cond do
         roll == 6 ->
-          update_game_state(game_state, %{
+          update_game(game, %{
             roll: nil,
             current_player: current_player,
             roll_count: 0
           })
 
-        roll_count + 1 < Constants.max_rolls() && !has_movable_pieces_in_play?(game_state) &&
-            !has_movable_pieces_in_goal?(game_state) ->
-          update_game_state(game_state, %{
+        roll_count + 1 < Constants.max_rolls() && !has_movable_pieces_in_play?(game) &&
+            !has_movable_pieces_in_goal?(game) ->
+          update_game(game, %{
             roll: nil,
             current_player: current_player,
             roll_count: roll_count + 1
           })
 
         true ->
-          update_game_state(game_state, %{
+          update_game(game, %{
             roll: nil,
             roll_count: 0,
-            current_player: get_next_player(game_state)
+            current_player: get_next_player(game)
           })
       end
     end
   end
 
-  def set_roll(%GameState{roll: previous_roll} = game_state, roll)
+  def set_roll(%Game{roll: previous_roll} = game, roll)
       when previous_roll == 0 or previous_roll == nil do
-    set_roll_internal(game_state, roll)
+    set_roll_internal(game, roll)
   end
 
-  def set_roll(%GameState{} = game_state, roll) do
-    moves = get_moves(game_state)
+  def set_roll(%Game{} = game, roll) do
+    moves = get_moves(game)
 
     if Enum.any?(moves, &match?(%{type: "move"}, &1)) do
       {:error, "Roll needs to be used before rolling again"}
     else
-      set_roll_internal(Map.put(game_state, :roll_count, 0), roll)
+      set_roll_internal(Map.put(game, :roll_count, 0), roll)
     end
   end
 
@@ -250,20 +234,20 @@ defmodule WebKimble.Logic do
     end
   end
 
-  defp get_goal_pieces_by_player(%GameState{pieces: pieces}) do
+  defp get_goal_pieces_by_player(%Game{pieces: pieces}) do
     pieces
     |> Enum.filter(fn p -> p.area == :goal end)
     |> Enum.group_by(fn p -> p.player_color end)
   end
 
-  defp get_first_goal_pieces(%GameState{} = game_state) do
-    get_goal_pieces_by_player(game_state)
+  defp get_first_goal_pieces(%Game{} = game) do
+    get_goal_pieces_by_player(game)
     |> Enum.map(fn {k, v} -> {k, Enum.sort_by(v, fn p -> p.position_index end)} end)
     |> Enum.map(fn {k, v} -> {k, hd(v)} end)
   end
 
   defp get_potential_raise(
-         %GameState{roll: roll, current_player: current_player, pieces: pieces} = game_state
+         %Game{roll: roll, current_player: current_player, pieces: pieces} = game
        )
        when roll == 6 do
     current_player_home_pieces =
@@ -271,7 +255,7 @@ defmodule WebKimble.Logic do
       |> Enum.filter(fn p -> p.player_color == current_player end)
       |> Enum.filter(fn p -> p.area == :home end)
 
-    goal_pieces = get_first_goal_pieces(game_state)
+    goal_pieces = get_first_goal_pieces(game)
     raised_piece = goal_pieces[current_player]
 
     cond do
@@ -298,16 +282,16 @@ defmodule WebKimble.Logic do
     end
   end
 
-  defp get_potential_raise(%GameState{roll: roll} = _game_state) when roll != 6 do
+  defp get_potential_raise(%Game{roll: roll} = _game) when roll != 6 do
     []
   end
 
-  def get_moves(%GameState{roll: roll, current_player: current_player} = game_state)
+  def get_moves(%Game{roll: roll, current_player: current_player} = game)
       when roll in 1..6 do
-    game_state = Repo.preload(game_state, :pieces)
+    game = Repo.preload(game, :pieces)
 
     current_player_pieces =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p -> p.player_color == current_player end)
 
     moves =
@@ -327,11 +311,11 @@ defmodule WebKimble.Logic do
         )
       end)
 
-    potential_raise = get_potential_raise(game_state)
+    potential_raise = get_potential_raise(game)
     moves = moves ++ potential_raise
 
     non_mine_moves =
-      moves |> Enum.filter(fn m -> !move_is_into_mine?(m, current_player, game_state.pieces) end)
+      moves |> Enum.filter(fn m -> !move_is_into_mine?(m, current_player, game.pieces) end)
 
     if length(non_mine_moves) > 0 do
       non_mine_moves
@@ -340,18 +324,18 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def get_moves(%GameState{roll: nil} = _game_state) do
+  def get_moves(%Game{roll: nil} = _game) do
     []
   end
 
-  def get_moves(%GameState{roll: 0} = _game_state) do
+  def get_moves(%Game{roll: 0} = _game) do
     []
   end
 
-  def create_piece(%GameState{} = game_state, attrs) do
+  def create_piece(%Game{} = game, attrs) do
     %Piece{}
     |> Piece.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:game_state, game_state)
+    |> Ecto.Changeset.put_assoc(:game, game)
     |> Repo.insert()
   end
 
@@ -369,42 +353,42 @@ defmodule WebKimble.Logic do
     Enum.random(Constants.player_colors())
   end
 
-  defp next_player_recurse(game_state, player) do
+  defp next_player_recurse(game, player) do
     cond do
-      has_movable_pieces?(game_state, player) ->
+      has_movable_pieces?(game, player) ->
         player
 
       true ->
-        next_player_recurse(game_state, Constants.next_player(player), player)
+        next_player_recurse(game, Constants.next_player(player), player)
     end
   end
 
-  defp next_player_recurse(game_state, player, initial_player) do
+  defp next_player_recurse(game, player, initial_player) do
     cond do
       player == initial_player ->
         :none
 
-      has_movable_pieces?(game_state, player) ->
+      has_movable_pieces?(game, player) ->
         player
 
       true ->
-        next_player_recurse(game_state, Constants.next_player(player), initial_player)
+        next_player_recurse(game, Constants.next_player(player), initial_player)
     end
   end
 
-  defp get_next_player(%GameState{roll: roll} = game_state) do
+  defp get_next_player(%Game{roll: roll} = game) do
     next_player_candidate =
       case roll do
-        6 -> game_state.current_player
-        _ -> Constants.next_player(game_state.current_player)
+        6 -> game.current_player
+        _ -> Constants.next_player(game.current_player)
       end
 
-    next_player_recurse(game_state, next_player_candidate)
+    next_player_recurse(game, next_player_candidate)
   end
 
-  defp get_first_free_home_index(game_state, player_color) do
+  defp get_first_free_home_index(game, player_color) do
     player_home_pieces =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p ->
         p.player_color == player_color and p.area == :home
       end)
@@ -417,10 +401,10 @@ defmodule WebKimble.Logic do
     |> hd
   end
 
-  defp handle_demoted_pieces(game_state, demoted_pieces) do
+  defp handle_demoted_pieces(game, demoted_pieces) do
     piece_index_tuples =
       demoted_pieces
-      |> Enum.map(fn p -> {p, get_first_free_home_index(game_state, p.player_color)} end)
+      |> Enum.map(fn p -> {p, get_first_free_home_index(game, p.player_color)} end)
 
     piece_index_tuples
     |> Enum.each(fn {p, home_index} ->
@@ -439,9 +423,9 @@ defmodule WebKimble.Logic do
     end)
   end
 
-  defp handle_eaten_piece(game_state, piece) do
+  defp handle_eaten_piece(game, piece) do
     player_home_pieces =
-      game_state.pieces
+      game.pieces
       |> Enum.filter(fn p ->
         p.player_color == piece.player_color and p.area == :home
       end)
@@ -467,7 +451,7 @@ defmodule WebKimble.Logic do
     eaten_array =
       if piece.multiplier > 1 do
         center_pieces =
-          game_state.pieces
+          game.pieces
           |> Enum.filter(fn p -> p.player_color == piece.player_color and p.area == :center end)
 
         eaten_center_pieces =
@@ -510,15 +494,15 @@ defmodule WebKimble.Logic do
   end
 
   def execute_move(
-        %GameState{current_player: current_player} = game_state,
+        %Game{current_player: current_player} = game,
         %Move{type: type} = move
       ) do
     piece = get_piece(move.piece_id)
 
-    game_state = Repo.preload(game_state, :pieces)
+    game = Repo.preload(game, :pieces)
 
     target_piece =
-      Enum.find(game_state.pieces, fn p ->
+      Enum.find(game.pieces, fn p ->
         p.position_index == move.target_index and move.target_area == :play and
           p.area == :play
       end)
@@ -527,7 +511,7 @@ defmodule WebKimble.Logic do
       if target_piece != nil do
         if target_piece.player_color == piece.player_color do
           player_center_piece_indices =
-            game_state.pieces
+            game.pieces
             |> Enum.filter(fn p -> p.player_color == piece.player_color end)
             |> Enum.filter(fn p -> p.area == :center end)
             |> Enum.map(fn p -> p.position_index end)
@@ -567,7 +551,7 @@ defmodule WebKimble.Logic do
                 start_index: piece.position_index
               },
               animated_effects:
-                handle_eaten_piece(game_state, %Piece{
+                handle_eaten_piece(game, %Piece{
                   id: piece.id,
                   position_index: target_piece.position_index,
                   area: piece.area,
@@ -593,7 +577,7 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              animated_effects: handle_eaten_piece(game_state, target_piece),
+              animated_effects: handle_eaten_piece(game, target_piece),
               penalties: [
                 %{
                   player: target_piece.player_color,
@@ -608,7 +592,7 @@ defmodule WebKimble.Logic do
           num_promoted_pieces = piece.multiplier - 1
 
           promoted_pieces =
-            game_state.pieces
+            game.pieces
             |> Enum.filter(fn p -> p.player_color == piece.player_color end)
             |> Enum.filter(fn p -> p.area == :center end)
             |> Enum.take(num_promoted_pieces)
@@ -669,15 +653,15 @@ defmodule WebKimble.Logic do
     changes =
       if type == "raise" do
         # Updates the possible previously eaten piece so we have an accurate representation of the free spaces
-        game_state = game_state |> Repo.preload(:pieces, force: true)
+        game = game |> Repo.preload(:pieces, force: true)
 
         demoted_pieces =
-          get_first_goal_pieces(game_state)
+          get_first_goal_pieces(game)
           |> Enum.filter(fn {c, _p} -> c != current_player end)
           |> Enum.map(fn {_c, p} -> p end)
 
         demoted =
-          handle_demoted_pieces(game_state, demoted_pieces) ++
+          handle_demoted_pieces(game, demoted_pieces) ++
             Map.get(changes, :animated_effects, [])
 
         Map.put(changes, :animated_effects, demoted)
@@ -685,13 +669,108 @@ defmodule WebKimble.Logic do
         changes
       end
 
-    next_player = get_next_player(game_state)
+    next_player = get_next_player(game)
 
-    {:ok, game_state} =
-      update_game_state(game_state, %{current_player: next_player, roll: nil, roll_count: 0})
+    {:ok, game} = update_game(game, %{current_player: next_player, roll: nil, roll_count: 0})
 
-    game_state = game_state |> Repo.preload(:pieces, force: true)
+    game = game |> Repo.preload(:pieces, force: true)
 
-    {game_state, changes}
+    {game, changes}
+  end
+
+  def get_game_by(attrs) do
+    game = Repo.get_by(Game, attrs)
+
+    case game do
+      nil -> {:error, "Game not found"}
+      game -> {:ok, game}
+    end
+  end
+
+  defp preload_game(game, opts \\ []) when is_list(opts) do
+    game =
+      game
+      |> Repo.preload(:pieces, opts)
+      |> Repo.preload(:players, opts)
+
+    sorted_players = Enum.sort_by(game.players, fn p -> p.inserted_at end, NaiveDateTime)
+    %Game{game | players: sorted_players}
+  end
+
+  def get_game_by_code(code) do
+    case get_game_by(%{code: code}) do
+      {:error, message} -> {:error, message}
+      {:ok, game} -> {:ok, preload_game(game)}
+    end
+  end
+
+  def create_game_with_initial_state(attrs) do
+    attrs = Map.put(attrs, :current_player, WebKimble.Logic.random_player())
+
+    # IO.inspect(attrs)
+    case create_game(attrs) do
+      {:ok, game} ->
+        WebKimble.Logic.Constants.initial_pieces()
+        |> Enum.each(fn p -> {:ok, _piece} = create_piece(game, p) end)
+
+        {:ok, game}
+
+      resp ->
+        # IO.inspect(resp)
+        resp
+    end
+  end
+
+  def list_games() do
+    Repo.all(Game)
+  end
+
+  def create_player(game, attrs) do
+    {:ok, _player} =
+      %Player{}
+      |> Player.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:game, game)
+      |> Repo.insert()
+  end
+
+  def get_player(id) do
+    Repo.get(Player, id)
+  end
+
+  def update_player(player, attrs) do
+    player
+    |> Player.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def set_player_penalty(player_id, amount) do
+    update_player(get_player(player_id), %{penalties: amount})
+  end
+
+  def apply_penalties(%Game{players: players} = game, penalties) do
+    penalties
+    |> Enum.each(fn p ->
+      player = Enum.find(players, fn pl -> pl.color == p.player end)
+      {:ok, _player} = set_player_penalty(player.id, player.penalties + p.amount)
+    end)
+
+    Repo.preload(game, :players, force: true)
+  end
+
+  def join_game(code, name) do
+    {:ok, game} = get_game_by(%{code: code})
+
+    game = Repo.preload(game, :players)
+    taken_colors = game.players |> Enum.map(fn p -> p.color end)
+    available_colors = available_colors(taken_colors)
+
+    case length(available_colors) do
+      n when n > 0 ->
+        {:ok, player} = create_player(game, %{name: name, color: Enum.random(available_colors)})
+        {:ok, player, preload_game(game, force: true)}
+
+      _ ->
+        {:error, "Game is full"}
+    end
   end
 end

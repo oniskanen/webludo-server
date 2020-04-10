@@ -21,9 +21,6 @@ defmodule WebKimbleWeb.Channels.LobbyChannelTest do
 
     ref = push(socket, "create_game", %{})
 
-    assert_reply ref,
-                 :error,
-                 %{details: [%{field: :name, message: "can't be blank"}], type: "ValidationError"} =
-                   params
+    assert_reply ref, :error, %{message: "'name' parameter is required to create a game"}
   end
 end

@@ -16,7 +16,7 @@ defmodule WebKimble.Logic.Piece do
     field :area, EctoAtom
     field :player_color, EctoAtom
     field :multiplier, :integer, default: 1
-    belongs_to :game_state, WebKimble.Logic.GameState
+    belongs_to :game, WebKimble.Logic.Game
   end
 
   def changeset(piece, attrs) do

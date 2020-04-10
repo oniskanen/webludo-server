@@ -1,5 +1,4 @@
 defmodule WebKimble.TestHelpers do
-  alias WebKimble.Networking
   alias WebKimble.Logic
 
   def game_fixture(attrs \\ %{}) do
@@ -7,9 +6,10 @@ defmodule WebKimble.TestHelpers do
       attrs
       |> Enum.into(%{
         name: "Test Game",
-        code: "secret"
+        code: "secret",
+        current_player: :red
       })
-      |> Networking.create_game()
+      |> Logic.create_game()
 
     %{players: players} =
       attrs
@@ -21,15 +21,7 @@ defmodule WebKimble.TestHelpers do
         ]
       })
 
-    Enum.each(players, fn p -> {:ok, _player} = Networking.create_player(game, p) end)
-
-    gs_attrs =
-      attrs
-      |> Enum.into(%{
-        current_player: :red
-      })
-
-    {:ok, game_state} = Logic.create_game_state(game, gs_attrs)
+    Enum.each(players, fn p -> {:ok, _player} = Logic.create_player(game, p) end)
 
     %{pieces: pieces} =
       attrs
@@ -37,28 +29,28 @@ defmodule WebKimble.TestHelpers do
         pieces: WebKimble.Logic.Constants.initial_pieces()
       })
 
-    Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game_state, p) end)
+    Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
     game
   end
 
-  def game_state_fixture(attrs \\ %{}) do
-    {:ok, state} =
-      attrs
-      |> Enum.into(%{
-        current_player: :red
-      })
-      |> Logic.create_game_state()
+  # def game_state_fixture(attrs \\ %{}) do
+  #   {:ok, state} =
+  #     attrs
+  #     |> Enum.into(%{
+  #       current_player: :red
+  #     })
+  #     |> Logic.create_game_state()
 
-    %{pieces: pieces} =
-      attrs
-      |> Enum.into(%{
-        pieces: WebKimble.Logic.Constants.initial_pieces()
-      })
+  #   %{pieces: pieces} =
+  #     attrs
+  #     |> Enum.into(%{
+  #       pieces: WebKimble.Logic.Constants.initial_pieces()
+  #     })
 
-    Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(state, p) end)
+  #   Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(state, p) end)
 
-    state
-  end
+  #   state
+  # end
 
   # NOTE: Doesn't account for duplicates
   def list_contents_equal?(l1, l2) do

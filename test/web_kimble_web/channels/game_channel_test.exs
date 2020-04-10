@@ -1,19 +1,14 @@
 defmodule WebKimbleWeb.Channels.GameChannelTest do
   use WebKimbleWeb.ChannelCase
 
-  alias WebKimble.Logic.GameState
-  alias WebKimble.Repo
   alias WebKimble.TestHelpers
 
-  test "join replies with game and gamestate" do
+  test "join replies with game" do
     game = TestHelpers.game_fixture()
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
     assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    assert %{game: %{players: _players, game_state: %GameState{} = state}} = reply
-
-    assert %{pieces: pieces} = state
-
+    assert %{game: %{players: _players, pieces: pieces}} = reply
     assert 16 == length(pieces)
   end
 
@@ -117,8 +112,6 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
-    game = Repo.preload(game, :game_state)
-
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
     p1 = join_game(socket, "Player 1")
@@ -139,8 +132,6 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
       })
 
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
-
-    game = Repo.preload(game, :game_state)
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -178,15 +169,11 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     p1 = join_game(socket, "Player 1")
 
-    ref = push(socket, "game_state", %{})
+    ref = push(socket, "game", %{})
 
     assert_reply ref, :ok, %{pieces: pieces}
 
     %{id: id} = hd(pieces)
-
-    # [piece | []] = pieces
-
-    # %{id: id} = piece
 
     ref =
       push(socket, "action", %{

@@ -1,4 +1,4 @@
-defmodule WebKimble.Networking.Player do
+defmodule WebKimble.Logic.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -8,7 +8,7 @@ defmodule WebKimble.Networking.Player do
     field :name, :string
     field :penalties, :integer, default: 0
 
-    belongs_to :game, WebKimble.Networking.Game
+    belongs_to :game, WebKimble.Logic.Game
 
     timestamps()
   end
