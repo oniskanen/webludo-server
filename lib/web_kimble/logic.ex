@@ -493,23 +493,22 @@ defmodule WebKimble.Logic do
     eaten_array
   end
 
-  defp check_game_end(
-         %Game{current_player: current_player, pieces: pieces, players: players} = game
-       ) do
-    player = players |> Enum.find(fn p -> p.color == current_player end)
+  defp check_game_end(%Game{pieces: pieces, players: players} = game) do
+    players
+    |> Enum.filter(fn p -> p.penalties == 0 end)
+    |> Enum.filter(fn pl ->
+      player_goal_pieces =
+        pieces
+        |> Enum.filter(fn pc -> pc.player_color == pl.color end)
+        |> Enum.filter(fn pc -> pc.area == :goal end)
 
-    with 0 <- player.penalties,
-         player_goal_pieces <-
-           pieces
-           |> Enum.filter(fn p -> p.player_color == current_player end)
-           |> Enum.filter(fn p -> p.area == :goal end),
-         true <- length(player_goal_pieces) == Constants.player_piece_count() do
-      update_player(player, %{has_finished: true})
-      game = game |> Repo.preload(:players, force: true)
-      game
-    else
-      _ -> game
-    end
+      length(player_goal_pieces) == Constants.player_piece_count()
+    end)
+    |> Enum.each(fn p ->
+      update_player(p, %{has_finished: true})
+    end)
+
+    game |> Repo.preload(:players, force: true)
   end
 
   def execute_move(
@@ -764,15 +763,22 @@ defmodule WebKimble.Logic do
     |> Repo.update()
   end
 
-  def set_player_penalty(player_id, amount) do
-    update_player(get_player(player_id), %{penalties: amount})
+  def set_player_penalty(%Game{} = game, player_id, amount) do
+    case update_player(get_player(player_id), %{penalties: amount}) do
+      {:ok, _player} ->
+        {:ok,
+         check_game_end(game |> Repo.preload(:pieces) |> Repo.preload(:players, force: true))}
+
+      {:error, error} ->
+        {:error, error}
+    end
   end
 
   def apply_penalties(%Game{players: players} = game, penalties) do
     penalties
     |> Enum.each(fn p ->
       player = Enum.find(players, fn pl -> pl.color == p.player end)
-      {:ok, _player} = set_player_penalty(player.id, player.penalties + p.amount)
+      set_player_penalty(game, player.id, player.penalties + p.amount)
     end)
 
     Repo.preload(game, :players, force: true)

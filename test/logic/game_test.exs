@@ -1009,6 +1009,29 @@ defmodule WebKimble.Logic.GameTest do
     assert Enum.any?(players, &match?(%{has_finished: true, color: :red}, &1))
   end
 
+  test "a player finishing last penalty with all pieces in goal has_finished to true" do
+    attrs = %{
+      current_player: :red,
+      roll: 4,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 1, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :goal, position_index: 3, player_color: :red}
+      ],
+      players: [
+        %{color: :red, penalties: 1, name: "Player 1"}
+      ]
+    }
+
+    assert %{players: [%{id: player_id, color: :red, has_finished: false}]} =
+             game = TestHelpers.game_fixture(attrs)
+
+    assert {:ok, %{players: [%{id: ^player_id, color: :red, has_finished: true}]}} =
+             Logic.set_player_penalty(game, player_id, 0)
+  end
+
   # TODO: Winning
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times

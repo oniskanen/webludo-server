@@ -121,9 +121,10 @@ defmodule WebKimbleWeb.GameChannel do
   end
 
   defp handle_player_penalty(player_id, amount, socket) do
-    case Logic.set_player_penalty(player_id, amount) do
-      {:ok, _player} ->
-        {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+
+    case Logic.set_player_penalty(game, player_id, amount) do
+      {:ok, game} ->
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: actions})
         {:reply, :ok, socket}

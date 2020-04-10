@@ -1,5 +1,6 @@
 defmodule WebKimble.TestHelpers do
   alias WebKimble.Logic
+  alias WebKimble.Repo
 
   def game_fixture(attrs \\ %{}) do
     {:ok, game} =
@@ -31,7 +32,7 @@ defmodule WebKimble.TestHelpers do
       })
 
     Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
-    game
+    game |> Repo.preload(:players)
   end
 
   # NOTE: Doesn't account for duplicates
