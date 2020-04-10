@@ -1,4 +1,4 @@
-defmodule WebKimble.Logic.GameStateTest do
+defmodule WebKimble.Logic.GameTest do
   use ExUnit.Case
 
   alias WebKimble.Logic

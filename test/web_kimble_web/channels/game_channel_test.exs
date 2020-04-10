@@ -18,7 +18,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert {:error, "Game not found"} = subscribe_and_join(socket, "games:invalid", %{})
   end
 
-  test "join game broadcasts game state" do
+  test "join game broadcasts game with list of players" do
     game = TestHelpers.game_fixture(%{players: []})
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
@@ -150,7 +150,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     player
   end
 
-  test "move action returns new game state" do
+  test "move action returns game with pieces in new positions" do
     game =
       WebKimble.TestHelpers.game_fixture(%{
         current_player: :red,
@@ -175,16 +175,15 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     %{id: id} = hd(pieces)
 
-    ref =
-      push(socket, "action", %{
-        token: p1.token,
-        type: "move",
-        move: %{piece_id: id, target_area: :play, target_index: 0, type: "move"}
-      })
+    push(socket, "action", %{
+      token: p1.token,
+      type: "move",
+      move: %{piece_id: id, target_area: :play, target_index: 0, type: "move"}
+    })
 
-    assert_reply ref, :ok, %{game_state: game_state}
+    assert_broadcast "game_updated", %{game: game}
 
-    pieces_in_play = game_state.pieces |> Enum.filter(fn p -> p.area == :play end)
+    pieces_in_play = game.pieces |> Enum.filter(fn p -> p.area == :play end)
 
     assert 1 = length(pieces_in_play)
   end
@@ -212,7 +211,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert "Roll needs to be used before rolling again" == error_message
   end
 
-  test "eating a piece causes a game state updated message with changes" do
+  test "eating a piece causes a game updated message with changes" do
     game =
       WebKimble.TestHelpers.game_fixture(%{
         current_player: :red,
@@ -234,7 +233,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
 
-    assert_broadcast "game_state_updated", %{changes: changes}
+    assert_broadcast "game_updated", %{changes: changes}
 
     assert %{move: %{target_area: :play, target_index: 1, start_area: :play, start_index: 0}} =
              changes
@@ -265,7 +264,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
 
-    assert_broadcast "game_state_updated", %{changes: changes}
+    assert_broadcast "game_updated", %{changes: changes}
 
     assert %{
              animated_effects: [
@@ -417,7 +416,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
   end
 
-  test "eating a piece causes game state broadcast with penalties" do
+  test "eating a piece causes game updated broadcast with penalties" do
     game =
       WebKimble.TestHelpers.game_fixture(%{
         current_player: :red,
@@ -442,7 +441,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
 
-    assert_broadcast "game_state_updated", %{changes: changes}
+    assert_broadcast "game_updated", %{changes: changes}
 
     assert %{penalties: [%{player: :blue, amount: 1}]} = changes
   end
@@ -473,7 +472,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
 
-    assert_broadcast "game_updated", %{players: players}
+    assert_broadcast "game_updated", %{game: %{players: players}}
 
     assert Enum.any?(players, &match?(%{color: :blue, penalties: 2}, &1))
   end

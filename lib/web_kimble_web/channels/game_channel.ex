@@ -66,20 +66,14 @@ defmodule WebKimbleWeb.GameChannel do
                 {:reply, {:error, %{message: "Not a valid move"}}, socket}
 
               m ->
-                {state, changes} = Logic.execute_move(game, m)
+                {game, changes} = Logic.execute_move(game, m)
 
                 penalties = Map.get(changes, :penalties, [])
                 game = Logic.apply_penalties(game, penalties)
 
-                broadcast!(socket, "game_updated", game)
+                broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
 
-                broadcast!(socket, "game_state_updated", %{
-                  game_state: state,
-                  changes: changes,
-                  actions: []
-                })
-
-                {:reply, {:ok, %{game_state: state}}, socket}
+                {:reply, :ok, socket}
             end
         end
     end

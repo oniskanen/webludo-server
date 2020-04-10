@@ -33,25 +33,6 @@ defmodule WebKimble.TestHelpers do
     game
   end
 
-  # def game_state_fixture(attrs \\ %{}) do
-  #   {:ok, state} =
-  #     attrs
-  #     |> Enum.into(%{
-  #       current_player: :red
-  #     })
-  #     |> Logic.create_game_state()
-
-  #   %{pieces: pieces} =
-  #     attrs
-  #     |> Enum.into(%{
-  #       pieces: WebKimble.Logic.Constants.initial_pieces()
-  #     })
-
-  #   Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(state, p) end)
-
-  #   state
-  # end
-
   # NOTE: Doesn't account for duplicates
   def list_contents_equal?(l1, l2) do
     set1 = MapSet.new(l1)
