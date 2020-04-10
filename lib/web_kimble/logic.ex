@@ -573,7 +573,13 @@ defmodule WebKimble.Logic do
                   area: piece.area,
                   player_color: piece.player_color,
                   multiplier: piece.multiplier
-                })
+                }),
+              penalties: [
+                %{
+                  player: piece.player_color,
+                  amount: target_piece.multiplier * piece.multiplier
+                }
+              ]
             }
           else
             {:ok, _piece} =

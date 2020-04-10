@@ -932,6 +932,29 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{penalties: [%{player: :blue, amount: 6}]} = changes
   end
 
+  test "walking into a mine lists a penalty for the current player" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 6, player_color: :red, multiplier: 3},
+        %{area: :play, position_index: 7, player_color: :blue, multiplier: 2},
+        %{area: :center, position_index: 0, player_color: :blue},
+        %{area: :center, position_index: 0, player_color: :red},
+        %{area: :center, position_index: 1, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{penalties: [%{player: :red, amount: 6}]} = changes
+  end
+
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
