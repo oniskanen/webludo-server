@@ -129,8 +129,8 @@ defmodule WebKimbleWeb.GameChannel do
         broadcast!(socket, "game_updated", game)
         {:reply, :ok, socket}
 
-      {:error, message} ->
-        {:reply, {:error, message}, socket}
+      {:error, error} ->
+        {:reply, {:error, %{errors: error.errors}}, socket}
     end
   end
 end
