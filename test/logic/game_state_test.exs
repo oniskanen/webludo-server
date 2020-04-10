@@ -847,7 +847,6 @@ defmodule WebKimble.Logic.GameStateTest do
       roll_count: 1,
       pieces: [
         %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 1, player_color: :red},
         %{area: :play, position_index: 2, player_color: :red},
         %{area: :play, position_index: 3, player_color: :red},
         %{area: :goal, position_index: 0, player_color: :blue},
@@ -868,7 +867,29 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{doubled: %{multiplier: 2}} = changes
   end
 
-  # TODO: Raising edge cases
+  test "a player can roll again if the only move available is a raise" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 1, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 27, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    {:ok, game_state} = Logic.set_roll(game_state, 1)
+    assert %{current_player: :red, roll_count: 1} = game_state
+  end
+
+  # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Penalties
   # TODO: Chat
   # TODO: Jag bor i hembo

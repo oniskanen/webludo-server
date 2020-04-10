@@ -108,12 +108,10 @@ defmodule WebKimble.Logic do
     length(movable_pieces) > 0
   end
 
-  def set_roll(
-        %GameState{roll: previous_roll, current_player: current_player, roll_count: roll_count} =
-          game_state,
-        roll
-      )
-      when previous_roll == 0 or previous_roll == nil do
+  defp set_roll_internal(
+         %GameState{current_player: current_player, roll_count: roll_count} = game_state,
+         roll
+       ) do
     if has_movable_pieces_with_roll?(game_state, roll) do
       update_game_state(game_state, %{roll: roll, roll_count: roll_count + 1})
     else
@@ -143,8 +141,19 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def set_roll(%GameState{} = _game_state, _roll) do
-    {:error, "Roll needs to be used before rolling again"}
+  def set_roll(%GameState{roll: previous_roll} = game_state, roll)
+      when previous_roll == 0 or previous_roll == nil do
+    set_roll_internal(game_state, roll)
+  end
+
+  def set_roll(%GameState{} = game_state, roll) do
+    moves = get_moves(game_state)
+
+    if Enum.any?(moves, &match?(%{type: "move"}, &1)) do
+      {:error, "Roll needs to be used before rolling again"}
+    else
+      set_roll_internal(Map.put(game_state, :roll_count, 0), roll)
+    end
   end
 
   defp home_to_play_move(%Piece{} = piece) do
