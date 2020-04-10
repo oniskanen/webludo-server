@@ -83,7 +83,8 @@ defmodule WebKimbleWeb.GameChannel do
     case Logic.join_game(socket.assigns.code, name) do
       {:ok, player, game} ->
         token = WebKimbleWeb.Auth.get_token(player)
-        broadcast!(socket, "game_updated", game)
+        actions = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, actions: actions})
 
         {:reply, {:ok, %{token: token, color: player.color}}, socket}
 
@@ -123,7 +124,8 @@ defmodule WebKimbleWeb.GameChannel do
     case Logic.set_player_penalty(player_id, amount) do
       {:ok, _player} ->
         {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-        broadcast!(socket, "game_updated", game)
+        actions = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, actions: actions})
         {:reply, :ok, socket}
 
       {:error, error} ->
