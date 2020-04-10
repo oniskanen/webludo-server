@@ -83,6 +83,16 @@ defmodule WebKimble.Networking do
     update_player(get_player(player_id), %{penalties: amount})
   end
 
+  def apply_penalties(%Game{players: players} = game, penalties) do
+    penalties
+    |> Enum.each(fn p ->
+      player = Enum.find(players, fn pl -> pl.color == p.player end)
+      {:ok, _player} = set_player_penalty(player.id, player.penalties + p.amount)
+    end)
+
+    Repo.preload(game, :players, force: true)
+  end
+
   def join_game(code, name) do
     {:ok, game} = get_game_by(%{code: code})
 

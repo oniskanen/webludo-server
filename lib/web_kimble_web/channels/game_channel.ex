@@ -69,6 +69,11 @@ defmodule WebKimbleWeb.GameChannel do
               m ->
                 {state, changes} = Logic.execute_move(game.game_state, m)
 
+                penalties = Map.get(changes, :penalties, [])
+                game = Networking.apply_penalties(game, penalties)
+
+                broadcast!(socket, "game_updated", game)
+
                 broadcast!(socket, "game_state_updated", %{
                   game_state: state,
                   changes: changes,
