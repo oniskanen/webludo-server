@@ -647,12 +647,15 @@ defmodule WebKimble.Logic do
 
     changes =
       if type == "raise" do
+        # Updates the possible previously eaten piece so we have an accurate representation of the free spaces
+        game_state = game_state |> Repo.preload(:pieces, force: true)
+
         demoted_pieces =
           get_first_goal_pieces(game_state)
           |> Enum.filter(fn {c, _p} -> c != current_player end)
           |> Enum.map(fn {_c, p} -> p end)
 
-        eaten = handle_demoted_pieces(game_state, demoted_pieces)
+        eaten = handle_demoted_pieces(game_state, demoted_pieces) ++ Map.get(changes, :eaten, [])
         Map.put(changes, :eaten, eaten)
       else
         changes
