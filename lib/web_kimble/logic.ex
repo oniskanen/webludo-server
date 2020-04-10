@@ -566,7 +566,7 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              eaten:
+              animated_effects:
                 handle_eaten_piece(game_state, %Piece{
                   id: piece.id,
                   position_index: target_piece.position_index,
@@ -587,7 +587,7 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              eaten: handle_eaten_piece(game_state, target_piece)
+              animated_effects: handle_eaten_piece(game_state, target_piece)
             }
           end
         end
@@ -664,8 +664,11 @@ defmodule WebKimble.Logic do
           |> Enum.filter(fn {c, _p} -> c != current_player end)
           |> Enum.map(fn {_c, p} -> p end)
 
-        eaten = handle_demoted_pieces(game_state, demoted_pieces) ++ Map.get(changes, :eaten, [])
-        Map.put(changes, :eaten, eaten)
+        demoted =
+          handle_demoted_pieces(game_state, demoted_pieces) ++
+            Map.get(changes, :animated_effects, [])
+
+        Map.put(changes, :animated_effects, demoted)
       else
         changes
       end

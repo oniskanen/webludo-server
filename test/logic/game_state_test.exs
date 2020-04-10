@@ -403,7 +403,7 @@ defmodule WebKimble.Logic.GameStateTest do
     move_piece_id = move.piece_id
     {_game_state, changes} = Logic.execute_move(game_state, move)
 
-    assert %{eaten: [%{piece_id: piece_id, start_index: 7, target_index: 0}]} = changes
+    assert %{animated_effects: [%{piece_id: piece_id, start_index: 7, target_index: 0}]} = changes
     assert move_piece_id == piece_id
   end
 
@@ -423,7 +423,7 @@ defmodule WebKimble.Logic.GameStateTest do
     move = hd(Logic.get_moves(game_state))
     {_game_state, changes} = Logic.execute_move(game_state, move)
 
-    refute match?(%{eaten: _eaten}, changes)
+    refute match?(%{animated_effects: _effects}, changes)
   end
 
   test "piece walking into mine moves to first free home index" do
@@ -563,7 +563,7 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{
              move: %{start_area: :play, start_index: 26, target_area: :play, target_index: 27},
-             eaten: [
+             animated_effects: [
                %{
                  piece_id: _doubled_id,
                  start_area: :play,
@@ -624,7 +624,7 @@ defmodule WebKimble.Logic.GameStateTest do
 
     assert %{
              move: %{start_area: :play, start_index: 6, target_area: :play, target_index: 7},
-             eaten: [
+             animated_effects: [
                %{
                  piece_id: _doubled_id,
                  start_area: :play,
@@ -791,10 +791,10 @@ defmodule WebKimble.Logic.GameStateTest do
              &match?(%{position_index: 0, area: :play, player_color: :red}, &1)
            )
 
-    assert %{eaten: eaten} = changes
-    assert length(eaten) == 3
+    assert %{animated_effects: effects} = changes
+    assert length(effects) == 3
 
-    assert Enum.all?(eaten, &match?(%{target_area: :home, target_index: 0}, &1))
+    assert Enum.all?(effects, &match?(%{target_area: :home, target_index: 0}, &1))
   end
 
   test "a player raising can eat a piece in their starting space" do
@@ -831,11 +831,11 @@ defmodule WebKimble.Logic.GameStateTest do
              &match?(%{position_index: 0, area: :play, player_color: :red}, &1)
            )
 
-    assert %{eaten: eaten} = changes
-    assert length(eaten) == 4
+    assert %{animated_effects: effects} = changes
+    assert length(effects) == 4
 
     assert Enum.any?(
-             eaten,
+             effects,
              &match?(%{target_area: :home, target_index: 1}, &1)
            )
   end

@@ -280,8 +280,11 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert_broadcast "game_state_updated", %{changes: changes}
 
-    assert %{eaten: [%{target_area: :home, target_index: 0, start_area: :play, start_index: 1}]} =
-             changes
+    assert %{
+             animated_effects: [
+               %{target_area: :home, target_index: 0, start_area: :play, start_index: 1}
+             ]
+           } = changes
   end
 
   test "player data includes penalties" do
