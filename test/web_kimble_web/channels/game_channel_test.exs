@@ -283,4 +283,54 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert %{eaten: [%{target_area: :home, target_index: 0, start_area: :play, start_index: 1}]} =
              changes
   end
+
+  test "player data includes penalties" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        current_player: :red,
+        roll: 1,
+        players: [
+          %{color: :blue, name: "Player 2", penalties: 0},
+          %{color: :green, name: "Player 3", penalties: 0},
+          %{color: :yellow, name: "Player 4", penalties: 0}
+        ],
+        pieces: [
+          %{player_color: :red, area: :play, position_index: 0},
+          %{player_color: :blue, area: :play, position_index: 1}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{game: %{players: players}} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    assert [%{penalties: 0}, %{penalties: 0}, %{penalties: 0}] = players
+  end
+
+  test "new player joining is assigned 0 penalties" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        current_player: :red,
+        roll: 1,
+        players: [
+          %{color: :blue, name: "Player 2", penalties: 0},
+          %{color: :green, name: "Player 3", penalties: 0},
+          %{color: :yellow, name: "Player 4", penalties: 0}
+        ],
+        pieces: [
+          %{player_color: :red, area: :play, position_index: 0},
+          %{player_color: :blue, area: :play, position_index: 1}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    join_game(socket, "Player 1")
+
+    assert_broadcast "game_updated", %{players: players}
+    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
+  end
 end
