@@ -986,7 +986,5 @@ defmodule WebKimble.Logic.GameStateTest do
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
-  # TODO: Penalties
-  # TODO: Chat
   # TODO: Jag bor i hembo
 end
