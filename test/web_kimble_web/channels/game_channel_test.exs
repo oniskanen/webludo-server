@@ -68,7 +68,15 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
   end
 
   test "join game responds with a player token" do
-    game = TestHelpers.game_fixture()
+    game =
+      TestHelpers.game_fixture(%{
+        players: [
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
     {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})

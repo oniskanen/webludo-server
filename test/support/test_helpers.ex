@@ -15,6 +15,7 @@ defmodule WebKimble.TestHelpers do
       attrs
       |> Enum.into(%{
         players: [
+          %{color: :red, name: "Player 1"},
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}

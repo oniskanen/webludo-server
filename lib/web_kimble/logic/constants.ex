@@ -47,4 +47,8 @@ defmodule WebKimble.Logic.Constants do
   def player_count do
     length(@player_colors)
   end
+
+  def player_piece_count do
+    4
+  end
 end

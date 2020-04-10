@@ -493,13 +493,32 @@ defmodule WebKimble.Logic do
     eaten_array
   end
 
+  defp check_game_end(
+         %Game{current_player: current_player, pieces: pieces, players: players} = game
+       ) do
+    player = players |> Enum.find(fn p -> p.color == current_player end)
+
+    with 0 <- player.penalties,
+         player_goal_pieces <-
+           pieces
+           |> Enum.filter(fn p -> p.player_color == current_player end)
+           |> Enum.filter(fn p -> p.area == :goal end),
+         true <- length(player_goal_pieces) == Constants.player_piece_count() do
+      update_player(player, %{has_finished: true})
+      game = game |> Repo.preload(:players, force: true)
+      game
+    else
+      _ -> game
+    end
+  end
+
   def execute_move(
         %Game{current_player: current_player} = game,
         %Move{type: type} = move
       ) do
     piece = get_piece(move.piece_id)
 
-    game = Repo.preload(game, :pieces)
+    game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
 
     target_piece =
       Enum.find(game.pieces, fn p ->
@@ -668,6 +687,8 @@ defmodule WebKimble.Logic do
       else
         changes
       end
+
+    game = check_game_end(game |> Repo.preload(:pieces, force: true))
 
     next_player = get_next_player(game)
 
