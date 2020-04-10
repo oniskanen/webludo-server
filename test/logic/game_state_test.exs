@@ -983,8 +983,10 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{penalties: [%{player: :green, amount: 1}]} = changes
   end
 
+  # TODO: Winning
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
   # TODO: Jag bor i hembo
+  # TODO: Playing with fewer than 4 players
 end
