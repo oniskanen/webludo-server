@@ -18,5 +18,6 @@ defmodule WebKimble.Networking.Player do
     player
     |> cast(attrs, [:name, :color, :penalties])
     |> validate_required([:name, :color, :penalties])
+    |> validate_number(:penalties, greater_than_or_equal_to: 0)
   end
 end

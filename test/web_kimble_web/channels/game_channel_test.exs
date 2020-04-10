@@ -395,4 +395,35 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 4}, &1))
   end
+
+  test "sending a decrement penalty message when penalty is a zero keeps penalty at zero" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        current_player: :red,
+        roll: 1,
+        players: [
+          %{color: :blue, name: "Player 2", penalties: 0},
+          %{color: :green, name: "Player 3", penalties: 0},
+          %{color: :yellow, name: "Player 4", penalties: 0}
+        ],
+        pieces: [
+          %{player_color: :red, area: :play, position_index: 0},
+          %{player_color: :blue, area: :play, position_index: 1}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    %{token: token} = join_game(socket, "Player 1")
+    assert_broadcast "game_updated", %{players: _players}
+
+    push(socket, "decrement_penalty", %{token: token})
+    refute_broadcast "game_updated", %{players: _players}
+
+    ref = push(socket, "game", %{token: token})
+    assert_reply ref, :ok, %{players: players}
+    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
+  end
 end

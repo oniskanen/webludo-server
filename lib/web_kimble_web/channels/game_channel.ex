@@ -106,21 +106,26 @@ defmodule WebKimbleWeb.GameChannel do
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
     {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
-    {:ok, _player} = Networking.set_player_penalty(player_id, amount)
-    {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
 
-    broadcast!(socket, "game_updated", game)
-    {:reply, :ok, socket}
+    handle_player_penalty(player_id, amount, socket)
   end
 
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
     {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
     player = Networking.get_player(player_id)
-    {:ok, _player} = Networking.set_player_penalty(player_id, player.penalties - 1)
 
-    {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
-    broadcast!(socket, "game_updated", game)
+    handle_player_penalty(player_id, player.penalties - 1, socket)
+  end
 
-    {:reply, :ok, socket}
+  defp handle_player_penalty(player_id, amount, socket) do
+    case Networking.set_player_penalty(player_id, amount) do
+      {:ok, _player} ->
+        {:ok, game} = Networking.get_game_by_code(socket.assigns.code)
+        broadcast!(socket, "game_updated", game)
+        {:reply, :ok, socket}
+
+      {:error, message} ->
+        {:reply, {:error, message}, socket}
+    end
   end
 end

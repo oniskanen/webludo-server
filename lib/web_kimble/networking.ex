@@ -80,7 +80,7 @@ defmodule WebKimble.Networking do
   end
 
   def set_player_penalty(player_id, amount) do
-    {:ok, _player} = update_player(get_player(player_id), %{penalties: amount})
+    update_player(get_player(player_id), %{penalties: amount})
   end
 
   def join_game(code, name) do
