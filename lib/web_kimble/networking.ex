@@ -73,6 +73,16 @@ defmodule WebKimble.Networking do
     Repo.get(Player, id)
   end
 
+  def update_player(player, attrs) do
+    player
+    |> Player.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def set_player_penalty(player_id, amount) do
+    {:ok, _player} = update_player(get_player(player_id), %{penalties: amount})
+  end
+
   def join_game(code, name) do
     {:ok, game} = get_game_by(%{code: code})
 
