@@ -955,6 +955,34 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{penalties: [%{player: :red, amount: 6}]} = changes
   end
 
+  test "a piece eaten when raising causes a penalty" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :red},
+        %{area: :play, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green},
+        %{area: :play, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
+
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{penalties: [%{player: :green, amount: 1}]} = changes
+  end
+
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
