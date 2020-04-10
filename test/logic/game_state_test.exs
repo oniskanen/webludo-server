@@ -889,7 +889,29 @@ defmodule WebKimble.Logic.GameStateTest do
     assert %{current_player: :red, roll_count: 1} = game_state
   end
 
+  test "a piece getting eaten lists a penalty for the eaten player" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :blue}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    move = hd(Logic.get_moves(game_state))
+
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{penalties: [%{player: :blue, amount: 1}]} = changes
+  end
+
   # TODO: Raising edge cases: returning to play if player still has penalties
+  # TODO: Cannot raise multiple times
+  # TODO: Agreeing on a new raising round
   # TODO: Penalties
   # TODO: Chat
   # TODO: Jag bor i hembo

@@ -587,7 +587,8 @@ defmodule WebKimble.Logic do
                 start_area: piece.area,
                 start_index: piece.position_index
               },
-              animated_effects: handle_eaten_piece(game_state, target_piece)
+              animated_effects: handle_eaten_piece(game_state, target_piece),
+              penalties: [%{player: target_piece.player_color, amount: 1}]
             }
           end
         end
