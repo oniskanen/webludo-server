@@ -840,6 +840,34 @@ defmodule WebKimble.Logic.GameStateTest do
            )
   end
 
+  test "a player raising can double a piece in their starting space" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :red},
+        %{area: :play, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green},
+        %{area: :play, position_index: 0, player_color: :red}
+      ]
+    }
+
+    game_state = TestHelpers.game_state_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
+
+    {_game_state, changes} = Logic.execute_move(game_state, move)
+
+    assert %{doubled: %{multiplier: 2}} = changes
+  end
+
   # TODO: Raising edge cases
   # TODO: Penalties
   # TODO: Chat
