@@ -1032,6 +1032,48 @@ defmodule WebKimble.Logic.GameTest do
              Logic.set_player_penalty(game, player_id, 0)
   end
 
+  test "a player that has finished is not affected by a raise" do
+    attrs = %{
+      current_player: :blue,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 1, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :goal, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :play, position_index: 8, player_color: :blue},
+        %{area: :play, position_index: 9, player_color: :blue},
+        %{area: :play, position_index: 10, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green},
+        %{area: :play, position_index: 0, player_color: :green}
+      ],
+      players: [
+        %{color: :red, name: "Player 1", has_finished: true},
+        %{color: :blue, name: "Player 2"},
+        %{color: :yellow, name: "Player 3"},
+        %{color: :green, name: "Player 4"}
+      ]
+    }
+
+    game_state = TestHelpers.game_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    move = Enum.find(moves, &match?(%{type: "raise"}, &1))
+
+    {%{pieces: pieces}, _changes} = Logic.execute_move(game_state, move)
+
+    red_pieces = pieces |> Enum.filter(fn p -> p.player_color == :red end)
+
+    assert Enum.all?(
+             red_pieces,
+             &match?(%{area: :goal, player_color: :red}, &1)
+           )
+  end
+
   # TODO: Winning
   # TODO: Raising edge cases: returning to play if player still has penalties
   # TODO: Cannot raise multiple times

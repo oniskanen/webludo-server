@@ -673,9 +673,12 @@ defmodule WebKimble.Logic do
         # Updates the possible previously eaten piece so we have an accurate representation of the free spaces
         game = game |> Repo.preload(:pieces, force: true)
 
+        finished_players = game.players |> Enum.filter(fn p -> p.has_finished end)
+
         demoted_pieces =
           get_first_goal_pieces(game)
           |> Enum.filter(fn {c, _p} -> c != current_player end)
+          |> Enum.filter(fn {c, _p} -> !Enum.any?(finished_players, fn p -> p.color == c end) end)
           |> Enum.map(fn {_c, p} -> p end)
 
         demoted =
