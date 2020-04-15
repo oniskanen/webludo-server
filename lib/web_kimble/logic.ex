@@ -790,7 +790,7 @@ defmodule WebKimble.Logic do
     penalties
     |> Enum.each(fn p ->
       player = Enum.find(players, fn pl -> pl.color == p.player end)
-      set_player_penalty(game, player.id, player.penalties + p.amount)
+      {:ok, _player} = set_player_penalty(game, player.id, player.penalties + p.amount)
     end)
 
     Repo.preload(game, :players, force: true)
