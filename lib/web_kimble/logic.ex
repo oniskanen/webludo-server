@@ -812,4 +812,13 @@ defmodule WebKimble.Logic do
         {:error, "Game is full"}
     end
   end
+
+  def agree_to_new_raise(%Game{players: players} = game, player_color) do
+    Repo.preload(game, :players)
+
+    player = players |> Enum.find(fn p -> p.color == player_color end)
+
+    update_player(player, %{new_raising_round: true})
+    Repo.preload(game, :players, force: true)
+  end
 end

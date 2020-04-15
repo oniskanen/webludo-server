@@ -1179,7 +1179,14 @@ defmodule WebKimble.Logic.GameTest do
     assert player.can_raise == false
   end
 
-  # TODO: Cannot raise multiple times
+  test "player can agree to a new raising round" do
+    game = TestHelpers.game_fixture()
+
+    assert %{players: players} = Logic.agree_to_new_raise(game, :red)
+
+    assert players |> Enum.any?(&match?(%{new_raising_round: true, color: :red}, &1))
+  end
+
   # TODO: Agreeing on a new raising round
   # TODO: Jag bor i hembo
   # TODO: Playing with fewer than 4 players
