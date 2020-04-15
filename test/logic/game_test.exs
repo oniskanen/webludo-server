@@ -1196,9 +1196,4 @@ defmodule WebKimble.Logic.GameTest do
 
     assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
   end
-
-  # TODO: Agreeing on a new raising round
-  # TODO: Jag bor i hembo
-  # TODO: Playing with fewer than 4 players
-  # TODO: Security: Validate that chat message payload is a string
 end
