@@ -1116,6 +1116,39 @@ defmodule WebKimble.Logic.GameTest do
            )
   end
 
+  test "a player cannot raise if they have can_raise set to false" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 1, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :goal, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :play, position_index: 8, player_color: :blue},
+        %{area: :play, position_index: 9, player_color: :blue},
+        %{area: :play, position_index: 10, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green},
+        %{area: :play, position_index: 0, player_color: :green}
+      ],
+      players: [
+        %{color: :red, name: "Player 1", can_raise: false},
+        %{color: :blue, name: "Player 2"},
+        %{color: :yellow, name: "Player 3"},
+        %{color: :green, name: "Player 4"}
+      ]
+    }
+
+    game_state = TestHelpers.game_fixture(attrs)
+
+    moves = Logic.get_moves(game_state)
+
+    assert !Enum.any?(moves, &match?(%{type: "raise"}, &1))
+  end
+
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
   # TODO: Jag bor i hembo

@@ -247,7 +247,8 @@ defmodule WebKimble.Logic do
   end
 
   defp get_potential_raise(
-         %Game{roll: roll, current_player: current_player, pieces: pieces} = game
+         %Game{roll: roll, current_player: current_player, pieces: pieces, players: players} =
+           game
        )
        when roll == 6 do
     current_player_home_pieces =
@@ -258,8 +259,13 @@ defmodule WebKimble.Logic do
     goal_pieces = get_first_goal_pieces(game)
     raised_piece = goal_pieces[current_player]
 
+    player = players |> Enum.find(fn p -> p.color == current_player end)
+
     cond do
       raised_piece == nil ->
+        []
+
+      !player.can_raise ->
         []
 
       length(current_player_home_pieces) > 0 ->
@@ -288,7 +294,7 @@ defmodule WebKimble.Logic do
 
   def get_moves(%Game{roll: roll, current_player: current_player} = game)
       when roll in 1..6 do
-    game = Repo.preload(game, :pieces)
+    game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
 
     current_player_pieces =
       game.pieces
