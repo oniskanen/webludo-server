@@ -276,6 +276,20 @@ defmodule WebKimble.Logic do
     []
   end
 
+  defp is_move_onto_player_piece?(player_pieces, move) do
+    Enum.any?(
+      player_pieces,
+      fn p ->
+        p.area == move.target_area && p.position_index == move.target_index
+      end
+    )
+  end
+
+  defp can_move_double?(move, roll, player_color) do
+    roll == 6 && move.target_index == Constants.get_home_space_index(player_color) &&
+      move.target_area == :play
+  end
+
   defp get_available_moves_for_player_with_roll(%Game{pieces: pieces} = game, roll, player_color)
        when roll in 1..6 do
     player_pieces =
@@ -290,13 +304,7 @@ defmodule WebKimble.Logic do
         m.target_area != :goal || m.target_index < Constants.goal_track_length()
       end)
       |> Enum.filter(fn m ->
-        !Enum.any?(
-          player_pieces,
-          fn p ->
-            roll != 6 && p.position_index != Constants.get_home_space_index(p.player_color) &&
-              (p.area == m.target_area && p.position_index == m.target_index)
-          end
-        )
+        !is_move_onto_player_piece?(player_pieces, m) || can_move_double?(m, roll, player_color)
       end)
 
     potential_raise = get_potential_raise(Map.put(game, :roll, roll))
