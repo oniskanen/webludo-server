@@ -1149,8 +1149,39 @@ defmodule WebKimble.Logic.GameTest do
     assert !Enum.any?(moves, &match?(%{type: "raise"}, &1))
   end
 
+  test "can_raise is set to false after a player raises" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :red},
+        %{area: :play, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    moves = Logic.get_moves(game)
+
+    move = Enum.find(moves, &match?(%{type: "raise"}, &1))
+
+    {game, _changes} = Logic.execute_move(game, move)
+
+    %{players: players} = game
+
+    player = Enum.find(players, &match?(%{color: :red}, &1))
+    assert player.can_raise == false
+  end
+
   # TODO: Cannot raise multiple times
   # TODO: Agreeing on a new raising round
   # TODO: Jag bor i hembo
   # TODO: Playing with fewer than 4 players
+  # TODO: Security: Validate that chat message payload is a string
 end
