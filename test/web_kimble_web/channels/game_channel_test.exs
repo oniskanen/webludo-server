@@ -510,4 +510,32 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert_broadcast "chat", %{message: "Hi chat!", player: "Player 1"}
   end
+
+  test "sending a new_raising_round message causes game_updated broadcast" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        players: [
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    %{token: token} = join_game(socket, "Player 1")
+
+    assert_broadcast "game_updated", %{}
+
+    ref = push(socket, "new_raising_round", %{token: token, new_raising_round: true})
+
+    assert_reply ref, :ok, %{}
+
+    assert_broadcast "game_updated", %{game: %{players: players}}
+
+    assert players |> Enum.any?(&match?(%{color: :red, new_raising_round: true}, &1))
+  end
 end

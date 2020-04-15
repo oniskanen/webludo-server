@@ -120,6 +120,24 @@ defmodule WebKimbleWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in(
+        "new_raising_round",
+        %{"token" => token, "new_raising_round" => new_raising_round},
+        socket
+      )
+      when is_boolean(new_raising_round) do
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+
+    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    player = Logic.get_player(player_id)
+
+    game = Logic.agree_to_new_raise(game, player, new_raising_round)
+
+    broadcast!(socket, "game_updated", %{game: game})
+
+    {:reply, :ok, socket}
+  end
+
   defp handle_player_penalty(player_id, amount, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 

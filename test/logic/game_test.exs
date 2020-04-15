@@ -1181,18 +1181,20 @@ defmodule WebKimble.Logic.GameTest do
 
   test "player can agree to a new raising round" do
     game = TestHelpers.game_fixture()
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
 
-    assert %{players: players} = Logic.agree_to_new_raise(game, :red)
+    assert %{players: players} = Logic.agree_to_new_raise(game, player, true)
 
     assert players |> Enum.any?(&match?(%{new_raising_round: true, color: :red}, &1))
   end
 
   test "player can draw back agreement to a new raising round" do
     game = TestHelpers.game_fixture()
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    game = Logic.agree_to_new_raise(game, player, true)
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
 
-    game = Logic.agree_to_new_raise(game, :red)
-
-    game = Logic.agree_to_new_raise(game, :red, false)
+    game = Logic.agree_to_new_raise(game, player, false)
 
     assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
   end

@@ -813,12 +813,9 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def agree_to_new_raise(%Game{players: players} = game, player_color, agrees_to_raise \\ true) do
-    Repo.preload(game, :players)
-
-    player = players |> Enum.find(fn p -> p.color == player_color end)
-
-    update_player(player, %{new_raising_round: agrees_to_raise})
+  def agree_to_new_raise(%Game{} = game, %Player{} = player, new_raising_round)
+      when is_boolean(new_raising_round) do
+    update_player(player, %{new_raising_round: new_raising_round})
     Repo.preload(game, :players, force: true)
   end
 end
