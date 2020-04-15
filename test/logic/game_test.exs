@@ -1187,6 +1187,16 @@ defmodule WebKimble.Logic.GameTest do
     assert players |> Enum.any?(&match?(%{new_raising_round: true, color: :red}, &1))
   end
 
+  test "player can draw back agreement to a new raising round" do
+    game = TestHelpers.game_fixture()
+
+    game = Logic.agree_to_new_raise(game, :red)
+
+    game = Logic.agree_to_new_raise(game, :red, false)
+
+    assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
+  end
+
   # TODO: Agreeing on a new raising round
   # TODO: Jag bor i hembo
   # TODO: Playing with fewer than 4 players
