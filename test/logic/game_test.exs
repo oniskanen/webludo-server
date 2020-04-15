@@ -889,6 +889,28 @@ defmodule WebKimble.Logic.GameTest do
     assert %{current_player: :red, roll_count: 1} = game_state
   end
 
+  test "a player can raise if the only move available is a raise" do
+    attrs = %{
+      current_player: :red,
+      roll: nil,
+      roll_count: 0,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 1, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 27, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    {:ok, game} = Logic.set_roll(game, 6)
+    [%{type: "raise"} | []] = Logic.get_moves(game)
+  end
+
   test "a piece getting eaten lists a penalty for the eaten player" do
     attrs = %{
       current_player: :red,

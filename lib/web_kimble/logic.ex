@@ -27,25 +27,7 @@ defmodule WebKimble.Logic do
          %Game{current_player: current_player} = game,
          roll
        ) do
-    game = Repo.preload(game, :pieces)
-
-    current_player_pieces =
-      game.pieces
-      |> Enum.filter(fn p -> p.player_color == current_player end)
-
-    moves =
-      current_player_pieces
-      |> Enum.map(&get_piece_move(&1, roll))
-      |> Enum.filter(fn m -> m != nil end)
-      |> Enum.filter(fn m ->
-        m.target_area != :goal || m.target_index < Constants.goal_track_length()
-      end)
-      |> Enum.filter(fn m ->
-        !Enum.any?(
-          current_player_pieces,
-          fn p -> p.area == m.target_area && p.position_index == m.target_index end
-        )
-      end)
+    moves = get_available_moves_for_player_with_roll(game, roll, current_player)
 
     length(moves) > 0
   end
@@ -96,6 +78,8 @@ defmodule WebKimble.Logic do
          %Game{current_player: current_player, roll_count: roll_count} = game,
          roll
        ) do
+    game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
+
     if has_movable_pieces_with_roll?(game, roll) do
       update_game(game, %{roll: roll, roll_count: roll_count + 1})
     else
@@ -292,16 +276,14 @@ defmodule WebKimble.Logic do
     []
   end
 
-  def get_moves(%Game{roll: roll, current_player: current_player} = game)
-      when roll in 1..6 do
-    game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
-
-    current_player_pieces =
-      game.pieces
-      |> Enum.filter(fn p -> p.player_color == current_player end)
+  defp get_available_moves_for_player_with_roll(%Game{pieces: pieces} = game, roll, player_color)
+       when roll in 1..6 do
+    player_pieces =
+      pieces
+      |> Enum.filter(fn p -> p.player_color == player_color end)
 
     moves =
-      current_player_pieces
+      player_pieces
       |> Enum.map(&get_piece_move(&1, roll))
       |> Enum.filter(fn m -> m != nil end)
       |> Enum.filter(fn m ->
@@ -309,7 +291,7 @@ defmodule WebKimble.Logic do
       end)
       |> Enum.filter(fn m ->
         !Enum.any?(
-          current_player_pieces,
+          player_pieces,
           fn p ->
             roll != 6 && p.position_index != Constants.get_home_space_index(p.player_color) &&
               (p.area == m.target_area && p.position_index == m.target_index)
@@ -317,17 +299,24 @@ defmodule WebKimble.Logic do
         )
       end)
 
-    potential_raise = get_potential_raise(game)
+    potential_raise = get_potential_raise(Map.put(game, :roll, roll))
     moves = moves ++ potential_raise
 
     non_mine_moves =
-      moves |> Enum.filter(fn m -> !move_is_into_mine?(m, current_player, game.pieces) end)
+      moves |> Enum.filter(fn m -> !move_is_into_mine?(m, player_color, pieces) end)
 
     if length(non_mine_moves) > 0 do
       non_mine_moves
     else
       moves
     end
+  end
+
+  def get_moves(%Game{roll: roll, current_player: current_player} = game)
+      when roll in 1..6 do
+    game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
+
+    get_available_moves_for_player_with_roll(game, roll, current_player)
   end
 
   def get_moves(%Game{roll: nil} = _game) do
