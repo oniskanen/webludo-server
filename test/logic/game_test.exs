@@ -1054,6 +1054,32 @@ defmodule WebKimble.Logic.GameTest do
              Logic.set_player_penalty(game, player_id, 0)
   end
 
+  test "player with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do
+    attrs = %{
+      current_player: :red,
+      roll: 4,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :goal, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 27, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green},
+        %{area: :play, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    move = hd(Logic.get_moves(game))
+
+    {%{players: players}, _changes} = Logic.execute_move(game, move)
+
+    assert Enum.any?(players, &match?(%{has_finished: false, color: :red}, &1))
+  end
+
   test "a player that has finished is not affected by a raise" do
     attrs = %{
       current_player: :blue,

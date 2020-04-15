@@ -492,12 +492,14 @@ defmodule WebKimble.Logic do
     players
     |> Enum.filter(fn p -> p.penalties == 0 end)
     |> Enum.filter(fn pl ->
-      player_goal_pieces =
+      player_goal_indices =
         pieces
         |> Enum.filter(fn pc -> pc.player_color == pl.color end)
         |> Enum.filter(fn pc -> pc.area == :goal end)
+        |> Enum.map(fn pc -> pc.position_index end)
+        |> Enum.sort()
 
-      length(player_goal_pieces) == Constants.player_piece_count()
+      player_goal_indices == Constants.goal_index_list()
     end)
     |> Enum.each(fn p ->
       update_player(p, %{has_finished: true})

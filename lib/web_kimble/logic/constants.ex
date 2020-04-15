@@ -51,4 +51,8 @@ defmodule WebKimble.Logic.Constants do
   def player_piece_count do
     4
   end
+
+  def goal_index_list do
+    [0, 1, 2, 3]
+  end
 end
