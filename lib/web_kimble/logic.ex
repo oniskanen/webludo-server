@@ -834,10 +834,27 @@ defmodule WebKimble.Logic do
     end
   end
 
-  def agree_to_new_raise(%Game{} = game, %Player{} = player, new_raising_round)
-      when is_boolean(new_raising_round) do
+  def agree_to_new_raise(
+        %Game{} = game,
+        %Player{can_raise: can_raise} = player,
+        new_raising_round
+      )
+      when is_boolean(new_raising_round) and not can_raise do
     update_player(player, %{new_raising_round: new_raising_round})
-    Repo.preload(game, :players, force: true)
+    game = Repo.preload(game, :players, force: true)
+
+    if(Enum.all?(game.players, fn p -> p.new_raising_round end)) do
+      game.players
+      |> Enum.each(fn p -> update_player(p, %{new_raising_round: false, can_raise: true}) end)
+
+      Repo.preload(game, :players, force: true)
+    else
+      game
+    end
+  end
+
+  def agree_to_new_raise(game, _player, _new_raising_round) do
+    game
   end
 
   def call_missed_hembo(%Game{players: players} = game, color) do

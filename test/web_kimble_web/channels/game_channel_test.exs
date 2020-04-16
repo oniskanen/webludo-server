@@ -2,6 +2,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
   use WebKimbleWeb.ChannelCase
 
   alias WebKimble.TestHelpers
+  alias WebKimbleWeb.Auth
 
   test "join replies with game" do
     game = TestHelpers.game_fixture()
@@ -515,6 +516,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     game =
       WebKimble.TestHelpers.game_fixture(%{
         players: [
+          %{color: :red, name: "Player 1", can_raise: false},
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
@@ -526,9 +528,9 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    %{token: token} = join_game(socket, "Player 1")
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
 
-    assert_broadcast "game_updated", %{}
+    token = Auth.get_token(player)
 
     ref = push(socket, "new_raising_round", %{token: token, agree: true})
 

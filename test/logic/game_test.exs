@@ -1245,7 +1245,14 @@ defmodule WebKimble.Logic.GameTest do
   end
 
   test "player can agree to a new raising round" do
-    game = TestHelpers.game_fixture()
+    attrs = %{
+      players: [
+        %{name: "Player 1", color: :red, can_raise: false},
+        %{name: "Player 2", color: :blue}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
     player = Enum.find(game.players, &match?(%{color: :red}, &1))
 
     assert %{players: players} = Logic.agree_to_new_raise(game, player, true)
@@ -1262,6 +1269,24 @@ defmodule WebKimble.Logic.GameTest do
     game = Logic.agree_to_new_raise(game, player, false)
 
     assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
+  end
+
+  test "players can raise again after everyone agrees to a new raising round" do
+    attrs = %{
+      players: [
+        %{name: "Player 1", color: :red, can_raise: false, new_raising_round: false},
+        %{name: "Player 2", color: :blue, can_raise: false, new_raising_round: true},
+        %{name: "Player 3", color: :yellow, can_raise: false, new_raising_round: true},
+        %{name: "Player 4", color: :green, can_raise: false, new_raising_round: true}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+
+    assert %{players: players} = Logic.agree_to_new_raise(game, player, true)
+
+    assert players |> Enum.all?(&match?(%{new_raising_round: false, can_raise: true}, &1))
   end
 
   test "a player getting all pieces moved to home by getting eaten gets needs_hembo flag set to true" do
