@@ -1264,7 +1264,7 @@ defmodule WebKimble.Logic.GameTest do
     assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
   end
 
-  test "a player getting all pieces moved to home gets needs_hembo flag toggled" do
+  test "a player getting all pieces moved to home by getting eaten gets needs_hembo flag set to true" do
     attrs = %{
       current_player: :red,
       roll: 1,
@@ -1286,5 +1286,41 @@ defmodule WebKimble.Logic.GameTest do
 
     blue = Enum.find(players, &match?(%{color: :blue}, &1))
     assert blue.needs_hembo
+  end
+
+  test "a player getting all pieces moved to home by a raise gets needs_hembo flag set to true" do
+    attrs = %{
+      current_player: :red,
+      roll: 6,
+      roll_count: 1,
+      pieces: [
+        %{area: :goal, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :red},
+        %{area: :play, position_index: 2, player_color: :red},
+        %{area: :play, position_index: 3, player_color: :red},
+        %{area: :goal, position_index: 0, player_color: :blue},
+        %{area: :home, position_index: 0, player_color: :blue},
+        %{area: :home, position_index: 1, player_color: :blue},
+        %{area: :home, position_index: 2, player_color: :blue},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :play, position_index: 0, player_color: :yellow},
+        %{area: :home, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :yellow},
+        %{area: :goal, position_index: 0, player_color: :green}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    moves = Logic.get_moves(game)
+
+    move = Enum.find(moves, &match?(%{type: "raise"}, &1))
+
+    {%{players: players}, _changes} = Logic.execute_move(game, move)
+    blue = Enum.find(players, &match?(%{color: :blue}, &1))
+    yellow = Enum.find(players, &match?(%{color: :yellow}, &1))
+
+    assert blue.needs_hembo
+    assert not yellow.needs_hembo
   end
 end
