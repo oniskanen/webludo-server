@@ -147,6 +147,7 @@ defmodule WebKimbleWeb.GameChannel do
     game = Logic.jag_bor_i_hembo(game, player.color)
 
     broadcast!(socket, "game_updated", %{game: game})
+    broadcast!(socket, "chat", %{message: "Jag bor i hembo!", player: player.name})
 
     {:reply, :ok, socket}
   end

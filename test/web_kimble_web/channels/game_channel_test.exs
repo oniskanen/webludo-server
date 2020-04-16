@@ -566,4 +566,28 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert players |> Enum.any?(&match?(%{color: :red, penalties: 1}, &1))
   end
+
+  test "sending jag_bor_i_hembo causes a chat broadcast" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        players: [
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    %{token: token} = join_game(socket, "Player 1")
+
+    ref = push(socket, "jag_bor_i_hembo", %{token: token})
+
+    assert_reply ref, :ok, %{}
+
+    assert_broadcast "chat", %{player: "Player 1", message: "Jag bor i hembo!"}
+  end
 end
