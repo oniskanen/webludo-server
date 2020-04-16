@@ -152,6 +152,23 @@ defmodule WebKimbleWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("call_missed_hembo", %{"token" => token, "player" => player}, socket) do
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+
+    {:ok, _player_id} = WebKimbleWeb.Auth.get_player_id(token)
+
+    player = game.players |> Enum.find(fn p -> p.color == player end)
+
+    case Logic.call_missed_hembo(game, player.color) do
+      {:ok, game} ->
+        broadcast!(socket, "game_updated", %{game: game})
+        {:reply, :ok, socket}
+
+      {:error, message} ->
+        {:reply, {:error, %{message: message}}, socket}
+    end
+  end
+
   defp handle_player_penalty(player_id, amount, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 

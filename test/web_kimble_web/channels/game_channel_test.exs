@@ -590,4 +590,56 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert_broadcast "chat", %{player: "Player 1", message: "Jag bor i hembo!"}
   end
+
+  test "sending call_missed_hembo causes a game_updated broadcast when needs_hembo is true for the player" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        players: [
+          %{color: :blue, name: "Player 2", needs_hembo: true},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    %{token: token} = join_game(socket, "Player 1")
+
+    assert_broadcast "game_updated", %{}
+
+    ref = push(socket, "call_missed_hembo", %{token: token, player: :blue})
+
+    assert_reply ref, :ok, %{}
+
+    assert_broadcast "game_updated", %{game: %{players: players}}
+
+    blue = Enum.find(players, &match?(%{color: :blue}, &1))
+
+    assert %{penalties: 1, needs_hembo: false} = blue
+  end
+
+  test "sending call_missed_hembo replies with error when needs_hembo is false" do
+    game =
+      WebKimble.TestHelpers.game_fixture(%{
+        players: [
+          %{color: :blue, name: "Player 2", needs_hembo: false},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ]
+      })
+
+    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    %{token: token} = join_game(socket, "Player 1")
+
+    ref = push(socket, "call_missed_hembo", %{token: token, player: :blue})
+
+    assert_reply ref, :error, %{message: "The blue player does not need to call hembo"}
+  end
 end
