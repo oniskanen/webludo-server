@@ -1334,4 +1334,26 @@ defmodule WebKimble.Logic.GameTest do
     assert {:ok, game} = Logic.call_missed_hembo(game, :red)
     assert %{players: [%{color: :red, penalties: 2, needs_hembo: false}]} = game
   end
+
+  test "a player is assigned a penalty when player who does not need hembo calls jag bor i hembo" do
+    attrs = %{
+      players: [%{name: "Player 1", color: :red, needs_hembo: false, penalties: 1}]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    game = Logic.jag_bor_i_hembo(game, :red)
+    assert %{players: [%{color: :red, penalties: 2, needs_hembo: false}]} = game
+  end
+
+  test "a player who needs to call hembo can call hembo to set needs_hembo to false" do
+    attrs = %{
+      players: [%{name: "Player 1", color: :red, needs_hembo: true, penalties: 1}]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    game = Logic.jag_bor_i_hembo(game, :red)
+    assert %{players: [%{color: :red, penalties: 1, needs_hembo: false}]} = game
+  end
 end
