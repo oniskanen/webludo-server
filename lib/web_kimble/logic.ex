@@ -863,6 +863,7 @@ defmodule WebKimble.Logic do
       {:ok, _player} = update_player(player, %{penalties: player.penalties + 1})
     end
 
+    # TODO: Possibly also return a changes object with penalties?
     Repo.preload(game, :players, force: true)
   end
 end

@@ -138,6 +138,19 @@ defmodule WebKimbleWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("jag_bor_i_hembo", %{"token" => token}, socket) do
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+
+    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    player = Logic.get_player(player_id)
+
+    game = Logic.jag_bor_i_hembo(game, player.color)
+
+    broadcast!(socket, "game_updated", %{game: game})
+
+    {:reply, :ok, socket}
+  end
+
   defp handle_player_penalty(player_id, amount, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
