@@ -516,6 +516,25 @@ defmodule WebKimble.Logic do
     game |> Repo.preload(:players, force: true)
   end
 
+  defp check_hembo(%Game{pieces: pieces, players: players} = game, %Game{pieces: initial_pieces}) do
+    Constants.player_colors()
+    |> Enum.filter(fn c ->
+      player_home_pieces = Enum.filter(pieces, fn p -> p.area == :home && p.player_color == c end)
+
+      length(player_home_pieces) == Constants.player_piece_count()
+    end)
+    |> Enum.filter(fn c ->
+      player_home_pieces =
+        Enum.filter(initial_pieces, fn p -> p.area == :home && p.player_color == c end)
+
+      length(player_home_pieces) < Constants.player_piece_count()
+    end)
+    |> Enum.map(fn c -> Enum.find(players, fn p -> p.color == c end) end)
+    |> Enum.each(fn p -> update_player(p, %{needs_hembo: true}) end)
+
+    game |> Repo.preload(:players, force: true)
+  end
+
   def execute_move(
         %Game{current_player: current_player} = game,
         %Move{type: type} = move
@@ -523,6 +542,7 @@ defmodule WebKimble.Logic do
     piece = get_piece(move.piece_id)
 
     game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
+    initial_game = game
 
     target_piece =
       Enum.find(game.pieces, fn p ->
@@ -699,6 +719,8 @@ defmodule WebKimble.Logic do
       end
 
     game = check_game_end(game |> Repo.preload(:pieces, force: true))
+
+    game = check_hembo(game, initial_game)
 
     next_player = get_next_player(game)
 

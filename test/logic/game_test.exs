@@ -1263,4 +1263,28 @@ defmodule WebKimble.Logic.GameTest do
 
     assert game.players |> Enum.all?(&match?(%{new_raising_round: false}, &1))
   end
+
+  test "a player getting all pieces moved to home gets needs_hembo flag toggled" do
+    attrs = %{
+      current_player: :red,
+      roll: 1,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 0, player_color: :red},
+        %{area: :play, position_index: 1, player_color: :blue},
+        %{area: :home, position_index: 0, player_color: :blue},
+        %{area: :home, position_index: 1, player_color: :blue},
+        %{area: :home, position_index: 2, player_color: :blue}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    move = hd(Logic.get_moves(game))
+
+    {%{players: players}, _changes} = Logic.execute_move(game, move)
+
+    blue = Enum.find(players, &match?(%{color: :blue}, &1))
+    assert blue.needs_hembo
+  end
 end
