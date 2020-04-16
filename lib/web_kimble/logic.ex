@@ -839,4 +839,18 @@ defmodule WebKimble.Logic do
     update_player(player, %{new_raising_round: new_raising_round})
     Repo.preload(game, :players, force: true)
   end
+
+  def call_missed_hembo(%Game{players: players} = game, color) do
+    player = Enum.find(players, fn p -> p.color == color end)
+
+    if player.needs_hembo do
+      {:ok, _player} =
+        update_player(player, %{needs_hembo: false, penalties: player.penalties + 1})
+
+      game = Repo.preload(game, :players, force: true)
+      {:ok, game}
+    else
+      {:error, "The #{color} player does not need to call hembo"}
+    end
+  end
 end
