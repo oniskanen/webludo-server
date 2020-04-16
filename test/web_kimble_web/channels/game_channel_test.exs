@@ -530,7 +530,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
     assert_broadcast "game_updated", %{}
 
-    ref = push(socket, "new_raising_round", %{token: token, new_raising_round: true})
+    ref = push(socket, "new_raising_round", %{token: token, agree: true})
 
     assert_reply ref, :ok, %{}
 
