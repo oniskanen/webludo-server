@@ -64,4 +64,12 @@ defmodule WebLudo.Logic.Constants do
       4 -> "quatro"
     end
   end
+
+  def multiplier_verb(multiplier) do
+    case multiplier do
+      2 -> "doubles"
+      3 -> "triples"
+      4 -> "quatros"
+    end
+  end
 end

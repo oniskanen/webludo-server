@@ -350,4 +350,34 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     assert_broadcast "announcement", %{message: "The Red player finishes the game!"}
   end
+
+  test "doubling a piece causes an announcement" do
+    game =
+      TestHelpers.game_fixture(%{
+        players: [
+          %{color: :red, name: "Player 1", penalties: 0}
+        ],
+        pieces: [
+          %{player_color: :red, area: :play, position_index: 0},
+          %{player_color: :red, area: :home, position_index: 1}
+        ],
+        current_player: :red,
+        roll: 6
+      })
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+
+    token = Auth.get_token(player)
+
+    move = hd(actions)
+
+    push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
+
+    assert_broadcast "announcement", %{message: "The Red player doubles a piece"}
+  end
 end

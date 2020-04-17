@@ -2,6 +2,7 @@ defmodule WebLudoWeb.GameChannel do
   use WebLudoWeb, :channel
 
   alias WebLudo.Logic
+  alias WebLudo.Logic.Constants
 
   def join("games:" <> code, _params, socket) do
     case Logic.get_game_by_code(code) do
@@ -71,10 +72,13 @@ defmodule WebLudoWeb.GameChannel do
                 penalties = Map.get(changes, :penalties, [])
                 game = Logic.apply_penalties(game, penalties)
 
-                handle_penalty_broadcast(penalties, socket)
+                handle_penalty_announcement(penalties, socket)
 
                 finishing_players = Map.get(changes, :finishing_players, [])
-                handle_finish_broadcast(finishing_players, socket)
+                handle_finish_announcement(finishing_players, socket)
+
+                multiplied_pieces = Map.get(changes, :doubled, [])
+                handle_multiplied_announcement(multiplied_pieces, socket)
 
                 broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
 
@@ -226,7 +230,7 @@ defmodule WebLudoWeb.GameChannel do
       {:ok, {game, finishing_players}} ->
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: actions})
-        handle_finish_broadcast(finishing_players, socket)
+        handle_finish_announcement(finishing_players, socket)
         {:reply, :ok, socket}
 
       {:error, error} ->
@@ -234,7 +238,7 @@ defmodule WebLudoWeb.GameChannel do
     end
   end
 
-  defp handle_penalty_broadcast(penalties, socket) do
+  defp handle_penalty_announcement(penalties, socket) do
     case penalties do
       [%{player: color, amount: 1, type: "eat"}] ->
         announce(
@@ -271,10 +275,21 @@ defmodule WebLudoWeb.GameChannel do
     end
   end
 
-  defp handle_finish_broadcast(finishing_players, socket) do
+  defp handle_finish_announcement(finishing_players, socket) do
     case finishing_players do
       [player] ->
         announce("The #{String.capitalize(to_string(player))} player finishes the game!", socket)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp handle_multiplied_announcement(multiplied_piece, socket) do
+    case multiplied_piece do
+      %{multiplier: multiplier, player: player} when multiplier > 1 ->
+        verb = Constants.multiplier_verb(multiplier)
+        announce("The #{String.capitalize(to_string(player))} player #{verb} a piece", socket)
 
       _ ->
         nil

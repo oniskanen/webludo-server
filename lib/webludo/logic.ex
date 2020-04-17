@@ -583,7 +583,8 @@ defmodule WebLudo.Logic do
             },
             doubled: %{
               piece_id: doubled_piece.id,
-              multiplier: doubled_piece.multiplier
+              multiplier: doubled_piece.multiplier,
+              player: doubled_piece.player_color
             }
           }
         else
