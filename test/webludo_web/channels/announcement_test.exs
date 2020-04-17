@@ -80,4 +80,37 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
       message: "Incorrect hembo! The red player gets a penalty"
     }
   end
+
+  test "getting eaten announces a penalty" do
+    game =
+      TestHelpers.game_fixture(%{
+        players: [
+          %{color: :red, name: "Player 1"},
+          %{color: :blue, name: "Player 2"}
+        ],
+        pieces: [
+          %{player_color: :red, area: :play, position_index: 0},
+          %{player_color: :blue, area: :play, position_index: 1}
+        ],
+        current_player: :red,
+        roll: 1
+      })
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+
+    token = Auth.get_token(player)
+
+    move = hd(actions)
+
+    push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
+
+    assert_broadcast "announcement", %{
+      message: "Blue player eaten! Penalty to the blue player"
+    }
+  end
 end

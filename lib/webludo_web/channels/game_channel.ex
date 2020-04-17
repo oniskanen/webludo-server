@@ -73,6 +73,24 @@ defmodule WebLudoWeb.GameChannel do
 
                 broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
 
+                case penalties do
+                  [%{player: color, amount: 1}] ->
+                    announce(
+                      "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{
+                        color
+                      } player",
+                      socket
+                    )
+
+                  [%{player: color, amount: amount}] ->
+                    announce(
+                      "#{String.capitalize(to_string(color))} player eaten! #{amount} penalties to the #{
+                        color
+                      } player",
+                      socket
+                    )
+                end
+
                 {:reply, :ok, socket}
             end
         end
