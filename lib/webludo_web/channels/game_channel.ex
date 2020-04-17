@@ -150,6 +150,7 @@ defmodule WebLudoWeb.GameChannel do
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
     broadcast!(socket, "chat", %{message: "Jag bor i hembo!", player: player.name})
+    announce("The #{player.color} player says 'Jag bor i hembo'", socket)
 
     {:reply, :ok, socket}
   end
@@ -170,6 +171,10 @@ defmodule WebLudoWeb.GameChannel do
       {:error, message} ->
         {:reply, {:error, %{message: message}}, socket}
     end
+  end
+
+  defp announce(message, socket) do
+    broadcast!(socket, "announcement", %{message: message, timestamp: DateTime.now!("Etc/UTC")})
   end
 
   defp handle_player_penalty(player_id, amount, socket) do
