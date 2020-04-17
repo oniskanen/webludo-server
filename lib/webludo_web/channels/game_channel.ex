@@ -77,8 +77,11 @@ defmodule WebLudoWeb.GameChannel do
                 finishing_players = Map.get(changes, :finishing_players, [])
                 handle_finish_announcement(finishing_players, socket)
 
-                multiplied_pieces = Map.get(changes, :doubled, [])
-                handle_multiplied_announcement(multiplied_pieces, socket)
+                multiplied_piece = Map.get(changes, :doubled, %{})
+                handle_multiplied_announcement(multiplied_piece, socket)
+
+                raise_info = Map.get(changes, :raise, %{})
+                handle_raise_announcement(raise_info, socket)
 
                 broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
 
@@ -307,6 +310,16 @@ defmodule WebLudoWeb.GameChannel do
       %{multiplier: multiplier, player: player} when multiplier > 1 ->
         verb = Constants.multiplier_verb(multiplier)
         announce("The #{String.capitalize(to_string(player))} player #{verb} a piece.", socket)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp handle_raise_announcement(raise_info, socket) do
+    case raise_info do
+      %{player: player} ->
+        announce("The #{String.capitalize(to_string(player))} player raises!", socket)
 
       _ ->
         nil

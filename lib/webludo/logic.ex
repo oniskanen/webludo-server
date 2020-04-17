@@ -724,7 +724,7 @@ defmodule WebLudo.Logic do
         player = game.players |> Enum.find(fn p -> p.color == current_player end)
         {:ok, _player} = update_player(player, %{can_raise: false})
 
-        Map.put(changes, :animated_effects, demoted)
+        Map.put(Map.put(changes, :animated_effects, demoted), :raise, %{player: current_player})
       else
         changes
       end
