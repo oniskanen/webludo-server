@@ -132,8 +132,9 @@ defmodule WebLudoWeb.GameChannel do
     player = Logic.get_player(player_id)
 
     game = Logic.agree_to_new_raise(game, player, agree)
+    moves = Logic.get_moves(game)
 
-    broadcast!(socket, "game_updated", %{game: game})
+    broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
     {:reply, :ok, socket}
   end
@@ -145,8 +146,9 @@ defmodule WebLudoWeb.GameChannel do
     player = Logic.get_player(player_id)
 
     game = Logic.jag_bor_i_hembo(game, player.color)
+    moves = Logic.get_moves(game)
 
-    broadcast!(socket, "game_updated", %{game: game})
+    broadcast!(socket, "game_updated", %{game: game, actions: moves})
     broadcast!(socket, "chat", %{message: "Jag bor i hembo!", player: player.name})
 
     {:reply, :ok, socket}
@@ -161,7 +163,8 @@ defmodule WebLudoWeb.GameChannel do
 
     case Logic.call_missed_hembo(game, player.color) do
       {:ok, game} ->
-        broadcast!(socket, "game_updated", %{game: game})
+        moves = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, actions: moves})
         {:reply, :ok, socket}
 
       {:error, message} ->
