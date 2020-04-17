@@ -380,4 +380,28 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     assert_broadcast "announcement", %{message: "The Red player doubles a piece"}
   end
+
+  test "calling a missed hembo causes an announcement" do
+    game =
+      TestHelpers.game_fixture(%{
+        players: [
+          %{color: :red, name: "Player 1", needs_hembo: true}
+        ]
+      })
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+
+    token = Auth.get_token(player)
+
+    push(socket, "call_missed_hembo", %{token: token, player: "red"})
+
+    assert_broadcast "announcement", %{
+      message: "The Red player missed calling hembo. Penalty to the Red player."
+    }
+  end
 end

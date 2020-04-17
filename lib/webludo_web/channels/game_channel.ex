@@ -212,6 +212,14 @@ defmodule WebLudoWeb.GameChannel do
       {:ok, game} ->
         moves = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: moves})
+
+        announce(
+          "The #{String.capitalize(to_string(player.color))} player missed calling hembo. Penalty to the #{
+            String.capitalize(to_string(player.color))
+          } player.",
+          socket
+        )
+
         {:reply, :ok, socket}
 
       {:error, message} ->
