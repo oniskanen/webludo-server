@@ -145,12 +145,17 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
-    game = Logic.jag_bor_i_hembo(game, player.color)
+    {game, penalties} = Logic.jag_bor_i_hembo(game, player.color)
     moves = Logic.get_moves(game)
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
     broadcast!(socket, "chat", %{message: "Jag bor i hembo!", player: player.name})
     announce("The #{player.color} player says 'Jag bor i hembo'", socket)
+
+    case penalties do
+      [%{amount: 1, player_color: color}] ->
+        announce("Incorrect hembo! The #{color} player gets a penalty", socket)
+    end
 
     {:reply, :ok, socket}
   end

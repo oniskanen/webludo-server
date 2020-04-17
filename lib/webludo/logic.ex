@@ -874,13 +874,15 @@ defmodule WebLudo.Logic do
   def jag_bor_i_hembo(%Game{players: players} = game, color) do
     player = Enum.find(players, fn p -> p.color == color end)
 
-    if player.needs_hembo do
-      {:ok, _player} = update_player(player, %{needs_hembo: false})
-    else
-      {:ok, _player} = update_player(player, %{penalties: player.penalties + 1})
-    end
+    penalties =
+      if player.needs_hembo do
+        {:ok, _player} = update_player(player, %{needs_hembo: false})
+        []
+      else
+        {:ok, _player} = update_player(player, %{penalties: player.penalties + 1})
+        [%{player_color: color, amount: 1}]
+      end
 
-    # TODO: Possibly also return a changes object with penalties?
-    Repo.preload(game, :players, force: true)
+    {Repo.preload(game, :players, force: true), penalties}
   end
 end

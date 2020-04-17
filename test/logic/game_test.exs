@@ -1367,8 +1367,9 @@ defmodule WebLudo.Logic.GameTest do
 
     game = TestHelpers.game_fixture(attrs)
 
-    game = Logic.jag_bor_i_hembo(game, :red)
+    {game, penalties} = Logic.jag_bor_i_hembo(game, :red)
     assert %{players: [%{color: :red, penalties: 2, needs_hembo: false}]} = game
+    assert [%{amount: 1, player_color: :red}] = penalties
   end
 
   test "a player who needs to call hembo can call hembo to set needs_hembo to false" do
@@ -1378,7 +1379,8 @@ defmodule WebLudo.Logic.GameTest do
 
     game = TestHelpers.game_fixture(attrs)
 
-    game = Logic.jag_bor_i_hembo(game, :red)
+    {game, penalties} = Logic.jag_bor_i_hembo(game, :red)
     assert %{players: [%{color: :red, penalties: 1, needs_hembo: false}]} = game
+    assert [] = penalties
   end
 end
