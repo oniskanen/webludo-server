@@ -55,4 +55,13 @@ defmodule WebLudo.Logic.Constants do
   def goal_index_list do
     [0, 1, 2, 3]
   end
+
+  def piece_name(multiplier) do
+    case multiplier do
+      1 -> "single"
+      2 -> "double"
+      3 -> "triple"
+      4 -> "quatro"
+    end
+  end
 end

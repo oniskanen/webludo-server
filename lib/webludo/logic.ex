@@ -604,7 +604,10 @@ defmodule WebLudo.Logic do
               penalties: [
                 %{
                   player: piece.player_color,
-                  amount: target_piece.multiplier * piece.multiplier
+                  amount: target_piece.multiplier * piece.multiplier,
+                  eaten: Constants.piece_name(piece.multiplier),
+                  eater: Constants.piece_name(target_piece.multiplier),
+                  type: "mine"
                 }
               ]
             }
@@ -624,7 +627,10 @@ defmodule WebLudo.Logic do
               penalties: [
                 %{
                   player: target_piece.player_color,
-                  amount: target_piece.multiplier * piece.multiplier
+                  amount: target_piece.multiplier * piece.multiplier,
+                  eaten: Constants.piece_name(target_piece.multiplier),
+                  eater: Constants.piece_name(piece.multiplier),
+                  type: "eat"
                 }
               ]
             }

@@ -74,7 +74,7 @@ defmodule WebLudoWeb.GameChannel do
                 broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
 
                 case penalties do
-                  [%{player: color, amount: 1}] ->
+                  [%{player: color, amount: 1, type: "eat"}] ->
                     announce(
                       "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{
                         color
@@ -82,11 +82,27 @@ defmodule WebLudoWeb.GameChannel do
                       socket
                     )
 
-                  [%{player: color, amount: amount}] ->
+                  [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
                     announce(
-                      "#{String.capitalize(to_string(color))} player eaten! #{amount} penalties to the #{
+                      "#{String.capitalize(to_string(color))} player #{eaten} eaten by a #{eater}! #{
+                        amount
+                      } penalties to the #{color} player",
+                      socket
+                    )
+
+                  [%{player: color, amount: 1, type: "mine"}] ->
+                    announce(
+                      "#{String.capitalize(to_string(color))} player walks into a mine! Penalty to the #{
                         color
                       } player",
+                      socket
+                    )
+
+                  [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
+                    announce(
+                      "#{String.capitalize(to_string(color))} player walks a #{eaten} into a #{
+                        eater
+                      } mine! #{amount} penalties to the #{color} player",
                       socket
                     )
                 end
