@@ -116,12 +116,14 @@ defmodule WebLudoWeb.GameChannel do
 
     response = handle_player_penalty(player_id, amount, socket)
 
-    announce(
-      "The #{String.capitalize(to_string(color))} player fixed their penalty value to #{amount} (used to be #{
-        previous_penalties
-      }).",
-      socket
-    )
+    if match?({:reply, :ok, _}, response) do
+      announce(
+        "The #{String.capitalize(to_string(color))} player fixed their penalty value to #{amount} (used to be #{
+          previous_penalties
+        }).",
+        socket
+      )
+    end
 
     response
   end
