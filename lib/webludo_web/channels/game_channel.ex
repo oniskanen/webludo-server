@@ -188,11 +188,18 @@ defmodule WebLudoWeb.GameChannel do
     moves = Logic.get_moves(game)
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
-    announce("The #{player.color} player says \"Jag bor i hembo\"", socket)
+
+    announce(
+      "The #{String.capitalize(to_string(player.color))} player says \"Jag bor i hembo\".",
+      socket
+    )
 
     case penalties do
       [%{amount: 1, player_color: color}] ->
-        announce("Incorrect hembo! The #{color} player gets a penalty", socket)
+        announce(
+          "Incorrect hembo! The #{String.capitalize(to_string(color))} player gets a penalty.",
+          socket
+        )
 
       _ ->
         nil
@@ -250,23 +257,25 @@ defmodule WebLudoWeb.GameChannel do
     case penalties do
       [%{player: color, amount: 1, type: "eat"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{color} player",
+          "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{
+            String.capitalize(to_string(color))
+          } player.",
           socket
         )
 
       [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
         announce(
           "#{String.capitalize(to_string(color))} player #{eaten} eaten by a #{eater}! #{amount} penalties to the #{
-            color
-          } player",
+            String.capitalize(to_string(color))
+          } player.",
           socket
         )
 
       [%{player: color, amount: 1, type: "mine"}] ->
         announce(
           "#{String.capitalize(to_string(color))} player walks into a mine! Penalty to the #{
-            color
-          } player",
+            String.capitalize(to_string(color))
+          } player.",
           socket
         )
 
@@ -274,7 +283,7 @@ defmodule WebLudoWeb.GameChannel do
         announce(
           "#{String.capitalize(to_string(color))} player walks a #{eaten} into a #{eater} mine! #{
             amount
-          } penalties to the #{color} player",
+          } penalties to the #{String.capitalize(to_string(color))} player.",
           socket
         )
 
@@ -297,7 +306,7 @@ defmodule WebLudoWeb.GameChannel do
     case multiplied_piece do
       %{multiplier: multiplier, player: player} when multiplier > 1 ->
         verb = Constants.multiplier_verb(multiplier)
-        announce("The #{String.capitalize(to_string(player))} player #{verb} a piece", socket)
+        announce("The #{String.capitalize(to_string(player))} player #{verb} a piece.", socket)
 
       _ ->
         nil

@@ -27,7 +27,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The red player says \"Jag bor i hembo\"",
+      message: "The Red player says \"Jag bor i hembo\".",
       timestamp: _ts
     }
   end
@@ -52,7 +52,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The red player says \"Jag bor i hembo\"",
+      message: "The Red player says \"Jag bor i hembo\".",
       timestamp: _ts
     }
   end
@@ -77,7 +77,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "Incorrect hembo! The red player gets a penalty"
+      message: "Incorrect hembo! The Red player gets a penalty."
     }
   end
 
@@ -110,7 +110,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player eaten! Penalty to the blue player"
+      message: "Blue player eaten! Penalty to the Blue player."
     }
   end
 
@@ -147,7 +147,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player quatro eaten by a double! 8 penalties to the blue player"
+      message: "Blue player quatro eaten by a double! 8 penalties to the Blue player."
     }
   end
 
@@ -180,7 +180,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player walks into a mine! Penalty to the blue player"
+      message: "Blue player walks into a mine! Penalty to the Blue player."
     }
   end
 
@@ -215,7 +215,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player walks a triple into a single mine! 3 penalties to the blue player"
+      message: "Blue player walks a triple into a single mine! 3 penalties to the Blue player."
     }
   end
 
@@ -378,7 +378,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
-    assert_broadcast "announcement", %{message: "The Red player doubles a piece"}
+    assert_broadcast "announcement", %{message: "The Red player doubles a piece."}
   end
 
   test "calling a missed hembo causes an announcement" do
