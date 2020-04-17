@@ -1,20 +1,29 @@
-# WebKimble
+# Webludo
 
-To start your Phoenix server:
+This project is a Phoenix server that handles running a game of beer-Ludo ("Kalja-Kimble"). The API is based on Phoenix channels. A Postgres-based persistence layer is included for longer games. See [the React frontend project](https://github.com/katrimarika/kimble-frontend) for the corresponding web client. The current version of the game can be played at https://webludo.katris.dev/
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+## Initial local setup
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Steps to setup the project the first time:
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+- Clone the repository
+- Install dependencies with `mix deps.get`
+- Ensure that a local Postgres database is running and the settings in `config/dev.exs` match your local setup
+- Create and migrate your database with `mix ecto.setup`
 
-## Learn more
+## Local server
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+To start your Phoenix server: `mix phx.server`
+
+The server now runs in [`localhost:4000`](http://localhost:4000). There is no built-in browser interface, but running [the React frontend project](https://github.com/katrimarika/kimble-frontend) locally works well.
+
+## Production deployment
+
+The production instance can be found at https://webludo-api.oni.dev. Deployment is done through Gigalixir.
+
+1. Deploy by running `git push gigalixir master`
+2. (If migrations are needed:) `gigalixir ps:migrate` to run missing database migrations
+
+## Accessing production server logs
+
+You can tail the production server logs by running `gigalixir logs`
