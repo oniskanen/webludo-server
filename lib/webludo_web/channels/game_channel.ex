@@ -71,41 +71,12 @@ defmodule WebLudoWeb.GameChannel do
                 penalties = Map.get(changes, :penalties, [])
                 game = Logic.apply_penalties(game, penalties)
 
+                handle_penalty_broadcast(penalties, socket)
+
+                finishing_players = Map.get(changes, :finishing_players, [])
+                handle_finish_broadcast(finishing_players, socket)
+
                 broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
-
-                case penalties do
-                  [%{player: color, amount: 1, type: "eat"}] ->
-                    announce(
-                      "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{
-                        color
-                      } player",
-                      socket
-                    )
-
-                  [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
-                    announce(
-                      "#{String.capitalize(to_string(color))} player #{eaten} eaten by a #{eater}! #{
-                        amount
-                      } penalties to the #{color} player",
-                      socket
-                    )
-
-                  [%{player: color, amount: 1, type: "mine"}] ->
-                    announce(
-                      "#{String.capitalize(to_string(color))} player walks into a mine! Penalty to the #{
-                        color
-                      } player",
-                      socket
-                    )
-
-                  [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
-                    announce(
-                      "#{String.capitalize(to_string(color))} player walks a #{eaten} into a #{
-                        eater
-                      } mine! #{amount} penalties to the #{color} player",
-                      socket
-                    )
-                end
 
                 {:reply, :ok, socket}
             end
@@ -252,13 +223,61 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     case Logic.set_player_penalty(game, player_id, amount) do
-      {:ok, game} ->
+      {:ok, {game, finishing_players}} ->
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: actions})
+        handle_finish_broadcast(finishing_players, socket)
         {:reply, :ok, socket}
 
       {:error, error} ->
         {:reply, {:error, %{errors: error.errors}}, socket}
+    end
+  end
+
+  defp handle_penalty_broadcast(penalties, socket) do
+    case penalties do
+      [%{player: color, amount: 1, type: "eat"}] ->
+        announce(
+          "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{color} player",
+          socket
+        )
+
+      [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
+        announce(
+          "#{String.capitalize(to_string(color))} player #{eaten} eaten by a #{eater}! #{amount} penalties to the #{
+            color
+          } player",
+          socket
+        )
+
+      [%{player: color, amount: 1, type: "mine"}] ->
+        announce(
+          "#{String.capitalize(to_string(color))} player walks into a mine! Penalty to the #{
+            color
+          } player",
+          socket
+        )
+
+      [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
+        announce(
+          "#{String.capitalize(to_string(color))} player walks a #{eaten} into a #{eater} mine! #{
+            amount
+          } penalties to the #{color} player",
+          socket
+        )
+
+      [] ->
+        nil
+    end
+  end
+
+  defp handle_finish_broadcast(finishing_players, socket) do
+    case finishing_players do
+      [player] ->
+        announce("The #{String.capitalize(to_string(player))} player finishes the game!", socket)
+
+      _ ->
+        nil
     end
   end
 end

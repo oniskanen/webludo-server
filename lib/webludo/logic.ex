@@ -497,23 +497,27 @@ defmodule WebLudo.Logic do
   end
 
   defp check_game_end(%Game{pieces: pieces, players: players} = game) do
-    players
-    |> Enum.filter(fn p -> p.penalties == 0 end)
-    |> Enum.filter(fn pl ->
-      player_goal_indices =
-        pieces
-        |> Enum.filter(fn pc -> pc.player_color == pl.color end)
-        |> Enum.filter(fn pc -> pc.area == :goal end)
-        |> Enum.map(fn pc -> pc.position_index end)
-        |> Enum.sort()
+    finishing_players =
+      players
+      |> Enum.filter(fn p -> p.penalties == 0 end)
+      |> Enum.filter(fn pl ->
+        player_goal_indices =
+          pieces
+          |> Enum.filter(fn pc -> pc.player_color == pl.color end)
+          |> Enum.filter(fn pc -> pc.area == :goal end)
+          |> Enum.map(fn pc -> pc.position_index end)
+          |> Enum.sort()
 
-      player_goal_indices == Constants.goal_index_list()
-    end)
+        player_goal_indices == Constants.goal_index_list()
+      end)
+
+    finishing_players
     |> Enum.each(fn p ->
       update_player(p, %{has_finished: true})
     end)
 
-    game |> Repo.preload(:players, force: true)
+    {game |> Repo.preload(:players, force: true),
+     Enum.map(finishing_players, fn p -> p.color end)}
   end
 
   defp check_hembo(%Game{pieces: pieces, players: players} = game, %Game{pieces: initial_pieces}) do
@@ -724,7 +728,9 @@ defmodule WebLudo.Logic do
         changes
       end
 
-    game = check_game_end(game |> Repo.preload(:pieces, force: true))
+    {game, finishing_players} = check_game_end(game |> Repo.preload(:pieces, force: true))
+
+    changes = Map.put(changes, :finishing_players, finishing_players)
 
     game = check_hembo(game, initial_game)
 

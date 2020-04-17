@@ -1067,8 +1067,10 @@ defmodule WebLudo.Logic.GameTest do
     assert %{players: [%{id: player_id, color: :red, has_finished: false}]} =
              game = TestHelpers.game_fixture(attrs)
 
-    assert {:ok, %{players: [%{id: ^player_id, color: :red, has_finished: true}]}} =
-             Logic.set_player_penalty(game, player_id, 0)
+    assert {:ok,
+            {%{
+               players: [%{id: ^player_id, color: :red, has_finished: true}]
+             }, _finishing_players}} = Logic.set_player_penalty(game, player_id, 0)
   end
 
   test "player with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do
