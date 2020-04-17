@@ -266,4 +266,28 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
       message: "Red player finished a penalty. That's their last one!"
     }
   end
+
+  test "setting the penalty value causes an announcement" do
+    game =
+      TestHelpers.game_fixture(%{
+        players: [
+          %{color: :red, name: "Player 1", penalties: 6}
+        ]
+      })
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+
+    token = Auth.get_token(player)
+
+    push(socket, "set_penalty", %{token: token, amount: 1})
+
+    assert_broadcast "announcement", %{
+      message: "The Red player fixed their penalty value to 1 (used to be 6)."
+    }
+  end
 end

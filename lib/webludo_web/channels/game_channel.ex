@@ -134,8 +134,18 @@ defmodule WebLudoWeb.GameChannel do
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
+    %{penalties: previous_penalties, color: color} = Logic.get_player(player_id)
 
-    handle_player_penalty(player_id, amount, socket)
+    response = handle_player_penalty(player_id, amount, socket)
+
+    announce(
+      "The #{String.capitalize(to_string(color))} player fixed their penalty value to #{amount} (used to be #{
+        previous_penalties
+      }).",
+      socket
+    )
+
+    response
   end
 
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
