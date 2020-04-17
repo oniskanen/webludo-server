@@ -152,12 +152,12 @@ defmodule WebLudoWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in("call_missed_hembo", %{"token" => token, "player" => player}, socket) do
+  def handle_in("call_missed_hembo", %{"token" => token, "player" => playerColorString}, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     {:ok, _player_id} = WebLudoWeb.Auth.get_player_id(token)
 
-    player = game.players |> Enum.find(fn p -> p.color == player end)
+    player = game.players |> Enum.find(fn p -> to_string(p.color) == playerColorString end)
 
     case Logic.call_missed_hembo(game, player.color) do
       {:ok, game} ->

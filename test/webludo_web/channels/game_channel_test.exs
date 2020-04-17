@@ -612,7 +612,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_broadcast "game_updated", %{}
 
-    ref = push(socket, "call_missed_hembo", %{token: token, player: :blue})
+    ref = push(socket, "call_missed_hembo", %{token: token, player: "blue"})
 
     assert_reply ref, :ok, %{}
 
@@ -640,7 +640,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     %{token: token} = join_game(socket, "Player 1")
 
-    ref = push(socket, "call_missed_hembo", %{token: token, player: :blue})
+    ref = push(socket, "call_missed_hembo", %{token: token, player: "blue"})
 
     assert_reply ref, :error, %{message: "The blue player does not need to call hembo"}
   end
