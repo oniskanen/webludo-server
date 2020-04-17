@@ -500,6 +500,7 @@ defmodule WebLudo.Logic do
     finishing_players =
       players
       |> Enum.filter(fn p -> p.penalties == 0 end)
+      |> Enum.filter(fn p -> !p.has_finished end)
       |> Enum.filter(fn pl ->
         player_goal_indices =
           pieces
