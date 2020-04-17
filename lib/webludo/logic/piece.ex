@@ -1,4 +1,4 @@
-defmodule WebKimble.Logic.Piece do
+defmodule WebLudo.Logic.Piece do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -16,7 +16,7 @@ defmodule WebKimble.Logic.Piece do
     field :area, EctoAtom
     field :player_color, EctoAtom
     field :multiplier, :integer, default: 1
-    belongs_to :game, WebKimble.Logic.Game
+    belongs_to :game, WebLudo.Logic.Game
   end
 
   def changeset(piece, attrs) do

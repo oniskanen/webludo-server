@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.MergeGameStateToGame do
+defmodule WebLudo.Repo.Migrations.MergeGameStateToGame do
   use Ecto.Migration
 
   def change do

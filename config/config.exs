@@ -7,15 +7,15 @@
 # General application configuration
 use Mix.Config
 
-config :web_kimble,
-  ecto_repos: [WebKimble.Repo]
+config :webludo,
+  ecto_repos: [WebLudo.Repo]
 
 # Configures the endpoint
-config :web_kimble, WebKimbleWeb.Endpoint,
+config :webludo, WebLudoWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "FLOYVRiQYbMc68sZSHmfExMRzIyI7thxEYwddsHPw3xlvFSQHNPCngM5G3H3Iazp",
-  render_errors: [view: WebKimbleWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: WebKimble.PubSub, adapter: Phoenix.PubSub.PG2],
+  render_errors: [view: WebLudoWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: WebLudo.PubSub, adapter: Phoenix.PubSub.PG2],
   live_view: [signing_salt: "SC1OdLtr"]
 
 # Configures Elixir's Logger

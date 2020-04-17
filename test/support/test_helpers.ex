@@ -1,6 +1,6 @@
-defmodule WebKimble.TestHelpers do
-  alias WebKimble.Logic
-  alias WebKimble.Repo
+defmodule WebLudo.TestHelpers do
+  alias WebLudo.Logic
+  alias WebLudo.Repo
 
   def game_fixture(attrs \\ %{}) do
     {:ok, game} =
@@ -28,7 +28,7 @@ defmodule WebKimble.TestHelpers do
     %{pieces: pieces} =
       attrs
       |> Enum.into(%{
-        pieces: WebKimble.Logic.Constants.initial_pieces()
+        pieces: WebLudo.Logic.Constants.initial_pieces()
       })
 
     Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)

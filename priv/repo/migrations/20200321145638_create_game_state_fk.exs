@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.CreateGameStateFk do
+defmodule WebLudo.Repo.Migrations.CreateGameStateFk do
   use Ecto.Migration
 
   def change do

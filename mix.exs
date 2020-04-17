@@ -1,9 +1,9 @@
-defmodule WebKimble.MixProject do
+defmodule WebLudo.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :web_kimble,
+      app: :webludo,
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule WebKimble.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {WebKimble.Application, []},
+      mod: {WebLudo.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

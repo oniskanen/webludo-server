@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddPlayerBooleanDefaults do
+defmodule WebLudo.Repo.Migrations.AddPlayerBooleanDefaults do
   use Ecto.Migration
 
   def change do

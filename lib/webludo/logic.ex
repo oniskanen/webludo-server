@@ -1,10 +1,10 @@
-defmodule WebKimble.Logic do
-  alias WebKimble.Repo
-  alias WebKimble.Logic.Move
-  alias WebKimble.Logic.Constants
-  alias WebKimble.Logic.Piece
-  alias WebKimble.Logic.Game
-  alias WebKimble.Logic.Player
+defmodule WebLudo.Logic do
+  alias WebLudo.Repo
+  alias WebLudo.Logic.Move
+  alias WebLudo.Logic.Constants
+  alias WebLudo.Logic.Piece
+  alias WebLudo.Logic.Game
+  alias WebLudo.Logic.Player
 
   def create_game(attrs) do
     %Game{}
@@ -758,12 +758,12 @@ defmodule WebKimble.Logic do
   end
 
   def create_game_with_initial_state(attrs) do
-    attrs = Map.put(attrs, :current_player, WebKimble.Logic.random_player())
+    attrs = Map.put(attrs, :current_player, WebLudo.Logic.random_player())
 
     # IO.inspect(attrs)
     case create_game(attrs) do
       {:ok, game} ->
-        WebKimble.Logic.Constants.initial_pieces()
+        WebLudo.Logic.Constants.initial_pieces()
         |> Enum.each(fn p -> {:ok, _piece} = create_piece(game, p) end)
 
         {:ok, game}

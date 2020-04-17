@@ -1,9 +1,9 @@
-defmodule WebKimbleWeb.UserSocket do
+defmodule WebLudoWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "games:*", WebKimbleWeb.GameChannel
-  channel "lobby", WebKimbleWeb.LobbyChannel
+  channel "games:*", WebLudoWeb.GameChannel
+  channel "lobby", WebLudoWeb.LobbyChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -27,7 +27,7 @@ defmodule WebKimbleWeb.UserSocket do
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     WebKimbleWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
+  #     WebLudoWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
   def id(_socket), do: nil

@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddPlayerPenalty do
+defmodule WebLudo.Repo.Migrations.AddPlayerPenalty do
   use Ecto.Migration
 
   def change do

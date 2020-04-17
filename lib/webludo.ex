@@ -1,6 +1,6 @@
-defmodule WebKimble do
+defmodule WebLudo do
   @moduledoc """
-  WebKimble keeps the contexts that define your domain
+  WebLudo keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

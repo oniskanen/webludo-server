@@ -1,7 +1,7 @@
-defmodule WebKimbleWeb.GameChannel do
-  use WebKimbleWeb, :channel
+defmodule WebLudoWeb.GameChannel do
+  use WebLudoWeb, :channel
 
-  alias WebKimble.Logic
+  alias WebLudo.Logic
 
   def join("games:" <> code, _params, socket) do
     case Logic.get_game_by_code(code) do
@@ -15,7 +15,7 @@ defmodule WebKimbleWeb.GameChannel do
   end
 
   def handle_in("action", %{"token" => token, "type" => "roll"}, socket) do
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     player = Logic.get_player(player_id)
@@ -42,7 +42,7 @@ defmodule WebKimbleWeb.GameChannel do
   end
 
   def handle_in("action", %{"token" => token, "type" => "move", "move" => move}, socket) do
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
     player = Logic.get_player(player_id)
     current_player = game.current_player
@@ -82,7 +82,7 @@ defmodule WebKimbleWeb.GameChannel do
   def handle_in("join_game", %{"name" => name}, socket) do
     case Logic.join_game(socket.assigns.code, name) do
       {:ok, player, game} ->
-        token = WebKimbleWeb.Auth.get_token(player)
+        token = WebLudoWeb.Auth.get_token(player)
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: actions})
 
@@ -99,20 +99,20 @@ defmodule WebKimbleWeb.GameChannel do
   end
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
 
     handle_player_penalty(player_id, amount, socket)
   end
 
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
     handle_player_penalty(player_id, player.penalties - 1, socket)
   end
 
   def handle_in("chat", %{"token" => token, "message" => message}, socket) do
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
     broadcast!(socket, "chat", %{message: message, player: player.name})
@@ -128,7 +128,7 @@ defmodule WebKimbleWeb.GameChannel do
       when is_boolean(agree) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
     game = Logic.agree_to_new_raise(game, player, agree)
@@ -141,7 +141,7 @@ defmodule WebKimbleWeb.GameChannel do
   def handle_in("jag_bor_i_hembo", %{"token" => token}, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
-    {:ok, player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
     game = Logic.jag_bor_i_hembo(game, player.color)
@@ -155,7 +155,7 @@ defmodule WebKimbleWeb.GameChannel do
   def handle_in("call_missed_hembo", %{"token" => token, "player" => player}, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
-    {:ok, _player_id} = WebKimbleWeb.Auth.get_player_id(token)
+    {:ok, _player_id} = WebLudoWeb.Auth.get_player_id(token)
 
     player = game.players |> Enum.find(fn p -> p.color == player end)
 

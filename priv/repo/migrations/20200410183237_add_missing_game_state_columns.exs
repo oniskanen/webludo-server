@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddMissingGameStateColumns do
+defmodule WebLudo.Repo.Migrations.AddMissingGameStateColumns do
   use Ecto.Migration
 
   def change do

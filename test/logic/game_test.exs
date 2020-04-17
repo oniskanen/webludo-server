@@ -1,13 +1,13 @@
-defmodule WebKimble.Logic.GameTest do
+defmodule WebLudo.Logic.GameTest do
   use ExUnit.Case
 
-  alias WebKimble.Logic
-  alias WebKimble.Repo
-  alias WebKimble.TestHelpers
+  alias WebLudo.Logic
+  alias WebLudo.Repo
+  alias WebLudo.TestHelpers
 
   setup do
     # Explicitly get a connection before each test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(WebKimble.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(WebLudo.Repo)
   end
 
   test "gamestate has current player" do

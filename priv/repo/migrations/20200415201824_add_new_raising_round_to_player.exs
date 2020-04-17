@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddNewRaisingRoundToPlayer do
+defmodule WebLudo.Repo.Migrations.AddNewRaisingRoundToPlayer do
   use Ecto.Migration
 
   def change do

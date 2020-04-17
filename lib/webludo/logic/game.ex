@@ -1,4 +1,4 @@
-defmodule WebKimble.Logic.Game do
+defmodule WebLudo.Logic.Game do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -8,9 +8,9 @@ defmodule WebKimble.Logic.Game do
     field :code, :string
     field :name, :string
 
-    has_many :players, WebKimble.Logic.Player
+    has_many :players, WebLudo.Logic.Player
     field :current_player, EctoAtom
-    has_many :pieces, WebKimble.Logic.Piece
+    has_many :pieces, WebLudo.Logic.Piece
     field :roll, :integer
     field :roll_count, :integer
     timestamps()

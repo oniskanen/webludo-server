@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddPlayerNeedsHembo do
+defmodule WebLudo.Repo.Migrations.AddPlayerNeedsHembo do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.CreatePieceFk do
+defmodule WebLudo.Repo.Migrations.CreatePieceFk do
   use Ecto.Migration
 
   def change do
@@ -6,11 +6,9 @@ defmodule WebKimble.Repo.Migrations.CreatePieceFk do
       add :player_color, :string
       add :area, :string
       add :position_index, :integer
-      add :game_state_id, references(:game_states, on_delete: :delete_all)      
+      add :game_state_id, references(:game_states, on_delete: :delete_all)
     end
 
     create index(:pieces, [:game_state_id])
   end
-
-
 end

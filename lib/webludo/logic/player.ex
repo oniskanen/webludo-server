@@ -1,4 +1,4 @@
-defmodule WebKimble.Logic.Player do
+defmodule WebLudo.Logic.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -21,7 +21,7 @@ defmodule WebKimble.Logic.Player do
     field :new_raising_round, :boolean, default: false
     field :needs_hembo, :boolean, default: false
 
-    belongs_to :game, WebKimble.Logic.Game
+    belongs_to :game, WebLudo.Logic.Game
 
     timestamps()
   end

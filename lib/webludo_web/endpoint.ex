@@ -1,7 +1,7 @@
-defmodule WebKimbleWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :web_kimble
+defmodule WebLudoWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :webludo
 
-  socket "/socket", WebKimbleWeb.UserSocket,
+  socket "/socket", WebLudoWeb.UserSocket,
     websocket: true,
     longpoll: false
 

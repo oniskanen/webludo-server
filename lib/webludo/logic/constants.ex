@@ -1,4 +1,4 @@
-defmodule WebKimble.Logic.Constants do
+defmodule WebLudo.Logic.Constants do
   @player_colors [:red, :blue, :yellow, :green]
   # @areas [:home, :play, :goal]
   @starting_indices [0, 1, 2, 3]

@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddCanRaiseToPlayer do
+defmodule WebLudo.Repo.Migrations.AddCanRaiseToPlayer do
   use Ecto.Migration
 
   def change do

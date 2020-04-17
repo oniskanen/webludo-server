@@ -1,13 +1,13 @@
-defmodule WebKimbleWeb.Channels.LobbyChannelTest do
-  use WebKimbleWeb.ChannelCase
+defmodule WebLudoWeb.Channels.LobbyChannelTest do
+  use WebLudoWeb.ChannelCase
 
   test "join replies ok" do
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     {:ok, _reply, _socket} = subscribe_and_join(socket, "lobby", %{})
   end
 
   test "create_game replies ok with game code" do
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
     ref = push(socket, "create_game", %{name: "game name"})
@@ -16,7 +16,7 @@ defmodule WebKimbleWeb.Channels.LobbyChannelTest do
   end
 
   test "create_game returns an error when no name given" do
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
     ref = push(socket, "create_game", %{})

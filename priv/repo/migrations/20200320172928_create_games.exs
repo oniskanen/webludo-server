@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.CreateGames do
+defmodule WebLudo.Repo.Migrations.CreateGames do
   use Ecto.Migration
 
   def change do
@@ -8,6 +8,5 @@ defmodule WebKimble.Repo.Migrations.CreateGames do
 
       timestamps()
     end
-
   end
 end

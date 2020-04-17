@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddPieceMultiplier do
+defmodule WebLudo.Repo.Migrations.AddPieceMultiplier do
   use Ecto.Migration
 
   def change do

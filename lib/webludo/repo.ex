@@ -1,5 +1,5 @@
-defmodule WebKimble.Repo do
+defmodule WebLudo.Repo do
   use Ecto.Repo,
-    otp_app: :web_kimble,
+    otp_app: :webludo,
     adapter: Ecto.Adapters.Postgres
 end

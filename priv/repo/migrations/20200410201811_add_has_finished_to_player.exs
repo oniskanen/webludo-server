@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.AddHasFinishedToPlayer do
+defmodule WebLudo.Repo.Migrations.AddHasFinishedToPlayer do
   use Ecto.Migration
 
   def change do

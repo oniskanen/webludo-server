@@ -1,12 +1,12 @@
-defmodule WebKimbleWeb.Channels.GameChannelTest do
-  use WebKimbleWeb.ChannelCase
+defmodule WebLudoWeb.Channels.GameChannelTest do
+  use WebLudoWeb.ChannelCase
 
-  alias WebKimble.TestHelpers
-  alias WebKimbleWeb.Auth
+  alias WebLudo.TestHelpers
+  alias WebLudoWeb.Auth
 
   test "join replies with game" do
     game = TestHelpers.game_fixture()
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     assert {:ok, reply, _socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
     assert %{game: %{players: _players, pieces: pieces}} = reply
@@ -14,14 +14,14 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
   end
 
   test "join replies with error for nonexistent game" do
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:error, "Game not found"} = subscribe_and_join(socket, "games:invalid", %{})
   end
 
   test "join game broadcasts game with list of players" do
     game = TestHelpers.game_fixture(%{players: []})
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -33,7 +33,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "4 players joining get different colors" do
     game = TestHelpers.game_fixture(%{players: []})
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -78,7 +78,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
     ref = push(socket, "join_game", %{name: "Player 1"})
@@ -96,7 +96,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -110,7 +110,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "player not in turn cannot roll die" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :blue,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -119,7 +119,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -131,7 +131,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "player in turn can roll die" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -140,7 +140,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -161,7 +161,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "move action returns game with pieces in new positions" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         pieces: [%{player_color: :red, area: :home, position_index: 0}],
         players: [
@@ -172,7 +172,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         roll: 6
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -201,7 +201,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "player rolling twice in a row receives an error" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -211,7 +211,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         pieces: [%{player_color: :red, area: :play, position_index: 0}]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -224,7 +224,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "eating a piece causes a game updated message with changes" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -235,7 +235,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         pieces: [%{player_color: :red, area: :play, position_index: 0}]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -252,7 +252,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "eating a piece causes broadcast with eaten piece details" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -266,7 +266,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -286,7 +286,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "player data includes penalties" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -300,7 +300,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{game: %{players: players}} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -310,7 +310,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "new player joining is assigned 0 penalties" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -324,7 +324,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -336,7 +336,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending a set penalty message sets the player penalty to provided value" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -350,7 +350,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -366,7 +366,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending a decrement penalty message reduces the penalty by 1" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -380,7 +380,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -398,7 +398,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending a decrement penalty message when penalty is a zero keeps penalty at zero" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -412,7 +412,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
@@ -429,7 +429,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "eating a piece causes game updated broadcast with penalties" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -443,7 +443,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -459,7 +459,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "eating a piece causes game broadcast with updated penalties" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         current_player: :red,
         roll: 1,
         players: [
@@ -473,7 +473,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -490,7 +490,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending a chat message causes chat broadcast" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -498,7 +498,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -514,7 +514,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending a new_raising_round message causes game_updated broadcast" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :red, name: "Player 1", can_raise: false},
           %{color: :blue, name: "Player 2"},
@@ -523,7 +523,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -543,7 +543,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending jag_bor_i_hembo causes a game_updated broadcast" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -551,7 +551,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -571,7 +571,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending jag_bor_i_hembo causes a chat broadcast" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -579,7 +579,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -595,7 +595,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending call_missed_hembo causes a game_updated broadcast when needs_hembo is true for the player" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :blue, name: "Player 2", needs_hembo: true},
           %{color: :green, name: "Player 3"},
@@ -603,7 +603,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
@@ -625,7 +625,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
 
   test "sending call_missed_hembo replies with error when needs_hembo is false" do
     game =
-      WebKimble.TestHelpers.game_fixture(%{
+      WebLudo.TestHelpers.game_fixture(%{
         players: [
           %{color: :blue, name: "Player 2", needs_hembo: false},
           %{color: :green, name: "Player 3"},
@@ -633,7 +633,7 @@ defmodule WebKimbleWeb.Channels.GameChannelTest do
         ]
       })
 
-    {:ok, socket} = connect(WebKimbleWeb.UserSocket, %{})
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})

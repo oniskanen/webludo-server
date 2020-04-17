@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.CreatePlayers do
+defmodule WebLudo.Repo.Migrations.CreatePlayers do
   use Ecto.Migration
 
   def change do

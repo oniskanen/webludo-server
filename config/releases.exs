@@ -1,6 +1,6 @@
 import Config
 
-config :web_kimble, WebKimbleWeb.Endpoint,
+config :webludo, WebLudoWeb.Endpoint,
   server: true,
   # Needed for Phoenix 1.2 and 1.4. Doesn't hurt for 1.3.
   http: [port: {:system, "PORT"}],

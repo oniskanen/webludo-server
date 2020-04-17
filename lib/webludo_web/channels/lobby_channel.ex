@@ -1,7 +1,7 @@
-defmodule WebKimbleWeb.LobbyChannel do
-  alias WebKimble.Logic
+defmodule WebLudoWeb.LobbyChannel do
+  alias WebLudo.Logic
 
-  use WebKimbleWeb, :channel
+  use WebLudoWeb, :channel
 
   def join("lobby", _params, socket) do
     {:ok, socket}

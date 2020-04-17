@@ -1,8 +1,8 @@
-defmodule WebKimbleWeb.AuthTest do
+defmodule WebLudoWeb.AuthTest do
   use ExUnit.Case
 
-  alias WebKimbleWeb.Auth
-  alias WebKimble.Logic.Player
+  alias WebLudoWeb.Auth
+  alias WebLudo.Logic.Player
 
   test "a created token can be validated" do
     assert token = Auth.get_token(%Player{id: 123})

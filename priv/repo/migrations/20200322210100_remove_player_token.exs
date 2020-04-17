@@ -1,4 +1,4 @@
-defmodule WebKimble.Repo.Migrations.RemovePlayerToken do
+defmodule WebLudo.Repo.Migrations.RemovePlayerToken do
   use Ecto.Migration
 
   def change do

@@ -1,12 +1,12 @@
-defmodule WebKimbleWeb do
+defmodule WebLudoWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use WebKimbleWeb, :controller
-      use WebKimbleWeb, :view
+      use WebLudoWeb, :controller
+      use WebLudoWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
