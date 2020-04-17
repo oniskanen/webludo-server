@@ -168,11 +168,14 @@ defmodule WebLudoWeb.GameChannel do
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
     broadcast!(socket, "chat", %{message: "Jag bor i hembo!", player: player.name})
-    announce("The #{player.color} player says 'Jag bor i hembo'", socket)
+    announce("The #{player.color} player says \"Jag bor i hembo\"", socket)
 
     case penalties do
       [%{amount: 1, player_color: color}] ->
         announce("Incorrect hembo! The #{color} player gets a penalty", socket)
+
+      _ ->
+        nil
     end
 
     {:reply, :ok, socket}

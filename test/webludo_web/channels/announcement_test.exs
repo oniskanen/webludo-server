@@ -27,7 +27,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The red player says 'Jag bor i hembo'",
+      message: "The red player says \"Jag bor i hembo\"",
       timestamp: _ts
     }
   end
@@ -52,7 +52,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The red player says 'Jag bor i hembo'",
+      message: "The red player says \"Jag bor i hembo\"",
       timestamp: _ts
     }
   end
