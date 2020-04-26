@@ -71,7 +71,7 @@ defmodule WebLudo.Logic.HemboTest do
 
   test "a team is assigned a penalty when team needs hembo and missed hembo is called" do
     attrs = %{
-      teams: [%{name: "Player 1", color: :red, needs_hembo: true, penalties: 1}]
+      teams: [%{color: :red, needs_hembo: true, penalties: 1}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -82,7 +82,7 @@ defmodule WebLudo.Logic.HemboTest do
 
   test "a team is assigned a penalty when player in team that does not need hembo calls jag bor i hembo" do
     attrs = %{
-      teams: [%{name: "Team 1", color: :red, needs_hembo: false, penalties: 1}]
+      teams: [%{color: :red, needs_hembo: false, penalties: 1}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -94,7 +94,7 @@ defmodule WebLudo.Logic.HemboTest do
 
   test "a player in a team that needs to call hembo can call hembo to set needs_hembo to false" do
     attrs = %{
-      teams: [%{name: "Player 1", color: :red, needs_hembo: true, penalties: 1}]
+      teams: [%{color: :red, needs_hembo: true, penalties: 1}]
     }
 
     game = TestHelpers.game_fixture(attrs)

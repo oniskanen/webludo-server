@@ -31,6 +31,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert_broadcast "game_updated", %{game: %{players: [%{name: "Test Name"}]}}
   end
 
+  # Need to redo the join game logic. See Github issue #6
+  @tag :skip
   test "4 players joining get different colors" do
     game = TestHelpers.game_fixture(%{players: []})
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
@@ -85,6 +87,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert_reply ref, :ok, %{token: token}
   end
 
+  # We will now allow unlimited players. See Github issue #6
+  @tag :skip
   test "5th player trying to join game receives an error" do
     game =
       TestHelpers.game_fixture(%{
@@ -641,10 +645,13 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     ref = push(socket, "call_missed_hembo", %{token: token, team: "blue"})
 
-    assert_reply ref, :error, %{message: "The blue player does not need to call hembo"}
+    assert_reply ref, :error, %{message: "The blue team does not need to call hembo"}
   end
 
   @tag :skip
   test "fetching team for a player should get a team from the same game" do
+    # The current team fetching logic can and will return teams from another game.
+    # Let's write a test with multiple concurrent games and ensure that each player
+    # receives their own team data.
   end
 end

@@ -219,14 +219,14 @@ defmodule WebLudo.Logic do
     end
   end
 
-  defp get_goal_pieces_by_player(%Game{pieces: pieces}) do
+  defp get_goal_pieces_by_team(%Game{pieces: pieces}) do
     pieces
     |> Enum.filter(fn p -> p.area == :goal end)
     |> Enum.group_by(fn p -> p.team_color end)
   end
 
   defp get_first_goal_pieces(%Game{} = game) do
-    get_goal_pieces_by_player(game)
+    get_goal_pieces_by_team(game)
     |> Enum.map(fn {k, v} -> {k, Enum.sort_by(v, fn p -> p.position_index end)} end)
     |> Enum.map(fn {k, v} -> {k, hd(v)} end)
   end
@@ -527,10 +527,10 @@ defmodule WebLudo.Logic do
       length(team_home_pieces) == Constants.team_piece_count()
     end)
     |> Enum.filter(fn c ->
-      player_home_pieces =
+      team_home_pieces =
         Enum.filter(initial_pieces, fn p -> p.area == :home && p.team_color == c end)
 
-      length(player_home_pieces) < Constants.team_piece_count()
+      length(team_home_pieces) < Constants.team_piece_count()
     end)
     |> Enum.map(fn c -> Enum.find(teams, fn t -> t.color == c end) end)
     |> Enum.each(fn t -> update_team(t, %{needs_hembo: true}) end)
@@ -556,7 +556,7 @@ defmodule WebLudo.Logic do
     changes =
       if target_piece != nil do
         if target_piece.team_color == piece.team_color do
-          player_center_piece_indices =
+          team_center_piece_indices =
             game.pieces
             |> Enum.filter(fn p -> p.team_color == piece.team_color end)
             |> Enum.filter(fn p -> p.area == :center end)
@@ -564,7 +564,7 @@ defmodule WebLudo.Logic do
 
           free_center_index =
             0..2
-            |> Enum.find(fn i -> !Enum.any?(player_center_piece_indices, fn j -> i == j end) end)
+            |> Enum.find(fn i -> !Enum.any?(team_center_piece_indices, fn j -> i == j end) end)
 
           {:ok, doubled_piece} =
             update_piece(target_piece, %{multiplier: target_piece.multiplier + 1})
@@ -851,6 +851,7 @@ defmodule WebLudo.Logic do
     Repo.preload(game, :teams, force: true)
   end
 
+  # TODO: Redo the logic when joining a game. See Github issue #6.
   def join_game(code, name) do
     {:ok, game} = get_game_by(%{code: code})
 
@@ -887,7 +888,7 @@ defmodule WebLudo.Logic do
     end
   end
 
-  def agree_to_new_raise(game, _player, _new_raising_round) do
+  def agree_to_new_raise(game, _team, _new_raising_round) do
     game
   end
 
@@ -900,7 +901,7 @@ defmodule WebLudo.Logic do
       game = Repo.preload(game, :teams, force: true)
       {:ok, game}
     else
-      {:error, "The #{color} player does not need to call hembo"}
+      {:error, "The #{color} team does not need to call hembo"}
     end
   end
 

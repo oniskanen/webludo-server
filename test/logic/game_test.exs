@@ -46,11 +46,11 @@ defmodule WebLudo.Logic.GameTest do
     test_start_index(:green, 21)
   end
 
-  defp test_start_index(player, expected_index) do
+  defp test_start_index(team, expected_index) do
     attrs = %{
-      current_team: player,
+      current_team: team,
       roll: 6,
-      pieces: [%{area: :home, position_index: 0, team_color: player}]
+      pieces: [%{area: :home, position_index: 0, team_color: team}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -96,18 +96,18 @@ defmodule WebLudo.Logic.GameTest do
     assert %{target_index: 1, target_area: :goal} = move
   end
 
-  test "no player can move back to starting point" do
+  test "no team can move back to starting point" do
     validate_piece_in_goal(:red, 27)
     validate_piece_in_goal(:blue, 6)
     validate_piece_in_goal(:yellow, 13)
     validate_piece_in_goal(:green, 20)
   end
 
-  defp validate_piece_in_goal(player, index) do
+  defp validate_piece_in_goal(team, index) do
     attrs = %{
-      current_team: player,
+      current_team: team,
       roll: 1,
-      pieces: [%{area: :play, position_index: index, team_color: player}]
+      pieces: [%{area: :play, position_index: index, team_color: team}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -119,18 +119,18 @@ defmodule WebLudo.Logic.GameTest do
     assert %{target_index: 0, target_area: :goal} = move
   end
 
-  test "players move in play from starting point" do
+  test "teams move in play from starting point" do
     validate_piece_in_play(:red, 0)
     validate_piece_in_play(:blue, 7)
     validate_piece_in_play(:yellow, 14)
     validate_piece_in_play(:green, 21)
   end
 
-  defp validate_piece_in_play(player, index) do
+  defp validate_piece_in_play(team, index) do
     attrs = %{
-      current_team: player,
+      current_team: team,
       roll: 1,
-      pieces: [%{area: :play, position_index: index, team_color: player}]
+      pieces: [%{area: :play, position_index: index, team_color: team}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -187,7 +187,7 @@ defmodule WebLudo.Logic.GameTest do
     assert [] = moves
   end
 
-  test "piece cannot move on top of another piece of the same player" do
+  test "piece cannot move on top of another piece of the same team" do
     attrs = %{
       current_team: :red,
       roll: 1,
@@ -222,7 +222,7 @@ defmodule WebLudo.Logic.GameTest do
     assert [] = Logic.get_moves(game)
   end
 
-  test "moving causes the current player to change" do
+  test "moving causes the current team to change" do
     attrs = %{
       current_team: :red,
       roll: 1,
@@ -242,7 +242,7 @@ defmodule WebLudo.Logic.GameTest do
     assert %{current_team: :blue} = state
   end
 
-  test "player cannot move without rolling first" do
+  test "team cannot move without rolling first" do
     attrs = %{
       current_team: :red,
       pieces: [%{area: :goal, position_index: 0, team_color: :red}]
@@ -255,7 +255,7 @@ defmodule WebLudo.Logic.GameTest do
     assert [] = moves
   end
 
-  test "player cannot roll twice in a row" do
+  test "team cannot roll twice in a row" do
     attrs = %{
       current_team: :red,
       roll_count: 0,
@@ -268,7 +268,7 @@ defmodule WebLudo.Logic.GameTest do
     assert {:error, message} = Logic.set_roll(game, 1)
   end
 
-  test "roll results do not carry between players" do
+  test "roll results do not carry between teams" do
     attrs = %{
       current_team: :red,
       roll: 2,
@@ -347,7 +347,7 @@ defmodule WebLudo.Logic.GameTest do
     assert %{roll_count: 0} = game
   end
 
-  test "moving on top of another player sends them home" do
+  test "moving on top of another team's piece sends it home" do
     attrs = %{
       current_team: :red,
       roll: 1,
@@ -716,7 +716,7 @@ defmodule WebLudo.Logic.GameTest do
     assert %{current_team: :red, roll: nil, roll_count: 0} = game
   end
 
-  test "a player with all pieces in goal area gets skipped" do
+  test "a team with all pieces in goal area indices 0-3 gets skipped" do
     attrs = %{
       current_team: :red,
       roll: 1,
@@ -854,7 +854,7 @@ defmodule WebLudo.Logic.GameTest do
     assert {:ok,
             {%{
                teams: [%{id: ^team_id, color: :red, has_finished: true}]
-             }, _finishing_players}} = Logic.set_team_penalty(game, team_id, 0)
+             }, _finishing_teams}} = Logic.set_team_penalty(game, team_id, 0)
   end
 
   test "team with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do

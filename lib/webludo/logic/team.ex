@@ -27,8 +27,8 @@ defmodule WebLudo.Logic.Team do
   end
 
   @doc false
-  def changeset(player, attrs) do
-    player
+  def changeset(team, attrs) do
+    team
     |> cast(attrs, [
       :name,
       :color,
