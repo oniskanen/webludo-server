@@ -34,9 +34,9 @@ defmodule WebLudo.Logic.GameTest do
   end
 
   test "cannot move from home without roll of 6" do
-    game_state = TestHelpers.game_fixture(%{roll: 1})
+    game = TestHelpers.game_fixture(%{roll: 1})
 
-    assert [] == Logic.get_moves(game_state)
+    assert [] == Logic.get_moves(game)
   end
 
   test "moving from home to play sets correct index" do
@@ -71,9 +71,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :play, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -87,9 +87,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :play, position_index: 24, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -110,9 +110,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -133,9 +133,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -150,9 +150,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -166,9 +166,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [] = moves
   end
@@ -180,9 +180,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 23, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [] = moves
   end
@@ -197,8 +197,8 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
-    moves = Logic.get_moves(game_state)
+    game = TestHelpers.game_fixture(attrs)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
@@ -218,8 +218,8 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
-    assert [] = Logic.get_moves(game_state)
+    game = TestHelpers.game_fixture(attrs)
+    assert [] = Logic.get_moves(game)
   end
 
   test "moving causes the current player to change" do
@@ -229,15 +229,15 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [move | []] = moves
 
     assert %{target_index: 1, target_area: :goal} = move
 
-    {state, _move} = Logic.execute_move(game_state, move)
+    {state, _move} = Logic.execute_move(game, move)
 
     assert %{current_team: :blue} = state
   end
@@ -248,9 +248,9 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert [] = moves
   end
@@ -262,10 +262,10 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    assert {:ok, game_state} = Logic.set_roll(game_state, 1)
-    assert {:error, message} = Logic.set_roll(game_state, 1)
+    assert {:ok, game} = Logic.set_roll(game, 1)
+    assert {:error, message} = Logic.set_roll(game, 1)
   end
 
   test "roll results do not carry between players" do
@@ -278,13 +278,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
-    {game_state, _move} = Logic.execute_move(game_state, hd(moves))
+    {game, _move} = Logic.execute_move(game, hd(moves))
 
-    assert %{roll: nil, current_team: :blue} = game_state
+    assert %{roll: nil, current_team: :blue} = game
   end
 
   test "rolling a 6 gives another turn" do
@@ -296,13 +296,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
-    {game_state, _move} = Logic.execute_move(game_state, hd(moves))
+    {game, _move} = Logic.execute_move(game, hd(moves))
 
-    assert %{roll: nil, current_team: :red} = game_state
+    assert %{roll: nil, current_team: :red} = game
   end
 
   test "allow 3 rolls if no movable pieces" do
@@ -318,16 +318,16 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    {:ok, game_state} = Logic.set_roll(game_state, 1)
-    assert %{current_team: :red, roll: nil, roll_count: 1} = game_state
+    {:ok, game} = Logic.set_roll(game, 1)
+    assert %{current_team: :red, roll: nil, roll_count: 1} = game
 
-    {:ok, game_state} = Logic.set_roll(game_state, 2)
-    assert %{current_team: :red, roll: nil, roll_count: 2} = game_state
+    {:ok, game} = Logic.set_roll(game, 2)
+    assert %{current_team: :red, roll: nil, roll_count: 2} = game
 
-    {:ok, game_state} = Logic.set_roll(game_state, 3)
-    assert %{current_team: :blue, roll: nil, roll_count: 0} = game_state
+    {:ok, game} = Logic.set_roll(game, 3)
+    assert %{current_team: :blue, roll: nil, roll_count: 0} = game
   end
 
   test "moving resets roll count" do
@@ -338,13 +338,13 @@ defmodule WebLudo.Logic.GameTest do
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {game_state, _move} = Logic.execute_move(game_state, move)
+    {game, _move} = Logic.execute_move(game, move)
 
-    assert %{roll_count: 0} = game_state
+    assert %{roll_count: 0} = game
   end
 
   test "moving on top of another player sends them home" do
@@ -358,11 +358,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {%{pieces: pieces} = _game_state, _move} = Logic.execute_move(game_state, move)
+    {%{pieces: pieces} = _game, _move} = Logic.execute_move(game, move)
 
     assert Enum.any?(pieces, &match?(%{area: :home, player_color: :blue}, &1))
   end
@@ -377,11 +377,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    {:ok, game_state} = Logic.set_roll(game_state, 5)
+    {:ok, game} = Logic.set_roll(game, 5)
 
-    assert %{current_team: :blue} = game_state
+    assert %{current_team: :blue} = game
   end
 
   test "can roll several times if pieces in goal are immobile" do
@@ -396,11 +396,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    {:ok, game_state} = Logic.set_roll(game_state, 5)
+    {:ok, game} = Logic.set_roll(game, 5)
 
-    assert %{current_team: :red} = game_state
+    assert %{current_team: :red} = game
   end
 
   test "moving to a piece on it's start position gets the moving piece eaten" do
@@ -414,11 +414,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
     move_piece_id = move.piece_id
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{animated_effects: [%{piece_id: piece_id, start_index: 7, target_index: 0}]} = changes
     assert move_piece_id == piece_id
@@ -435,10 +435,10 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    move = hd(Logic.get_moves(game))
+    {_game, changes} = Logic.execute_move(game, move)
 
     refute match?(%{animated_effects: _effects}, changes)
   end
@@ -454,12 +454,12 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
-    {game_state, _changes} = Logic.execute_move(game_state, move)
+    move = hd(Logic.get_moves(game))
+    {game, _changes} = Logic.execute_move(game, move)
 
-    assert %{pieces: pieces} = game_state
+    assert %{pieces: pieces} = game
 
     assert Enum.any?(pieces, &match?(%{position_index: 0, area: :home, player_color: :red}, &1))
   end
@@ -475,13 +475,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
     assert 2 = length(moves)
 
     move = Enum.find(moves, &match?(%{target_area: :play, target_index: 0}, &1))
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{
              move: %{start_area: :home, start_index: 2, target_area: :center, target_index: 0},
@@ -504,13 +504,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
     assert 2 = length(moves)
 
     move = Enum.find(moves, &match?(%{target_area: :play, target_index: 0}, &1))
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{
              move: %{start_area: :home, start_index: 2, target_area: :center, target_index: 1},
@@ -532,11 +532,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{
              move: %{start_area: :play, start_index: 27, target_area: :goal, target_index: 0},
@@ -572,11 +572,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {game_state, changes} = Logic.execute_move(game_state, move)
+    {game, changes} = Logic.execute_move(game, move)
 
     assert %{
              move: %{start_area: :play, start_index: 26, target_area: :play, target_index: 27},
@@ -598,7 +598,7 @@ defmodule WebLudo.Logic.GameTest do
              ]
            } = changes
 
-    assert %{pieces: pieces} = game_state
+    assert %{pieces: pieces} = game
 
     expected_pieces = [
       %{area: :play, position_index: 27, player_color: :blue, multiplier: 1},
@@ -633,11 +633,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {game_state, changes} = Logic.execute_move(game_state, move)
+    {game, changes} = Logic.execute_move(game, move)
 
     assert %{
              move: %{start_area: :play, start_index: 6, target_area: :play, target_index: 7},
@@ -659,7 +659,7 @@ defmodule WebLudo.Logic.GameTest do
              ]
            } = changes
 
-    assert %{pieces: pieces} = game_state
+    assert %{pieces: pieces} = game
 
     expected_pieces = [
       %{area: :play, position_index: 7, player_color: :blue, multiplier: 1},
@@ -694,9 +694,9 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    assert [move | []] = Logic.get_moves(game_state)
+    assert [move | []] = Logic.get_moves(game)
     assert %{target_area: :play, target_index: 1} = move
   end
 
@@ -710,10 +710,10 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    {:ok, game_state} = Logic.set_roll(game_state, 6)
-    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
+    {:ok, game} = Logic.set_roll(game, 6)
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game
   end
 
   test "a player with all pieces in goal area gets skipped" do
@@ -731,13 +731,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {game_state, _changes} = Logic.execute_move(game_state, move)
+    {game, _changes} = Logic.execute_move(game, move)
 
-    assert %{current_team: :yellow, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :yellow, roll: nil, roll_count: 0} = game
   end
 
   test "a player rolling a six can raise when criteria are met" do
@@ -761,9 +761,9 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert 4 = length(moves)
 
@@ -791,20 +791,20 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert 4 = length(moves)
 
     move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
 
-    {game_state, changes} = Logic.execute_move(game_state, move)
+    {game, changes} = Logic.execute_move(game, move)
 
-    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game
 
     assert Enum.any?(
-             game_state.pieces,
+             game.pieces,
              &match?(%{position_index: 0, area: :play, player_color: :red}, &1)
            )
 
@@ -831,20 +831,20 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert 4 = length(moves)
 
     move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
 
-    {game_state, changes} = Logic.execute_move(game_state, move)
+    {game, changes} = Logic.execute_move(game, move)
 
-    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game
 
     assert Enum.any?(
-             game_state.pieces,
+             game.pieces,
              &match?(%{position_index: 0, area: :play, player_color: :red}, &1)
            )
 
@@ -873,13 +873,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{doubled: %{multiplier: 2}} = changes
   end
@@ -900,10 +900,10 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    {:ok, game_state} = Logic.set_roll(game_state, 1)
-    assert %{current_team: :red, roll_count: 1} = game_state
+    {:ok, game} = Logic.set_roll(game, 1)
+    assert %{current_team: :red, roll_count: 1} = game
   end
 
   test "a player can raise if the only move available is a raise" do
@@ -939,11 +939,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{penalties: [%{player: :blue, amount: 1}]} = changes
   end
@@ -962,11 +962,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{penalties: [%{player: :blue, amount: 6}]} = changes
   end
@@ -985,11 +985,11 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    move = hd(Logic.get_moves(game_state))
+    move = hd(Logic.get_moves(game))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{penalties: [%{player: :red, amount: 6}]} = changes
   end
@@ -1011,13 +1011,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     move = Enum.find(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
 
-    {_game_state, changes} = Logic.execute_move(game_state, move)
+    {_game, changes} = Logic.execute_move(game, move)
 
     assert %{penalties: [%{player: :green, amount: 1}]} = changes
   end
@@ -1125,13 +1125,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     move = Enum.find(moves, &match?(%{type: "raise"}, &1))
 
-    {%{pieces: pieces}, _changes} = Logic.execute_move(game_state, move)
+    {%{pieces: pieces}, _changes} = Logic.execute_move(game, move)
 
     red_pieces = pieces |> Enum.filter(fn p -> p.player_color == :red end)
 
@@ -1167,13 +1167,13 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     move = Enum.find(moves, &match?(%{type: "raise"}, &1))
 
-    {%{pieces: pieces}, _changes} = Logic.execute_move(game_state, move)
+    {%{pieces: pieces}, _changes} = Logic.execute_move(game, move)
 
     red_pieces = pieces |> Enum.filter(fn p -> p.player_color == :red end)
 
@@ -1209,9 +1209,9 @@ defmodule WebLudo.Logic.GameTest do
       ]
     }
 
-    game_state = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(game_state)
+    moves = Logic.get_moves(game)
 
     assert !Enum.any?(moves, &match?(%{type: "raise"}, &1))
   end
