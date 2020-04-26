@@ -92,7 +92,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :red, area: :play, position_index: 0},
           %{player_color: :blue, area: :play, position_index: 1}
         ],
-        current_player: :red,
+        current_team: :red,
         roll: 1
       })
 
@@ -129,7 +129,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :blue, area: :center, position_index: 1},
           %{player_color: :blue, area: :center, position_index: 2}
         ],
-        current_player: :red,
+        current_team: :red,
         roll: 1
       })
 
@@ -162,7 +162,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :red, area: :play, position_index: 0},
           %{player_color: :blue, area: :play, position_index: 27}
         ],
-        current_player: :blue,
+        current_team: :blue,
         roll: 1
       })
 
@@ -197,7 +197,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :blue, area: :center, position_index: 0},
           %{player_color: :blue, area: :center, position_index: 1}
         ],
-        current_player: :blue,
+        current_team: :blue,
         roll: 1
       })
 
@@ -355,7 +355,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :red, area: :goal, position_index: 2},
           %{player_color: :red, area: :goal, position_index: 3}
         ],
-        current_player: :red,
+        current_team: :red,
         roll: 1
       })
 
@@ -385,7 +385,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :red, area: :play, position_index: 0},
           %{player_color: :red, area: :home, position_index: 1}
         ],
-        current_player: :red,
+        current_team: :red,
         roll: 6
       })
 
@@ -448,7 +448,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
           %{player_color: :green, area: :goal, position_index: 0}
         ],
         roll: 6,
-        current_player: :red
+        current_team: :red
       })
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})

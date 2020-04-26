@@ -24,10 +24,10 @@ defmodule WebLudo.Logic do
   end
 
   defp has_movable_pieces_with_roll?(
-         %Game{current_player: current_player} = game,
+         %Game{current_team: current_team} = game,
          roll
        ) do
-    moves = get_available_moves_for_player_with_roll(game, roll, current_player)
+    moves = get_available_moves_for_player_with_roll(game, roll, current_team)
 
     length(moves) > 0
   end
@@ -45,23 +45,23 @@ defmodule WebLudo.Logic do
     goal_piece_indices != Enum.to_list(0..3)
   end
 
-  defp has_movable_pieces_in_play?(%Game{current_player: current_player} = game) do
+  defp has_movable_pieces_in_play?(%Game{current_team: current_team} = game) do
     game = Repo.preload(game, :pieces)
 
     pieces_in_play =
       game.pieces
-      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.player_color == current_team end)
       |> Enum.filter(fn p -> p.area == :play end)
 
     length(pieces_in_play) > 0
   end
 
-  defp has_movable_pieces_in_goal?(%Game{current_player: current_player} = game) do
+  defp has_movable_pieces_in_goal?(%Game{current_team: current_team} = game) do
     game = Repo.preload(game, :pieces)
 
     pieces_in_goal =
       game.pieces
-      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.player_color == current_team end)
       |> Enum.filter(fn p -> p.area == :goal end)
 
     indices = Enum.map(pieces_in_goal, fn p -> p.position_index end)
@@ -75,7 +75,7 @@ defmodule WebLudo.Logic do
   end
 
   defp set_roll_internal(
-         %Game{current_player: current_player, roll_count: roll_count} = game,
+         %Game{current_team: current_team, roll_count: roll_count} = game,
          roll
        ) do
     game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
@@ -87,7 +87,7 @@ defmodule WebLudo.Logic do
         roll == 6 ->
           update_game(game, %{
             roll: nil,
-            current_player: current_player,
+            current_team: current_team,
             roll_count: 0
           })
 
@@ -95,7 +95,7 @@ defmodule WebLudo.Logic do
             !has_movable_pieces_in_goal?(game) ->
           update_game(game, %{
             roll: nil,
-            current_player: current_player,
+            current_team: current_team,
             roll_count: roll_count + 1
           })
 
@@ -103,7 +103,7 @@ defmodule WebLudo.Logic do
           update_game(game, %{
             roll: nil,
             roll_count: 0,
-            current_player: get_next_player(game)
+            current_team: get_next_player(game)
           })
       end
     end
@@ -193,11 +193,11 @@ defmodule WebLudo.Logic do
     end
   end
 
-  defp move_is_into_mine?(%Move{type: "raise"}, _current_player, _pieces) do
+  defp move_is_into_mine?(%Move{type: "raise"}, _current_team, _pieces) do
     false
   end
 
-  defp move_is_into_mine?(%Move{type: "move"} = move, current_player, pieces) do
+  defp move_is_into_mine?(%Move{type: "move"} = move, current_team, pieces) do
     target_piece =
       Enum.find(pieces, fn p ->
         p.area == move.target_area && p.position_index == move.target_index
@@ -207,7 +207,7 @@ defmodule WebLudo.Logic do
       nil ->
         false
 
-      %Piece{player_color: ^current_player} ->
+      %Piece{player_color: ^current_team} ->
         false
 
       %Piece{area: :play, position_index: index, player_color: color} ->
@@ -231,19 +231,18 @@ defmodule WebLudo.Logic do
   end
 
   defp get_potential_raise(
-         %Game{roll: roll, current_player: current_player, pieces: pieces, players: players} =
-           game
+         %Game{roll: roll, current_team: current_team, pieces: pieces, players: players} = game
        )
        when roll == 6 do
-    current_player_home_pieces =
+    current_team_home_pieces =
       pieces
-      |> Enum.filter(fn p -> p.player_color == current_player end)
+      |> Enum.filter(fn p -> p.player_color == current_team end)
       |> Enum.filter(fn p -> p.area == :home end)
 
     goal_pieces = get_first_goal_pieces(game)
-    raised_piece = goal_pieces[current_player]
+    raised_piece = goal_pieces[current_team]
 
-    player = players |> Enum.find(fn p -> p.color == current_player end)
+    player = players |> Enum.find(fn p -> p.color == current_team end)
 
     cond do
       raised_piece == nil ->
@@ -252,19 +251,19 @@ defmodule WebLudo.Logic do
       !player.can_raise ->
         []
 
-      length(current_player_home_pieces) > 0 ->
+      length(current_team_home_pieces) > 0 ->
         []
 
       length(goal_pieces) < Constants.player_count() ->
         []
 
       true ->
-        piece = goal_pieces[current_player]
+        piece = goal_pieces[current_team]
 
         [
           %Move{
             piece_id: piece.id,
-            target_index: Constants.get_home_space_index(current_player),
+            target_index: Constants.get_home_space_index(current_team),
             target_area: :play,
             type: "raise"
           }
@@ -320,11 +319,11 @@ defmodule WebLudo.Logic do
     end
   end
 
-  def get_moves(%Game{roll: roll, current_player: current_player} = game)
+  def get_moves(%Game{roll: roll, current_team: current_team} = game)
       when roll in 1..6 do
     game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
 
-    get_available_moves_for_player_with_roll(game, roll, current_player)
+    get_available_moves_for_player_with_roll(game, roll, current_team)
   end
 
   def get_moves(%Game{roll: nil} = _game) do
@@ -382,8 +381,8 @@ defmodule WebLudo.Logic do
   defp get_next_player(%Game{roll: roll} = game) do
     next_player_candidate =
       case roll do
-        6 -> game.current_player
-        _ -> Constants.next_player(game.current_player)
+        6 -> game.current_team
+        _ -> Constants.next_player(game.current_team)
       end
 
     next_player_recurse(game, next_player_candidate)
@@ -541,7 +540,7 @@ defmodule WebLudo.Logic do
   end
 
   def execute_move(
-        %Game{current_player: current_player} = game,
+        %Game{current_team: current_team} = game,
         %Move{type: type} = move
       ) do
     piece = get_piece(move.piece_id)
@@ -714,7 +713,7 @@ defmodule WebLudo.Logic do
 
         demoted_pieces =
           get_first_goal_pieces(game)
-          |> Enum.filter(fn {c, _p} -> c != current_player end)
+          |> Enum.filter(fn {c, _p} -> c != current_team end)
           |> Enum.filter(fn {c, _p} -> !Enum.any?(finished_players, fn p -> p.color == c end) end)
           |> Enum.map(fn {_c, p} -> p end)
 
@@ -722,10 +721,10 @@ defmodule WebLudo.Logic do
           handle_demoted_pieces(game, demoted_pieces) ++
             Map.get(changes, :animated_effects, [])
 
-        player = game.players |> Enum.find(fn p -> p.color == current_player end)
+        player = game.players |> Enum.find(fn p -> p.color == current_team end)
         {:ok, _player} = update_player(player, %{can_raise: false})
 
-        Map.put(Map.put(changes, :animated_effects, demoted), :raise, %{player: current_player})
+        Map.put(Map.put(changes, :animated_effects, demoted), :raise, %{player: current_team})
       else
         changes
       end
@@ -738,7 +737,7 @@ defmodule WebLudo.Logic do
 
     next_player = get_next_player(game)
 
-    {:ok, game} = update_game(game, %{current_player: next_player, roll: nil, roll_count: 0})
+    {:ok, game} = update_game(game, %{current_team: next_player, roll: nil, roll_count: 0})
 
     game = game |> Repo.preload(:pieces, force: true)
 
@@ -772,7 +771,7 @@ defmodule WebLudo.Logic do
   end
 
   def create_game_with_initial_state(attrs) do
-    attrs = Map.put(attrs, :current_player, WebLudo.Logic.random_player())
+    attrs = Map.put(attrs, :current_team, WebLudo.Logic.random_player())
 
     # IO.inspect(attrs)
     case create_game(attrs) do

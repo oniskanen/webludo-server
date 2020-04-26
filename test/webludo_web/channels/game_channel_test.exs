@@ -111,7 +111,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "player not in turn cannot roll die" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :blue,
+        current_team: :blue,
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -132,7 +132,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "player in turn can roll die" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -162,7 +162,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "move action returns game with pieces in new positions" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         pieces: [%{player_color: :red, area: :home, position_index: 0}],
         players: [
           %{color: :blue, name: "Player 2"},
@@ -202,7 +202,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "player rolling twice in a row receives an error" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -225,7 +225,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "eating a piece causes a game updated message with changes" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -253,7 +253,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "eating a piece causes broadcast with eaten piece details" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -287,7 +287,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "player data includes penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 0},
@@ -311,7 +311,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "new player joining is assigned 0 penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 0},
@@ -337,7 +337,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "sending a set penalty message sets the player penalty to provided value" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 0},
@@ -367,7 +367,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "sending a decrement penalty message reduces the penalty by 1" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 0},
@@ -399,7 +399,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "sending a decrement penalty message when penalty is a zero keeps penalty at zero" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 0},
@@ -430,7 +430,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "eating a piece causes game updated broadcast with penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2"},
@@ -460,7 +460,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "eating a piece causes game broadcast with updated penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        current_player: :red,
+        current_team: :red,
         roll: 1,
         players: [
           %{color: :blue, name: "Player 2", penalties: 1},

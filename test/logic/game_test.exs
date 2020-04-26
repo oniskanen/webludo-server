@@ -10,23 +10,23 @@ defmodule WebLudo.Logic.GameTest do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(WebLudo.Repo)
   end
 
-  test "gamestate has current player" do
-    gamestate = TestHelpers.game_fixture(%{current_player: :yellow})
+  test "game has current team" do
+    game = TestHelpers.game_fixture(%{current_team: :yellow})
 
-    assert :yellow = gamestate.current_player
+    assert :yellow = game.current_team
   end
 
-  test "gamestate has 16 pieces" do
-    gamestate = TestHelpers.game_fixture()
-    gamestate = Repo.preload(gamestate, :pieces)
+  test "game has 16 pieces" do
+    game = TestHelpers.game_fixture()
+    game = Repo.preload(game, :pieces)
 
-    assert 16 = length(gamestate.pieces)
+    assert 16 = length(game.pieces)
   end
 
   test "get_moves returns a list of possible moves" do
-    gamestate = TestHelpers.game_fixture(%{current_player: :yellow, roll: 6})
+    game = TestHelpers.game_fixture(%{current_team: :yellow, roll: 6})
 
-    moves = Logic.get_moves(gamestate)
+    moves = Logic.get_moves(game)
 
     assert 4 = length(moves)
 
@@ -48,14 +48,14 @@ defmodule WebLudo.Logic.GameTest do
 
   defp test_start_index(player, expected_index) do
     attrs = %{
-      current_player: player,
+      current_team: player,
       roll: 6,
       pieces: [%{area: :home, position_index: 0, player_color: player}]
     }
 
-    gamestate = TestHelpers.game_fixture(attrs)
+    game = TestHelpers.game_fixture(attrs)
 
-    moves = Logic.get_moves(gamestate)
+    moves = Logic.get_moves(game)
 
     assert 1 = length(moves)
 
@@ -66,7 +66,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "moving in play adds to position index" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 3,
       pieces: [%{area: :play, position_index: 0, player_color: :red}]
     }
@@ -82,7 +82,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "moving at end of play track moves to goal" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 5,
       pieces: [%{area: :play, position_index: 24, player_color: :red}]
     }
@@ -105,7 +105,7 @@ defmodule WebLudo.Logic.GameTest do
 
   defp validate_piece_in_goal(player, index) do
     attrs = %{
-      current_player: player,
+      current_team: player,
       roll: 1,
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
@@ -128,7 +128,7 @@ defmodule WebLudo.Logic.GameTest do
 
   defp validate_piece_in_play(player, index) do
     attrs = %{
-      current_player: player,
+      current_team: player,
       roll: 1,
       pieces: [%{area: :play, position_index: index, player_color: player}]
     }
@@ -145,7 +145,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece in goal can move" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
@@ -161,7 +161,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece in goal cannot move past end" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 4,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
@@ -175,7 +175,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece in play cannot move past goal end" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 5,
       pieces: [%{area: :goal, position_index: 23, player_color: :red}]
     }
@@ -189,7 +189,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece cannot move on top of another piece of the same player" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       pieces: [
         %{area: :play, position_index: 22, player_color: :red},
@@ -207,7 +207,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece cannot move on top of pieces in goal with a roll of 6" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -224,7 +224,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "moving causes the current player to change" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
@@ -239,12 +239,12 @@ defmodule WebLudo.Logic.GameTest do
 
     {state, _move} = Logic.execute_move(game_state, move)
 
-    assert %{current_player: :blue} = state
+    assert %{current_team: :blue} = state
   end
 
   test "player cannot move without rolling first" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
 
@@ -257,7 +257,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "player cannot roll twice in a row" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll_count: 0,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
     }
@@ -270,7 +270,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "roll results do not carry between players" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 2,
       pieces: [
         %{area: :goal, position_index: 0, player_color: :red},
@@ -284,12 +284,12 @@ defmodule WebLudo.Logic.GameTest do
 
     {game_state, _move} = Logic.execute_move(game_state, hd(moves))
 
-    assert %{roll: nil, current_player: :blue} = game_state
+    assert %{roll: nil, current_team: :blue} = game_state
   end
 
   test "rolling a 6 gives another turn" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       pieces: [
         %{area: :play, position_index: 0, player_color: :red}
@@ -302,12 +302,12 @@ defmodule WebLudo.Logic.GameTest do
 
     {game_state, _move} = Logic.execute_move(game_state, hd(moves))
 
-    assert %{roll: nil, current_player: :red} = game_state
+    assert %{roll: nil, current_team: :red} = game_state
   end
 
   test "allow 3 rolls if no movable pieces" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: nil,
       roll_count: 0,
       pieces: [
@@ -321,18 +321,18 @@ defmodule WebLudo.Logic.GameTest do
     game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 1)
-    assert %{current_player: :red, roll: nil, roll_count: 1} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 1} = game_state
 
     {:ok, game_state} = Logic.set_roll(game_state, 2)
-    assert %{current_player: :red, roll: nil, roll_count: 2} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 2} = game_state
 
     {:ok, game_state} = Logic.set_roll(game_state, 3)
-    assert %{current_player: :blue, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :blue, roll: nil, roll_count: 0} = game_state
   end
 
   test "moving resets roll count" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [%{area: :goal, position_index: 0, player_color: :red}]
@@ -349,7 +349,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "moving on top of another player sends them home" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -369,7 +369,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "cannot roll several times if pieces in play have legal moves" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: nil,
       roll_count: 0,
       pieces: [
@@ -381,12 +381,12 @@ defmodule WebLudo.Logic.GameTest do
 
     {:ok, game_state} = Logic.set_roll(game_state, 5)
 
-    assert %{current_player: :blue} = game_state
+    assert %{current_team: :blue} = game_state
   end
 
   test "can roll several times if pieces in goal are immobile" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: nil,
       roll_count: 0,
       pieces: [
@@ -400,12 +400,12 @@ defmodule WebLudo.Logic.GameTest do
 
     {:ok, game_state} = Logic.set_roll(game_state, 5)
 
-    assert %{current_player: :red} = game_state
+    assert %{current_team: :red} = game_state
   end
 
   test "moving to a piece on it's start position gets the moving piece eaten" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -426,7 +426,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "cannot eat in same coordinates in goal" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -445,7 +445,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "piece walking into mine moves to first free home index" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -466,7 +466,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "moving a second piece to start position yields a double piece" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -494,7 +494,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "tripling yields a different position index for the two center pieces" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -523,7 +523,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a doubled piece arriving into goal zone places matching center pieces into goal" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -562,7 +562,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "eating a doubled piece causes the center piece to go to home" do
     attrs = %{
-      current_player: :blue,
+      current_team: :blue,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -623,7 +623,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "walking a doubled piece into mine causes the center piece to go to home" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -684,7 +684,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "walking into mine not a valid action if other moves available" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -702,7 +702,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "rolling a 6 allows a re-roll even if no moves are available" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: nil,
       roll_count: 0,
       pieces: [
@@ -713,12 +713,12 @@ defmodule WebLudo.Logic.GameTest do
     game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 6)
-    assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
   end
 
   test "a player with all pieces in goal area gets skipped" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -737,7 +737,7 @@ defmodule WebLudo.Logic.GameTest do
 
     {game_state, _changes} = Logic.execute_move(game_state, move)
 
-    assert %{current_player: :yellow, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :yellow, roll: nil, roll_count: 0} = game_state
   end
 
   test "a player rolling a six can raise when criteria are met" do
@@ -747,7 +747,7 @@ defmodule WebLudo.Logic.GameTest do
     # 3) And all players have at least one piece in goal
 
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -777,7 +777,7 @@ defmodule WebLudo.Logic.GameTest do
     # 3) And all players have at least one piece in goal
 
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -801,7 +801,7 @@ defmodule WebLudo.Logic.GameTest do
 
     {game_state, changes} = Logic.execute_move(game_state, move)
 
-    assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
 
     assert Enum.any?(
              game_state.pieces,
@@ -816,7 +816,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player raising can eat a piece in their starting space" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -841,7 +841,7 @@ defmodule WebLudo.Logic.GameTest do
 
     {game_state, changes} = Logic.execute_move(game_state, move)
 
-    assert %{current_player: :red, roll: nil, roll_count: 0} = game_state
+    assert %{current_team: :red, roll: nil, roll_count: 0} = game_state
 
     assert Enum.any?(
              game_state.pieces,
@@ -859,7 +859,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player raising can double a piece in their starting space" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -886,7 +886,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player can roll again if the only move available is a raise" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -903,12 +903,12 @@ defmodule WebLudo.Logic.GameTest do
     game_state = TestHelpers.game_fixture(attrs)
 
     {:ok, game_state} = Logic.set_roll(game_state, 1)
-    assert %{current_player: :red, roll_count: 1} = game_state
+    assert %{current_team: :red, roll_count: 1} = game_state
   end
 
   test "a player can raise if the only move available is a raise" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: nil,
       roll_count: 0,
       pieces: [
@@ -930,7 +930,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a piece getting eaten lists a penalty for the eaten player" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -950,7 +950,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "listed penalty is equal to multiplier of eating piece times multiplier of target piece" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -973,7 +973,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "walking into a mine lists a penalty for the current player" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -996,7 +996,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a piece eaten when raising causes a penalty" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -1024,7 +1024,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player moving last piece into goal with no penalties sets has_finished to true" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
@@ -1050,7 +1050,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player finishing last penalty with all pieces in goal has_finished to true" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
@@ -1075,7 +1075,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "player with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
@@ -1101,7 +1101,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player that has finished is not affected by a raise" do
     attrs = %{
-      current_player: :blue,
+      current_team: :blue,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -1143,7 +1143,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player in goal with penalties remaining is affected by a raise" do
     attrs = %{
-      current_player: :blue,
+      current_team: :blue,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -1185,7 +1185,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player cannot raise if they have can_raise set to false" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -1218,7 +1218,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "can_raise is set to false after a player raises" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [
@@ -1293,7 +1293,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player getting all pieces moved to home by getting eaten gets needs_hembo flag set to true" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
@@ -1317,7 +1317,7 @@ defmodule WebLudo.Logic.GameTest do
 
   test "a player getting all pieces moved to home by a raise gets needs_hembo flag set to true" do
     attrs = %{
-      current_player: :red,
+      current_team: :red,
       roll: 6,
       roll_count: 1,
       pieces: [

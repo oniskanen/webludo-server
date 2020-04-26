@@ -20,11 +20,11 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     player = Logic.get_player(player_id)
-    current_player = game.current_player
+    current_team = game.current_team
 
-    case current_player == player.color do
+    case current_team == player.color do
       false ->
-        {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
+        {:reply, {:error, %{error: "It is the #{current_team} player's turn"}}, socket}
 
       true ->
         num = :rand.uniform(6)
@@ -46,11 +46,11 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
     player = Logic.get_player(player_id)
-    current_player = game.current_player
+    current_team = game.current_team
 
-    case current_player == player.color do
+    case current_team == player.color do
       false ->
-        {:reply, {:error, %{error: "It is the #{current_player} player's turn"}}, socket}
+        {:reply, {:error, %{error: "It is the #{current_team} player's turn"}}, socket}
 
       true ->
         moves = Logic.get_moves(game)
