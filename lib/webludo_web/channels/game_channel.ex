@@ -24,7 +24,7 @@ defmodule WebLudoWeb.GameChannel do
 
     case current_team == player.color do
       false ->
-        {:reply, {:error, %{error: "It is the #{current_team} player's turn"}}, socket}
+        {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
 
       true ->
         num = :rand.uniform(6)
@@ -50,7 +50,7 @@ defmodule WebLudoWeb.GameChannel do
 
     case current_team == player.color do
       false ->
-        {:reply, {:error, %{error: "It is the #{current_team} player's turn"}}, socket}
+        {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
 
       true ->
         moves = Logic.get_moves(game)
@@ -74,8 +74,8 @@ defmodule WebLudoWeb.GameChannel do
 
                 handle_penalty_announcement(penalties, socket)
 
-                finishing_players = Map.get(changes, :finishing_players, [])
-                handle_finish_announcement(finishing_players, socket)
+                finishing_teams = Map.get(changes, :finishing_teams, [])
+                handle_finish_announcement(finishing_teams, socket)
 
                 multiplied_piece = Map.get(changes, :doubled, %{})
                 handle_multiplied_announcement(multiplied_piece, socket)
@@ -112,13 +112,14 @@ defmodule WebLudoWeb.GameChannel do
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    %{penalties: previous_penalties, color: color} = Logic.get_player(player_id)
+    %{color: color} = Logic.get_player(player_id)
+    %{penalties: previous_penalties, id: id} = Logic.get_team_by(%{color: color})
 
-    response = handle_player_penalty(player_id, amount, socket)
+    response = handle_team_penalty(id, amount, socket)
 
     if match?({:reply, :ok, _}, response) do
       announce(
-        "The #{String.capitalize(to_string(color))} player fixed their penalty value to #{amount} (used to be #{
+        "The #{String.capitalize(to_string(color))} team fixed their penalty value to #{amount} (used to be #{
           previous_penalties
         }).",
         socket
@@ -131,19 +132,20 @@ defmodule WebLudoWeb.GameChannel do
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
+    team = Logic.get_team_by(%{color: player.color})
 
-    response = handle_player_penalty(player_id, player.penalties - 1, socket)
+    response = handle_team_penalty(team.id, team.penalties - 1, socket)
 
-    case player.penalties - 1 do
+    case team.penalties - 1 do
       0 ->
         announce(
-          "#{String.capitalize(to_string(player.color))} player finished a penalty. That's their last one!",
+          "#{String.capitalize(to_string(team.color))} team finished a penalty. That's their last one!",
           socket
         )
 
       new_amount ->
         announce(
-          "#{String.capitalize(to_string(player.color))} player finished a penalty. #{new_amount} more to go!",
+          "#{String.capitalize(to_string(team.color))} team finished a penalty. #{new_amount} more to go!",
           socket
         )
     end
@@ -174,8 +176,9 @@ defmodule WebLudoWeb.GameChannel do
 
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
+    team = Logic.get_team_by(%{color: player.color})
 
-    game = Logic.agree_to_new_raise(game, player, agree)
+    game = Logic.agree_to_new_raise(game, team, agree)
     moves = Logic.get_moves(game)
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
@@ -195,14 +198,14 @@ defmodule WebLudoWeb.GameChannel do
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
     announce(
-      "The #{String.capitalize(to_string(player.color))} player says \"Jag bor i hembo\".",
+      "The #{String.capitalize(to_string(player.color))} team says \"Jag bor i hembo\".",
       socket
     )
 
     case penalties do
-      [%{amount: 1, player_color: color}] ->
+      [%{amount: 1, team_color: color}] ->
         announce(
-          "Incorrect hembo! The #{String.capitalize(to_string(color))} player gets a penalty.",
+          "Incorrect hembo! The #{String.capitalize(to_string(color))} team gets a penalty.",
           socket
         )
 
@@ -213,22 +216,22 @@ defmodule WebLudoWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in("call_missed_hembo", %{"token" => token, "player" => playerColorString}, socket) do
+  def handle_in("call_missed_hembo", %{"token" => token, "team" => teamColorString}, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     {:ok, _player_id} = WebLudoWeb.Auth.get_player_id(token)
 
-    player = game.players |> Enum.find(fn p -> to_string(p.color) == playerColorString end)
+    team = game.teams |> Enum.find(fn t -> to_string(t.color) == teamColorString end)
 
-    case Logic.call_missed_hembo(game, player.color) do
+    case Logic.call_missed_hembo(game, team.color) do
       {:ok, game} ->
         moves = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
         announce(
-          "The #{String.capitalize(to_string(player.color))} player missed calling hembo. Penalty to the #{
-            String.capitalize(to_string(player.color))
-          } player.",
+          "The #{String.capitalize(to_string(team.color))} team missed calling hembo. Penalty to the #{
+            String.capitalize(to_string(team.color))
+          } team.",
           socket
         )
 
@@ -243,14 +246,14 @@ defmodule WebLudoWeb.GameChannel do
     broadcast!(socket, "announcement", %{message: message, timestamp: DateTime.now!("Etc/UTC")})
   end
 
-  defp handle_player_penalty(player_id, amount, socket) do
+  defp handle_team_penalty(team_id, amount, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
-    case Logic.set_player_penalty(game, player_id, amount) do
-      {:ok, {game, finishing_players}} ->
+    case Logic.set_team_penalty(game, team_id, amount) do
+      {:ok, {game, finishing_teams}} ->
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, actions: actions})
-        handle_finish_announcement(finishing_players, socket)
+        handle_finish_announcement(finishing_teams, socket)
         {:reply, :ok, socket}
 
       {:error, error} ->
@@ -260,35 +263,35 @@ defmodule WebLudoWeb.GameChannel do
 
   defp handle_penalty_announcement(penalties, socket) do
     case penalties do
-      [%{player: color, amount: 1, type: "eat"}] ->
+      [%{team: color, amount: 1, type: "eat"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} player eaten! Penalty to the #{
+          "#{String.capitalize(to_string(color))} team piece eaten! Penalty to the #{
             String.capitalize(to_string(color))
-          } player.",
+          } team.",
           socket
         )
 
-      [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
+      [%{team: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} player #{eaten} eaten by a #{eater}! #{amount} penalties to the #{
+          "#{String.capitalize(to_string(color))} team #{eaten} eaten by a #{eater}! #{amount} penalties to the #{
             String.capitalize(to_string(color))
-          } player.",
+          } team.",
           socket
         )
 
-      [%{player: color, amount: 1, type: "mine"}] ->
+      [%{team: color, amount: 1, type: "mine"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} player walks into a mine! Penalty to the #{
+          "#{String.capitalize(to_string(color))} team walks into a mine! Penalty to the #{
             String.capitalize(to_string(color))
-          } player.",
+          } team.",
           socket
         )
 
-      [%{player: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
+      [%{team: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} player walks a #{eaten} into a #{eater} mine! #{
+          "#{String.capitalize(to_string(color))} team walks a #{eaten} into a #{eater} mine! #{
             amount
-          } penalties to the #{String.capitalize(to_string(color))} player.",
+          } penalties to the #{String.capitalize(to_string(color))} team.",
           socket
         )
 
@@ -297,10 +300,10 @@ defmodule WebLudoWeb.GameChannel do
     end
   end
 
-  defp handle_finish_announcement(finishing_players, socket) do
-    case finishing_players do
-      [player] ->
-        announce("The #{String.capitalize(to_string(player))} player finishes the game!", socket)
+  defp handle_finish_announcement(teams, socket) do
+    case teams do
+      [team] ->
+        announce("The #{String.capitalize(to_string(team))} team finishes the game!", socket)
 
       _ ->
         nil
@@ -309,9 +312,9 @@ defmodule WebLudoWeb.GameChannel do
 
   defp handle_multiplied_announcement(multiplied_piece, socket) do
     case multiplied_piece do
-      %{multiplier: multiplier, player: player} when multiplier > 1 ->
+      %{multiplier: multiplier, team: team} when multiplier > 1 ->
         verb = Constants.multiplier_verb(multiplier)
-        announce("The #{String.capitalize(to_string(player))} player #{verb} a piece.", socket)
+        announce("The #{String.capitalize(to_string(team))} team #{verb} a piece.", socket)
 
       _ ->
         nil
@@ -320,8 +323,8 @@ defmodule WebLudoWeb.GameChannel do
 
   defp handle_raise_announcement(raise_info, socket) do
     case raise_info do
-      %{player: player} ->
-        announce("The #{String.capitalize(to_string(player))} player raises!", socket)
+      %{team: team} ->
+        announce("The #{String.capitalize(to_string(team))} team raises!", socket)
 
       _ ->
         nil

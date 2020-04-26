@@ -10,8 +10,8 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
   test "correct jag_bor_i_hembo announces Jag bor i hembo" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", needs_hembo: true}
+        teams: [
+          %{color: :red, needs_hembo: true}
         ]
       })
 
@@ -27,7 +27,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The Red player says \"Jag bor i hembo\".",
+      message: "The Red team says \"Jag bor i hembo\".",
       timestamp: _ts
     }
   end
@@ -35,8 +35,8 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
   test "incorrect jag_bor_i_hembo announces Jag bor i hembo" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", needs_hembo: false}
+        teams: [
+          %{color: :red, needs_hembo: false}
         ]
       })
 
@@ -52,7 +52,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "The Red player says \"Jag bor i hembo\".",
+      message: "The Red team says \"Jag bor i hembo\".",
       timestamp: _ts
     }
   end
@@ -60,8 +60,8 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
   test "incorrect jag_bor_i_hembo announces a new penalty" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", needs_hembo: false}
+        teams: [
+          %{color: :red, needs_hembo: false}
         ]
       })
 
@@ -77,20 +77,20 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "jag_bor_i_hembo", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "Incorrect hembo! The Red player gets a penalty."
+      message: "Incorrect hembo! The Red team gets a penalty."
     }
   end
 
   test "getting eaten announces a penalty" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"}
+        teams: [
+          %{color: :red},
+          %{color: :blue}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ],
         current_team: :red,
         roll: 1
@@ -110,24 +110,24 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player eaten! Penalty to the Blue player."
+      message: "Blue team piece eaten! Penalty to the Blue team."
     }
   end
 
   test "eating announcement has penalty amount when penalty is over 1" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"}
+        teams: [
+          %{color: :red},
+          %{color: :blue}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0, multiplier: 2},
-          %{player_color: :red, area: :center, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1, multiplier: 4},
-          %{player_color: :blue, area: :center, position_index: 0},
-          %{player_color: :blue, area: :center, position_index: 1},
-          %{player_color: :blue, area: :center, position_index: 2}
+          %{team_color: :red, area: :play, position_index: 0, multiplier: 2},
+          %{team_color: :red, area: :center, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1, multiplier: 4},
+          %{team_color: :blue, area: :center, position_index: 0},
+          %{team_color: :blue, area: :center, position_index: 1},
+          %{team_color: :blue, area: :center, position_index: 2}
         ],
         current_team: :red,
         roll: 1
@@ -147,20 +147,20 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player quatro eaten by a double! 8 penalties to the Blue player."
+      message: "Blue team quatro eaten by a double! 8 penalties to the Blue team."
     }
   end
 
   test "walking into a mine announces a penalty" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"}
+        teams: [
+          %{color: :red},
+          %{color: :blue}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 27}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 27}
         ],
         current_team: :blue,
         roll: 1
@@ -180,22 +180,22 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player walks into a mine! Penalty to the Blue player."
+      message: "Blue team walks into a mine! Penalty to the Blue team."
     }
   end
 
   test "walking into mine announcement has penalty amount when penalty is over 1" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"}
+        teams: [
+          %{color: :red},
+          %{color: :blue}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 27, multiplier: 3},
-          %{player_color: :blue, area: :center, position_index: 0},
-          %{player_color: :blue, area: :center, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 27, multiplier: 3},
+          %{team_color: :blue, area: :center, position_index: 0},
+          %{team_color: :blue, area: :center, position_index: 1}
         ],
         current_team: :blue,
         roll: 1
@@ -215,15 +215,15 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "Blue player walks a triple into a single mine! 3 penalties to the Blue player."
+      message: "Blue team walks a triple into a single mine! 3 penalties to the Blue team."
     }
   end
 
   test "completing a penalty causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 3}
+        teams: [
+          %{color: :red, penalties: 3}
         ]
       })
 
@@ -239,15 +239,15 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "decrement_penalty", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "Red player finished a penalty. 2 more to go!"
+      message: "Red team finished a penalty. 2 more to go!"
     }
   end
 
   test "completing the last penalty causes a different announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 1}
+        teams: [
+          %{color: :red, penalties: 1}
         ]
       })
 
@@ -263,15 +263,15 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "decrement_penalty", %{token: token})
 
     assert_broadcast "announcement", %{
-      message: "Red player finished a penalty. That's their last one!"
+      message: "Red team finished a penalty. That's their last one!"
     }
   end
 
   test "setting the penalty value causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 6}
+        teams: [
+          %{color: :red, penalties: 6}
         ]
       })
 
@@ -287,15 +287,15 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "set_penalty", %{token: token, amount: 1})
 
     assert_broadcast "announcement", %{
-      message: "The Red player fixed their penalty value to 1 (used to be 6)."
+      message: "The Red team fixed their penalty value to 1 (used to be 6)."
     }
   end
 
   test "setting the penalty value to an invalid value does not cause an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 6}
+        teams: [
+          %{color: :red, penalties: 6}
         ]
       })
 
@@ -318,14 +318,14 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
   test "finishing the game by finising last penalty causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 1}
+        teams: [
+          %{color: :red, penalties: 1}
         ],
         pieces: [
-          %{player_color: :red, area: :goal, position_index: 0},
-          %{player_color: :red, area: :goal, position_index: 1},
-          %{player_color: :red, area: :goal, position_index: 2},
-          %{player_color: :red, area: :goal, position_index: 3}
+          %{team_color: :red, area: :goal, position_index: 0},
+          %{team_color: :red, area: :goal, position_index: 1},
+          %{team_color: :red, area: :goal, position_index: 2},
+          %{team_color: :red, area: :goal, position_index: 3}
         ]
       })
 
@@ -340,20 +340,20 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     push(socket, "decrement_penalty", %{token: token})
 
-    assert_broadcast "announcement", %{message: "The Red player finishes the game!"}
+    assert_broadcast "announcement", %{message: "The Red team finishes the game!"}
   end
 
   test "finishing the game by moving last piece to goal causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 0}
+        teams: [
+          %{color: :red, penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 27},
-          %{player_color: :red, area: :goal, position_index: 1},
-          %{player_color: :red, area: :goal, position_index: 2},
-          %{player_color: :red, area: :goal, position_index: 3}
+          %{team_color: :red, area: :play, position_index: 27},
+          %{team_color: :red, area: :goal, position_index: 1},
+          %{team_color: :red, area: :goal, position_index: 2},
+          %{team_color: :red, area: :goal, position_index: 3}
         ],
         current_team: :red,
         roll: 1
@@ -372,18 +372,18 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
-    assert_broadcast "announcement", %{message: "The Red player finishes the game!"}
+    assert_broadcast "announcement", %{message: "The Red team finishes the game!"}
   end
 
   test "doubling a piece causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", penalties: 0}
+        teams: [
+          %{color: :red}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :red, area: :home, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :red, area: :home, position_index: 1}
         ],
         current_team: :red,
         roll: 6
@@ -402,14 +402,14 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
-    assert_broadcast "announcement", %{message: "The Red player doubles a piece."}
+    assert_broadcast "announcement", %{message: "The Red team doubles a piece."}
   end
 
   test "calling a missed hembo causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", needs_hembo: true}
+        teams: [
+          %{color: :red, needs_hembo: true}
         ]
       })
 
@@ -422,30 +422,30 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     token = Auth.get_token(player)
 
-    push(socket, "call_missed_hembo", %{token: token, player: "red"})
+    push(socket, "call_missed_hembo", %{token: token, team: "red"})
 
     assert_broadcast "announcement", %{
-      message: "The Red player missed calling hembo. Penalty to the Red player."
+      message: "The Red team missed calling hembo. Penalty to the Red team."
     }
   end
 
   test "raising causes an announcement" do
     game =
       TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"},
-          %{color: :yellow, name: "Player 3"},
-          %{color: :green, name: "Player 4"}
+        teams: [
+          %{color: :red},
+          %{color: :blue},
+          %{color: :yellow},
+          %{color: :green}
         ],
         pieces: [
-          %{player_color: :red, area: :goal, position_index: 0},
-          %{player_color: :red, area: :play, position_index: 1},
-          %{player_color: :red, area: :play, position_index: 2},
-          %{player_color: :red, area: :play, position_index: 3},
-          %{player_color: :blue, area: :goal, position_index: 0},
-          %{player_color: :yellow, area: :goal, position_index: 0},
-          %{player_color: :green, area: :goal, position_index: 0}
+          %{team_color: :red, area: :goal, position_index: 0},
+          %{team_color: :red, area: :play, position_index: 1},
+          %{team_color: :red, area: :play, position_index: 2},
+          %{team_color: :red, area: :play, position_index: 3},
+          %{team_color: :blue, area: :goal, position_index: 0},
+          %{team_color: :yellow, area: :goal, position_index: 0},
+          %{team_color: :green, area: :goal, position_index: 0}
         ],
         roll: 6,
         current_team: :red
@@ -464,7 +464,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
     assert_broadcast "announcement", %{
-      message: "The Red player raises!"
+      message: "The Red team raises!"
     }
   end
 end

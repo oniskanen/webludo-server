@@ -61,11 +61,11 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
              player_names
            )
 
-    player_colors =
+    team_colors =
       payload.players
       |> Enum.map(fn p -> p.color end)
 
-    assert TestHelpers.list_contents_equal?([:red, :blue, :green, :yellow], player_colors)
+    assert TestHelpers.list_contents_equal?([:red, :blue, :green, :yellow], team_colors)
   end
 
   test "join game responds with a player token" do
@@ -126,7 +126,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     p1 = join_game(socket, "Player 1")
 
     assert_reply roll(p1, socket), :error, %{error: error_message}
-    assert "It is the blue player's turn" == error_message
+    assert "It is the blue team's turn" == error_message
   end
 
   test "player in turn can roll die" do
@@ -163,7 +163,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     game =
       WebLudo.TestHelpers.game_fixture(%{
         current_team: :red,
-        pieces: [%{player_color: :red, area: :home, position_index: 0}],
+        pieces: [%{team_color: :red, area: :home, position_index: 0}],
         players: [
           %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
@@ -208,7 +208,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
         ],
-        pieces: [%{player_color: :red, area: :play, position_index: 0}]
+        pieces: [%{team_color: :red, area: :play, position_index: 0}]
       })
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
@@ -232,7 +232,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
         ],
-        pieces: [%{player_color: :red, area: :play, position_index: 0}]
+        pieces: [%{team_color: :red, area: :play, position_index: 0}]
       })
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
@@ -261,8 +261,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :yellow, name: "Player 4"}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -284,30 +284,37 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
            } = changes
   end
 
-  test "player data includes penalties" do
+  test "team data includes penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
         current_team: :red,
         roll: 1,
         players: [
-          %{color: :blue, name: "Player 2", penalties: 0},
-          %{color: :green, name: "Player 3", penalties: 0},
-          %{color: :yellow, name: "Player 4", penalties: 0}
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ],
+        teams: [
+          %{color: :blue, penalties: 0},
+          %{color: :green, penalties: 0},
+          %{color: :yellow, penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{game: %{players: players}} = reply, socket} =
+    assert {:ok, %{game: %{teams: teams}} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    assert [%{penalties: 0}, %{penalties: 0}, %{penalties: 0}] = players
+    assert [%{penalties: 0}, %{penalties: 0}, %{penalties: 0}] = teams
   end
 
+  # Penalties are now per team, but we do need tests for a new player joining
+  @tag :skip
   test "new player joining is assigned 0 penalties" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
@@ -319,8 +326,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :yellow, name: "Player 4", penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -334,19 +341,25 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
   end
 
-  test "sending a set penalty message sets the player penalty to provided value" do
+  test "sending a set penalty message sets the team penalty to provided value" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
         current_team: :red,
         roll: 1,
         players: [
-          %{color: :blue, name: "Player 2", penalties: 0},
-          %{color: :green, name: "Player 3", penalties: 0},
-          %{color: :yellow, name: "Player 4", penalties: 0}
+          %{color: :blue, name: "Player 2"},
+          %{color: :green, name: "Player 3"},
+          %{color: :yellow, name: "Player 4"}
+        ],
+        teams: [
+          %{color: :red, penalties: 0},
+          %{color: :blue, penalties: 0},
+          %{color: :green, penalties: 0},
+          %{color: :yellow, penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -355,13 +368,13 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
     %{token: token} = join_game(socket, "Player 1")
-    assert_broadcast "game_updated", %{game: %{players: _players}}
+    assert_broadcast "game_updated", %{}
 
     ref = push(socket, "set_penalty", %{token: token, amount: 5})
     assert_reply ref, :ok, %{}
 
-    assert_broadcast "game_updated", %{game: %{players: players}}
-    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 5}, &1))
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
+    assert Enum.any?(teams, &match?(%{color: :red, penalties: 5}, &1))
   end
 
   test "sending a decrement penalty message reduces the penalty by 1" do
@@ -375,8 +388,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :yellow, name: "Player 4", penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -385,15 +398,15 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
     %{token: token} = join_game(socket, "Player 1")
-    assert_broadcast "game_updated", %{game: %{players: _players}}
+    assert_broadcast "game_updated", %{}
 
     push(socket, "set_penalty", %{token: token, amount: 5})
-    assert_broadcast "game_updated", %{game: %{players: _players}}
+    assert_broadcast "game_updated", %{}
 
     push(socket, "decrement_penalty", %{token: token})
-    assert_broadcast "game_updated", %{game: %{players: players}}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
 
-    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 4}, &1))
+    assert Enum.any?(teams, &match?(%{color: :red, penalties: 4}, &1))
   end
 
   test "sending a decrement penalty message when penalty is a zero keeps penalty at zero" do
@@ -407,8 +420,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :yellow, name: "Player 4", penalties: 0}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -417,14 +430,14 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
 
     %{token: token} = join_game(socket, "Player 1")
-    assert_broadcast "game_updated", %{game: %{players: _players}}
+    assert_broadcast "game_updated", %{}
 
     push(socket, "decrement_penalty", %{token: token})
-    refute_broadcast "game_updated", %{game: %{players: _players}}
+    refute_broadcast "game_updated", %{}
 
     ref = push(socket, "game", %{token: token})
-    assert_reply ref, :ok, %{players: players}
-    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
+    assert_reply ref, :ok, %{teams: teams}
+    assert Enum.any?(teams, &match?(%{color: :red, penalties: 0}, &1))
   end
 
   test "eating a piece causes game updated broadcast with penalties" do
@@ -438,8 +451,8 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
           %{color: :yellow, name: "Player 4"}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -454,7 +467,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_broadcast "game_updated", %{changes: changes}
 
-    assert %{penalties: [%{player: :blue, amount: 1}]} = changes
+    assert %{penalties: [%{team: :blue, amount: 1}]} = changes
   end
 
   test "eating a piece causes game broadcast with updated penalties" do
@@ -462,14 +475,19 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
       WebLudo.TestHelpers.game_fixture(%{
         current_team: :red,
         roll: 1,
+        teams: [
+          %{color: :blue, penalties: 1},
+          %{color: :green},
+          %{color: :yellow}
+        ],
         players: [
-          %{color: :blue, name: "Player 2", penalties: 1},
+          %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
         ],
         pieces: [
-          %{player_color: :red, area: :play, position_index: 0},
-          %{player_color: :blue, area: :play, position_index: 1}
+          %{team_color: :red, area: :play, position_index: 0},
+          %{team_color: :blue, area: :play, position_index: 1}
         ]
       })
 
@@ -483,9 +501,9 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     push(socket, "action", %{token: p1.token, type: "move", move: Map.from_struct(hd(actions))})
 
-    assert_broadcast "game_updated", %{game: %{players: players}}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
 
-    assert Enum.any?(players, &match?(%{color: :blue, penalties: 2}, &1))
+    assert Enum.any?(teams, &match?(%{color: :blue, penalties: 2}, &1))
   end
 
   test "sending a chat message causes chat broadcast" do
@@ -515,11 +533,11 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
   test "sending a new_raising_round message causes game_updated broadcast" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
-        players: [
-          %{color: :red, name: "Player 1", can_raise: false},
-          %{color: :blue, name: "Player 2"},
-          %{color: :green, name: "Player 3"},
-          %{color: :yellow, name: "Player 4"}
+        teams: [
+          %{color: :red, can_raise: false},
+          %{color: :blue},
+          %{color: :green},
+          %{color: :yellow}
         ]
       })
 
@@ -536,9 +554,9 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_reply ref, :ok, %{}
 
-    assert_broadcast "game_updated", %{game: %{players: players}}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
 
-    assert players |> Enum.any?(&match?(%{color: :red, new_raising_round: true}, &1))
+    assert teams |> Enum.any?(&match?(%{color: :red, new_raising_round: true}, &1))
   end
 
   test "sending jag_bor_i_hembo causes a game_updated broadcast" do
@@ -564,18 +582,23 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_reply ref, :ok, %{}
 
-    assert_broadcast "game_updated", %{game: %{players: players}}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
 
-    assert players |> Enum.any?(&match?(%{color: :red, penalties: 1}, &1))
+    assert teams |> Enum.any?(&match?(%{color: :red, penalties: 1}, &1))
   end
 
-  test "sending call_missed_hembo causes a game_updated broadcast when needs_hembo is true for the player" do
+  test "sending call_missed_hembo causes a game_updated broadcast when needs_hembo is true for the team" do
     game =
       WebLudo.TestHelpers.game_fixture(%{
         players: [
-          %{color: :blue, name: "Player 2", needs_hembo: true},
+          %{color: :blue, name: "Player 2"},
           %{color: :green, name: "Player 3"},
           %{color: :yellow, name: "Player 4"}
+        ],
+        teams: [
+          %{color: :blue, needs_hembo: true},
+          %{color: :green},
+          %{color: :yellow}
         ]
       })
 
@@ -588,13 +611,13 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_broadcast "game_updated", %{}
 
-    ref = push(socket, "call_missed_hembo", %{token: token, player: "blue"})
+    ref = push(socket, "call_missed_hembo", %{token: token, team: "blue"})
 
     assert_reply ref, :ok, %{}
 
-    assert_broadcast "game_updated", %{game: %{players: players}}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
 
-    blue = Enum.find(players, &match?(%{color: :blue}, &1))
+    blue = Enum.find(teams, &match?(%{color: :blue}, &1))
 
     assert %{penalties: 1, needs_hembo: false} = blue
   end
@@ -616,8 +639,12 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     %{token: token} = join_game(socket, "Player 1")
 
-    ref = push(socket, "call_missed_hembo", %{token: token, player: "blue"})
+    ref = push(socket, "call_missed_hembo", %{token: token, team: "blue"})
 
     assert_reply ref, :error, %{message: "The blue player does not need to call hembo"}
+  end
+
+  @tag :skip
+  test "fetching team for a player should get a team from the same game" do
   end
 end

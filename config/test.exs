@@ -4,7 +4,7 @@ use Mix.Config
 config :webludo, WebLudo.Repo,
   username: "postgres",
   password: "postgres",
-  database: "web_ludo_test",
+  database: "webludo_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 

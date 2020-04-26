@@ -50,7 +50,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: player,
       roll: 6,
-      pieces: [%{area: :home, position_index: 0, player_color: player}]
+      pieces: [%{area: :home, position_index: 0, team_color: player}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -68,7 +68,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 3,
-      pieces: [%{area: :play, position_index: 0, player_color: :red}]
+      pieces: [%{area: :play, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -84,7 +84,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 5,
-      pieces: [%{area: :play, position_index: 24, player_color: :red}]
+      pieces: [%{area: :play, position_index: 24, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -107,7 +107,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: player,
       roll: 1,
-      pieces: [%{area: :play, position_index: index, player_color: player}]
+      pieces: [%{area: :play, position_index: index, team_color: player}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -130,7 +130,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: player,
       roll: 1,
-      pieces: [%{area: :play, position_index: index, player_color: player}]
+      pieces: [%{area: :play, position_index: index, team_color: player}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -147,7 +147,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 1,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -163,7 +163,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 4,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -177,7 +177,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 5,
-      pieces: [%{area: :goal, position_index: 23, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 23, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -192,8 +192,8 @@ defmodule WebLudo.Logic.GameTest do
       current_team: :red,
       roll: 1,
       pieces: [
-        %{area: :play, position_index: 22, player_color: :red},
-        %{area: :play, position_index: 23, player_color: :red}
+        %{area: :play, position_index: 22, team_color: :red},
+        %{area: :play, position_index: 23, team_color: :red}
       ]
     }
 
@@ -211,10 +211,10 @@ defmodule WebLudo.Logic.GameTest do
       roll: 6,
       roll_count: 1,
       pieces: [
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :goal, position_index: 1, player_color: :red},
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :play, position_index: 24, player_color: :red}
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :goal, position_index: 1, team_color: :red},
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :play, position_index: 24, team_color: :red}
       ]
     }
 
@@ -226,7 +226,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 1,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -245,7 +245,7 @@ defmodule WebLudo.Logic.GameTest do
   test "player cannot move without rolling first" do
     attrs = %{
       current_team: :red,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -259,7 +259,7 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll_count: 0,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -273,8 +273,8 @@ defmodule WebLudo.Logic.GameTest do
       current_team: :red,
       roll: 2,
       pieces: [
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 7, player_color: :blue}
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 7, team_color: :blue}
       ]
     }
 
@@ -292,7 +292,7 @@ defmodule WebLudo.Logic.GameTest do
       current_team: :red,
       roll: 6,
       pieces: [
-        %{area: :play, position_index: 0, player_color: :red}
+        %{area: :play, position_index: 0, team_color: :red}
       ]
     }
 
@@ -311,10 +311,10 @@ defmodule WebLudo.Logic.GameTest do
       roll: nil,
       roll_count: 0,
       pieces: [
-        %{area: :home, position_index: 0, player_color: :red},
-        %{area: :home, position_index: 1, player_color: :red},
-        %{area: :home, position_index: 2, player_color: :red},
-        %{area: :home, position_index: 3, player_color: :red}
+        %{area: :home, position_index: 0, team_color: :red},
+        %{area: :home, position_index: 1, team_color: :red},
+        %{area: :home, position_index: 2, team_color: :red},
+        %{area: :home, position_index: 3, team_color: :red}
       ]
     }
 
@@ -335,7 +335,7 @@ defmodule WebLudo.Logic.GameTest do
       current_team: :red,
       roll: 1,
       roll_count: 1,
-      pieces: [%{area: :goal, position_index: 0, player_color: :red}]
+      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -353,8 +353,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 1, player_color: :blue}
+        %{area: :play, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 1, team_color: :blue}
       ]
     }
 
@@ -364,7 +364,7 @@ defmodule WebLudo.Logic.GameTest do
 
     {%{pieces: pieces} = _game, _move} = Logic.execute_move(game, move)
 
-    assert Enum.any?(pieces, &match?(%{area: :home, player_color: :blue}, &1))
+    assert Enum.any?(pieces, &match?(%{area: :home, team_color: :blue}, &1))
   end
 
   test "cannot roll several times if pieces in play have legal moves" do
@@ -373,7 +373,7 @@ defmodule WebLudo.Logic.GameTest do
       roll: nil,
       roll_count: 0,
       pieces: [
-        %{area: :play, position_index: 27, player_color: :red}
+        %{area: :play, position_index: 27, team_color: :red}
       ]
     }
 
@@ -390,9 +390,9 @@ defmodule WebLudo.Logic.GameTest do
       roll: nil,
       roll_count: 0,
       pieces: [
-        %{area: :goal, position_index: 3, player_color: :red},
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :home, position_index: 0, player_color: :red}
+        %{area: :goal, position_index: 3, team_color: :red},
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :home, position_index: 0, team_color: :red}
       ]
     }
 
@@ -409,8 +409,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 6, player_color: :red},
-        %{area: :play, position_index: 7, player_color: :blue}
+        %{area: :play, position_index: 6, team_color: :red},
+        %{area: :play, position_index: 7, team_color: :blue}
       ]
     }
 
@@ -430,8 +430,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :goal, position_index: 3, player_color: :blue}
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :goal, position_index: 3, team_color: :blue}
       ]
     }
 
@@ -449,8 +449,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 6, player_color: :red},
-        %{area: :play, position_index: 7, player_color: :blue}
+        %{area: :play, position_index: 6, team_color: :red},
+        %{area: :play, position_index: 7, team_color: :blue}
       ]
     }
 
@@ -461,7 +461,7 @@ defmodule WebLudo.Logic.GameTest do
 
     assert %{pieces: pieces} = game
 
-    assert Enum.any?(pieces, &match?(%{position_index: 0, area: :home, player_color: :red}, &1))
+    assert Enum.any?(pieces, &match?(%{position_index: 0, area: :home, team_color: :red}, &1))
   end
 
   test "moving a second piece to start position yields a double piece" do
@@ -470,8 +470,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 6,
       roll_count: 1,
       pieces: [
-        %{area: :home, position_index: 2, player_color: :red},
-        %{area: :play, position_index: 0, player_color: :red}
+        %{area: :home, position_index: 2, team_color: :red},
+        %{area: :play, position_index: 0, team_color: :red}
       ]
     }
 
@@ -498,9 +498,9 @@ defmodule WebLudo.Logic.GameTest do
       roll: 6,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 0, player_color: :red, multiplier: 2},
-        %{area: :home, position_index: 2, player_color: :red},
-        %{area: :center, position_index: 0, player_color: :red}
+        %{area: :play, position_index: 0, team_color: :red, multiplier: 2},
+        %{area: :home, position_index: 2, team_color: :red},
+        %{area: :center, position_index: 0, team_color: :red}
       ]
     }
 
@@ -527,8 +527,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 27, player_color: :red, multiplier: 2},
-        %{area: :center, position_index: 0, player_color: :red}
+        %{area: :play, position_index: 27, team_color: :red, multiplier: 2},
+        %{area: :center, position_index: 0, team_color: :red}
       ]
     }
 
@@ -566,9 +566,9 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 27, player_color: :red, multiplier: 2},
-        %{area: :center, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 26, player_color: :blue}
+        %{area: :play, position_index: 27, team_color: :red, multiplier: 2},
+        %{area: :center, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 26, team_color: :blue}
       ]
     }
 
@@ -601,9 +601,9 @@ defmodule WebLudo.Logic.GameTest do
     assert %{pieces: pieces} = game
 
     expected_pieces = [
-      %{area: :play, position_index: 27, player_color: :blue, multiplier: 1},
-      %{area: :home, position_index: 0, player_color: :red, multiplier: 1},
-      %{area: :home, position_index: 1, player_color: :red, multiplier: 1}
+      %{area: :play, position_index: 27, team_color: :blue, multiplier: 1},
+      %{area: :home, position_index: 0, team_color: :red, multiplier: 1},
+      %{area: :home, position_index: 1, team_color: :red, multiplier: 1}
     ]
 
     pieces =
@@ -612,7 +612,7 @@ defmodule WebLudo.Logic.GameTest do
         %{
           area: p.area,
           position_index: p.position_index,
-          player_color: p.player_color,
+          team_color: p.team_color,
           multiplier: p.multiplier
         }
       end)
@@ -627,9 +627,9 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 6, player_color: :red, multiplier: 2},
-        %{area: :center, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 7, player_color: :blue}
+        %{area: :play, position_index: 6, team_color: :red, multiplier: 2},
+        %{area: :center, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 7, team_color: :blue}
       ]
     }
 
@@ -662,9 +662,9 @@ defmodule WebLudo.Logic.GameTest do
     assert %{pieces: pieces} = game
 
     expected_pieces = [
-      %{area: :play, position_index: 7, player_color: :blue, multiplier: 1},
-      %{area: :home, position_index: 0, player_color: :red, multiplier: 1},
-      %{area: :home, position_index: 1, player_color: :red, multiplier: 1}
+      %{area: :play, position_index: 7, team_color: :blue, multiplier: 1},
+      %{area: :home, position_index: 0, team_color: :red, multiplier: 1},
+      %{area: :home, position_index: 1, team_color: :red, multiplier: 1}
     ]
 
     pieces =
@@ -673,7 +673,7 @@ defmodule WebLudo.Logic.GameTest do
         %{
           area: p.area,
           position_index: p.position_index,
-          player_color: p.player_color,
+          team_color: p.team_color,
           multiplier: p.multiplier
         }
       end)
@@ -688,9 +688,9 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 6, player_color: :red},
-        %{area: :play, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 7, player_color: :blue}
+        %{area: :play, position_index: 6, team_color: :red},
+        %{area: :play, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 7, team_color: :blue}
       ]
     }
 
@@ -706,7 +706,7 @@ defmodule WebLudo.Logic.GameTest do
       roll: nil,
       roll_count: 0,
       pieces: [
-        %{area: :play, position_index: 27, player_color: :red}
+        %{area: :play, position_index: 27, team_color: :red}
       ]
     }
 
@@ -722,12 +722,12 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 27, player_color: :red},
-        %{area: :goal, position_index: 3, player_color: :blue},
-        %{area: :goal, position_index: 2, player_color: :blue},
-        %{area: :goal, position_index: 1, player_color: :blue},
-        %{area: :goal, position_index: 0, player_color: :blue},
-        %{area: :home, position_index: 0, player_color: :yellow}
+        %{area: :play, position_index: 27, team_color: :red},
+        %{area: :goal, position_index: 3, team_color: :blue},
+        %{area: :goal, position_index: 2, team_color: :blue},
+        %{area: :goal, position_index: 1, team_color: :blue},
+        %{area: :goal, position_index: 0, team_color: :blue},
+        %{area: :home, position_index: 0, team_color: :yellow}
       ]
     }
 
@@ -740,14 +740,14 @@ defmodule WebLudo.Logic.GameTest do
     assert %{current_team: :yellow, roll: nil, roll_count: 0} = game
   end
 
-  test "a piece getting eaten lists a penalty for the eaten player" do
+  test "a piece getting eaten lists a penalty for the eaten team" do
     attrs = %{
       current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 0, player_color: :red},
-        %{area: :play, position_index: 1, player_color: :blue}
+        %{area: :play, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 1, team_color: :blue}
       ]
     }
 
@@ -757,7 +757,7 @@ defmodule WebLudo.Logic.GameTest do
 
     {_game, changes} = Logic.execute_move(game, move)
 
-    assert %{penalties: [%{player: :blue, amount: 1}]} = changes
+    assert %{penalties: [%{team: :blue, amount: 1}]} = changes
   end
 
   test "listed penalty is equal to multiplier of eating piece times multiplier of target piece" do
@@ -766,11 +766,11 @@ defmodule WebLudo.Logic.GameTest do
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 0, player_color: :red, multiplier: 3},
-        %{area: :play, position_index: 1, player_color: :blue, multiplier: 2},
-        %{area: :center, position_index: 0, player_color: :blue},
-        %{area: :center, position_index: 0, player_color: :red},
-        %{area: :center, position_index: 1, player_color: :red}
+        %{area: :play, position_index: 0, team_color: :red, multiplier: 3},
+        %{area: :play, position_index: 1, team_color: :blue, multiplier: 2},
+        %{area: :center, position_index: 0, team_color: :blue},
+        %{area: :center, position_index: 0, team_color: :red},
+        %{area: :center, position_index: 1, team_color: :red}
       ]
     }
 
@@ -780,20 +780,20 @@ defmodule WebLudo.Logic.GameTest do
 
     {_game, changes} = Logic.execute_move(game, move)
 
-    assert %{penalties: [%{player: :blue, amount: 6}]} = changes
+    assert %{penalties: [%{team: :blue, amount: 6}]} = changes
   end
 
-  test "walking into a mine lists a penalty for the current player" do
+  test "walking into a mine lists a penalty for the current team" do
     attrs = %{
       current_team: :red,
       roll: 1,
       roll_count: 1,
       pieces: [
-        %{area: :play, position_index: 6, player_color: :red, multiplier: 3},
-        %{area: :play, position_index: 7, player_color: :blue, multiplier: 2},
-        %{area: :center, position_index: 0, player_color: :blue},
-        %{area: :center, position_index: 0, player_color: :red},
-        %{area: :center, position_index: 1, player_color: :red}
+        %{area: :play, position_index: 6, team_color: :red, multiplier: 3},
+        %{area: :play, position_index: 7, team_color: :blue, multiplier: 2},
+        %{area: :center, position_index: 0, team_color: :blue},
+        %{area: :center, position_index: 0, team_color: :red},
+        %{area: :center, position_index: 1, team_color: :red}
       ]
     }
 
@@ -803,23 +803,23 @@ defmodule WebLudo.Logic.GameTest do
 
     {_game, changes} = Logic.execute_move(game, move)
 
-    assert %{penalties: [%{player: :red, amount: 6}]} = changes
+    assert %{penalties: [%{team: :red, amount: 6}]} = changes
   end
 
-  test "a player moving last piece into goal with no penalties sets has_finished to true" do
+  test "a team moving last piece into goal with no penalties sets has_finished to true" do
     attrs = %{
       current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :goal, position_index: 1, player_color: :red},
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :play, position_index: 27, player_color: :red},
-        %{area: :goal, position_index: 0, player_color: :blue},
-        %{area: :goal, position_index: 0, player_color: :yellow},
-        %{area: :goal, position_index: 0, player_color: :green},
-        %{area: :play, position_index: 0, player_color: :green}
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :goal, position_index: 1, team_color: :red},
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :play, position_index: 27, team_color: :red},
+        %{area: :goal, position_index: 0, team_color: :blue},
+        %{area: :goal, position_index: 0, team_color: :yellow},
+        %{area: :goal, position_index: 0, team_color: :green},
+        %{area: :play, position_index: 0, team_color: :green}
       ]
     }
 
@@ -827,50 +827,50 @@ defmodule WebLudo.Logic.GameTest do
 
     move = hd(Logic.get_moves(game))
 
-    {%{players: players}, _changes} = Logic.execute_move(game, move)
+    {%{teams: teams}, _changes} = Logic.execute_move(game, move)
 
-    assert Enum.any?(players, &match?(%{has_finished: true, color: :red}, &1))
+    assert Enum.any?(teams, &match?(%{has_finished: true, color: :red}, &1))
   end
 
-  test "a player finishing last penalty with all pieces in goal has_finished to true" do
+  test "a team finishing last penalty with all pieces in goal has_finished to true" do
     attrs = %{
       current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :goal, position_index: 1, player_color: :red},
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :goal, position_index: 3, player_color: :red}
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :goal, position_index: 1, team_color: :red},
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :goal, position_index: 3, team_color: :red}
       ],
-      players: [
-        %{color: :red, penalties: 1, name: "Player 1"}
+      teams: [
+        %{color: :red, penalties: 1}
       ]
     }
 
-    assert %{players: [%{id: player_id, color: :red, has_finished: false}]} =
+    assert %{teams: [%{id: team_id, color: :red, has_finished: false}]} =
              game = TestHelpers.game_fixture(attrs)
 
     assert {:ok,
             {%{
-               players: [%{id: ^player_id, color: :red, has_finished: true}]
-             }, _finishing_players}} = Logic.set_player_penalty(game, player_id, 0)
+               teams: [%{id: ^team_id, color: :red, has_finished: true}]
+             }, _finishing_players}} = Logic.set_team_penalty(game, team_id, 0)
   end
 
-  test "player with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do
+  test "team with pieces in goal indices 0, 0, 2, 3 does not get has_finished set to true" do
     attrs = %{
       current_team: :red,
       roll: 4,
       roll_count: 1,
       pieces: [
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :goal, position_index: 0, player_color: :red},
-        %{area: :goal, position_index: 2, player_color: :red},
-        %{area: :play, position_index: 27, player_color: :red},
-        %{area: :goal, position_index: 0, player_color: :blue},
-        %{area: :goal, position_index: 0, player_color: :yellow},
-        %{area: :goal, position_index: 0, player_color: :green},
-        %{area: :play, position_index: 0, player_color: :green}
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :goal, position_index: 2, team_color: :red},
+        %{area: :play, position_index: 27, team_color: :red},
+        %{area: :goal, position_index: 0, team_color: :blue},
+        %{area: :goal, position_index: 0, team_color: :yellow},
+        %{area: :goal, position_index: 0, team_color: :green},
+        %{area: :play, position_index: 0, team_color: :green}
       ]
     }
 
@@ -878,8 +878,8 @@ defmodule WebLudo.Logic.GameTest do
 
     move = hd(Logic.get_moves(game))
 
-    {%{players: players}, _changes} = Logic.execute_move(game, move)
+    {%{teams: teams}, _changes} = Logic.execute_move(game, move)
 
-    assert Enum.any?(players, &match?(%{has_finished: false, color: :red}, &1))
+    assert Enum.any?(teams, &match?(%{has_finished: false, color: :red}, &1))
   end
 end

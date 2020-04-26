@@ -25,6 +25,19 @@ defmodule WebLudo.TestHelpers do
 
     Enum.each(players, fn p -> {:ok, _player} = Logic.create_player(game, p) end)
 
+    %{teams: teams} =
+      attrs
+      |> Enum.into(%{
+        teams: [
+          %{color: :red},
+          %{color: :blue},
+          %{color: :green},
+          %{color: :yellow}
+        ]
+      })
+
+    Enum.each(teams, fn t -> {:ok, _team} = Logic.create_team(game, t) end)
+
     %{pieces: pieces} =
       attrs
       |> Enum.into(%{
@@ -32,7 +45,7 @@ defmodule WebLudo.TestHelpers do
       })
 
     Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
-    game |> Repo.preload(:players)
+    game |> Repo.preload(:teams) |> Repo.preload(:players)
   end
 
   # NOTE: Doesn't account for duplicates
