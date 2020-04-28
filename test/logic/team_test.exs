@@ -4,7 +4,6 @@ defmodule WebLudo.Logic.TeamTest do
 
   alias WebLudo.TestHelpers
   alias WebLudo.Logic.Game
-  alias WebLudo.Logic.Player
   alias WebLudo.Logic
   alias WebLudo.Repo
 
@@ -30,13 +29,13 @@ defmodule WebLudo.Logic.TeamTest do
 
     assert %{teams: teams, players: players, current_team: :none} = game
     assert length(teams) == 4
-    assert length(players) == 0
+    assert players == []
   end
 
   test "a player can join a team when game has not started" do
     {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
     team = hd(game.teams)
-    {:ok, player} = Logic.create_player(game, %{name: "Player 1"})
+    {:ok, _player} = Logic.create_player(game, %{name: "Player 1"})
 
     assert {:ok, %{players: [player]}} = Logic.get_game_by_code("secret")
 
