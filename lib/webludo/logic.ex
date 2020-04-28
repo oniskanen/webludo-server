@@ -821,6 +821,14 @@ defmodule WebLudo.Logic do
     |> Repo.update()
   end
 
+  def update_player(player, team, attrs) do
+    player
+    |> Repo.preload(:team)
+    |> Player.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:team, team)
+    |> Repo.update()
+  end
+
   def update_team(team, attrs) do
     team
     |> Team.changeset(attrs)
@@ -845,24 +853,6 @@ defmodule WebLudo.Logic do
     end)
 
     Repo.preload(game, :teams, force: true)
-  end
-
-  # TODO: Redo the logic when joining a game. See Github issue #6.
-  def join_game(code, name) do
-    {:ok, game} = get_game_by(%{code: code})
-
-    game = Repo.preload(game, :players)
-    taken_colors = game.players |> Enum.map(fn p -> p.color end)
-    available_colors = available_colors(taken_colors)
-
-    case length(available_colors) do
-      n when n > 0 ->
-        {:ok, player} = create_player(game, %{name: name, color: Enum.random(available_colors)})
-        {:ok, player, preload_game(game, force: true)}
-
-      _ ->
-        {:error, "Game is full"}
-    end
   end
 
   def agree_to_new_raise(
@@ -901,9 +891,7 @@ defmodule WebLudo.Logic do
     end
   end
 
-  def jag_bor_i_hembo(%Game{teams: teams} = game, color) do
-    team = Enum.find(teams, fn p -> p.color == color end)
-
+  def jag_bor_i_hembo(%Game{} = game, %Team{color: color} = team) do
     penalties =
       if team.needs_hembo do
         {:ok, _team} = update_team(team, %{needs_hembo: false})
@@ -914,5 +902,11 @@ defmodule WebLudo.Logic do
       end
 
     {Repo.preload(game, :teams, force: true), penalties}
+  end
+
+  def join_team(%Game{} = game, %Team{} = team, %Player{} = player) do
+    {:ok, _player} = update_player(player, team, %{})
+
+    preload_game(game, force: true)
   end
 end

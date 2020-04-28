@@ -2,13 +2,13 @@ defmodule WebLudo.Logic.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, only: [:color, :name]}
+  @derive {Jason.Encoder, only: [:name]}
 
   schema "players" do
-    field :color, EctoAtom
     field :name, :string
 
     belongs_to :game, WebLudo.Logic.Game
+    belongs_to :team, WebLudo.Logic.Team
 
     timestamps()
   end
@@ -16,7 +16,7 @@ defmodule WebLudo.Logic.Player do
   @doc false
   def changeset(player, attrs) do
     player
-    |> cast(attrs, [:name, :color])
-    |> validate_required([:name, :color])
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
   end
 end

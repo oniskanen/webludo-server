@@ -3,6 +3,7 @@ defmodule WebLudoWeb.GameChannel do
 
   alias WebLudo.Logic
   alias WebLudo.Logic.Constants
+  alias WebLudo.Repo
 
   def join("games:" <> code, _params, socket) do
     case Logic.get_game_by_code(code) do
@@ -19,10 +20,10 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
-    player = Logic.get_player(player_id)
+    player = Logic.get_player(player_id) |> Repo.preload(:team)
     current_team = game.current_team
 
-    case current_team == player.color do
+    case current_team == player.team.color do
       false ->
         {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
 
@@ -45,10 +46,10 @@ defmodule WebLudoWeb.GameChannel do
   def handle_in("action", %{"token" => token, "type" => "move", "move" => move}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-    player = Logic.get_player(player_id)
+    player = Logic.get_player(player_id) |> Repo.preload(:team)
     current_team = game.current_team
 
-    case current_team == player.color do
+    case current_team == player.team.color do
       false ->
         {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
 
@@ -92,17 +93,14 @@ defmodule WebLudoWeb.GameChannel do
   end
 
   def handle_in("join_game", %{"name" => name}, socket) do
-    case Logic.join_game(socket.assigns.code, name) do
-      {:ok, player, game} ->
-        token = WebLudoWeb.Auth.get_token(player)
-        actions = Logic.get_moves(game)
-        broadcast!(socket, "game_updated", %{game: game, actions: actions})
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    {:ok, player} = Logic.create_player(game, %{name: name})
+    game = game |> Repo.preload(:players, force: true)
 
-        {:reply, {:ok, %{token: token, color: player.color}}, socket}
-
-      {:error, message} ->
-        {:reply, {:error, %{error: message}}, socket}
-    end
+    actions = Logic.get_moves(game)
+    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+    token = WebLudoWeb.Auth.get_token(player)
+    {:reply, {:ok, %{token: token}}, socket}
   end
 
   def handle_in("game", _params, socket) do
@@ -112,7 +110,7 @@ defmodule WebLudoWeb.GameChannel do
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    %{color: color} = Logic.get_player(player_id)
+    %{team: %{color: color}} = Logic.get_player(player_id) |> Repo.preload(:team)
     %{penalties: previous_penalties, id: id} = Logic.get_team_by(%{color: color})
 
     response = handle_team_penalty(id, amount, socket)
@@ -131,8 +129,8 @@ defmodule WebLudoWeb.GameChannel do
 
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
-    team = Logic.get_team_by(%{color: player.color})
+    player = Logic.get_player(player_id) |> Repo.preload(:team)
+    team = player.team
 
     response = handle_team_penalty(team.id, team.penalties - 1, socket)
 
@@ -175,8 +173,8 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
-    team = Logic.get_team_by(%{color: player.color})
+    player = Logic.get_player(player_id) |> Repo.preload(:team)
+    team = player.team
 
     game = Logic.agree_to_new_raise(game, team, agree)
     moves = Logic.get_moves(game)
@@ -190,15 +188,15 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
 
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
+    player = Logic.get_player(player_id) |> Repo.preload(:team)
 
-    {game, penalties} = Logic.jag_bor_i_hembo(game, player.color)
+    {game, penalties} = Logic.jag_bor_i_hembo(game, player.team)
     moves = Logic.get_moves(game)
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
     announce(
-      "The #{String.capitalize(to_string(player.color))} team says \"Jag bor i hembo\".",
+      "The #{String.capitalize(to_string(player.team.color))} team says \"Jag bor i hembo\".",
       socket
     )
 

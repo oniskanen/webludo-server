@@ -20,7 +20,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -45,7 +45,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -70,7 +70,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -101,7 +101,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -138,7 +138,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -171,7 +171,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :blue}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :blue}}, &1))
 
     token = Auth.get_token(player)
 
@@ -206,7 +206,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :blue}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :blue}}, &1))
 
     token = Auth.get_token(player)
 
@@ -232,7 +232,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -256,7 +256,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -280,7 +280,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -304,7 +304,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -334,7 +334,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -364,7 +364,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -394,7 +394,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -418,7 +418,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 
@@ -456,7 +456,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
     assert {:ok, %{actions: actions} = reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
-    player = Enum.find(game.players, &match?(%{color: :red}, &1))
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
 
     token = Auth.get_token(player)
 

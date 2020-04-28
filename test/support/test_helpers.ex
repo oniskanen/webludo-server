@@ -16,14 +16,19 @@ defmodule WebLudo.TestHelpers do
       attrs
       |> Enum.into(%{
         players: [
-          %{color: :red, name: "Player 1"},
-          %{color: :blue, name: "Player 2"},
-          %{color: :green, name: "Player 3"},
-          %{color: :yellow, name: "Player 4"}
+          %{name: "Player 1"},
+          %{name: "Player 2"},
+          %{name: "Player 3"},
+          %{name: "Player 4"}
         ]
       })
 
-    Enum.each(players, fn p -> {:ok, _player} = Logic.create_player(game, p) end)
+    players =
+      Enum.map(players, fn p ->
+        {:ok, player} = Logic.create_player(game, p)
+        player
+      end)
+      |> Enum.filter(fn p -> p != nil end)
 
     %{teams: teams} =
       attrs
@@ -36,7 +41,17 @@ defmodule WebLudo.TestHelpers do
         ]
       })
 
-    Enum.each(teams, fn t -> {:ok, _team} = Logic.create_team(game, t) end)
+    teams =
+      Enum.map(teams, fn t ->
+        {:ok, team} = Logic.create_team(game, t)
+        team
+      end)
+      |> Enum.filter(fn t -> t != nil end)
+
+    0..3
+    |> Enum.map(fn i -> {Enum.at(players, i), Enum.at(teams, i)} end)
+    |> Enum.filter(fn {p, t} -> p != nil and t != nil end)
+    |> Enum.each(fn {player, team} -> Logic.join_team(game, team, player) end)
 
     %{pieces: pieces} =
       attrs
@@ -45,7 +60,7 @@ defmodule WebLudo.TestHelpers do
       })
 
     Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
-    game |> Repo.preload(:teams) |> Repo.preload(:players)
+    game |> Repo.preload(:teams) |> Repo.preload(players: [:team]) |> Repo.preload(:pieces)
   end
 
   # NOTE: Doesn't account for duplicates
