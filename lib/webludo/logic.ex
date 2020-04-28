@@ -774,19 +774,15 @@ defmodule WebLudo.Logic do
     end
   end
 
-  def create_game_with_initial_state(attrs) do
-    attrs = Map.put(attrs, :current_team, WebLudo.Logic.random_team())
-
-    # IO.inspect(attrs)
-    case create_game(attrs) do
+  def create_game_with_initial_state(name, code) do
+    case create_game(%{name: name, code: code, current_team: :none}) do
       {:ok, game} ->
-        WebLudo.Logic.Constants.initial_pieces()
-        |> Enum.each(fn p -> {:ok, _piece} = create_piece(game, p) end)
+        1..4
+        |> Enum.each(fn _ -> {:ok, _team} = create_team(game, %{color: :none}) end)
 
-        {:ok, game}
+        {:ok, preload_game(game)}
 
       resp ->
-        # IO.inspect(resp)
         resp
     end
   end

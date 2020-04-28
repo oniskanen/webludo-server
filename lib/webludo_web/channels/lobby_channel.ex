@@ -24,7 +24,7 @@ defmodule WebLudoWeb.LobbyChannel do
   def handle_in("create_game", %{"name" => name}, socket) do
     code = generate_code()
 
-    case Logic.create_game_with_initial_state(%{code: code, name: name}) do
+    case Logic.create_game_with_initial_state(code, name) do
       {:ok, game} ->
         {:reply, {:ok, %{code: game.code}}, socket}
 

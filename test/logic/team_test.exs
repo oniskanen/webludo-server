@@ -3,6 +3,7 @@ defmodule WebLudo.Logic.TeamTest do
 
   alias WebLudo.TestHelpers
   alias WebLudo.Logic.Game
+  alias WebLudo.Logic
 
   setup do
     # Explicitly get a connection before each test
@@ -20,5 +21,13 @@ defmodule WebLudo.Logic.TeamTest do
     game = %Game{}
 
     assert %{has_started: false} = game
+  end
+
+  test "initial game contains 4 empty teams" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+
+    assert %{teams: teams, players: players, current_team: :none} = game
+    assert length(teams) == 4
+    assert length(players) == 0
   end
 end
