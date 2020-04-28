@@ -80,6 +80,16 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert_reply ref, :ok, %{token: token}
   end
 
+  test "join game responds with a player id" do
+    game = TestHelpers.game_fixture()
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
+    ref = push(socket, "join_game", %{name: "Player 5"})
+    assert_reply ref, :ok, %{id: id}
+  end
+
   test "player not in turn cannot roll die" do
     game =
       WebLudo.TestHelpers.game_fixture(%{

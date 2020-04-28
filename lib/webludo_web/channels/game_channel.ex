@@ -100,7 +100,7 @@ defmodule WebLudoWeb.GameChannel do
     actions = Logic.get_moves(game)
     broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
     token = WebLudoWeb.Auth.get_token(player)
-    {:reply, {:ok, %{token: token}}, socket}
+    {:reply, {:ok, %{token: token, id: player.id}}, socket}
   end
 
   def handle_in("game", _params, socket) do
