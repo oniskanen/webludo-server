@@ -9,7 +9,8 @@ defmodule WebLudo.Logic.Team do
              :penalties,
              :has_finished,
              :can_raise,
-             :new_raising_round
+             :new_raising_round,
+             :id
            ]}
 
   schema "teams" do
