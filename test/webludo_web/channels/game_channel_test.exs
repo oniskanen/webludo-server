@@ -524,11 +524,4 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_reply ref, :error, %{message: "The blue team does not need to call hembo"}
   end
-
-  @tag :skip
-  test "fetching team for a player should get a team from the same game" do
-    # The current team fetching logic can and will return teams from another game.
-    # Let's write a test with multiple concurrent games and ensure that each player
-    # receives their own team data.
-  end
 end

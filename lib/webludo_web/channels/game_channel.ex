@@ -110,8 +110,9 @@ defmodule WebLudoWeb.GameChannel do
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    %{team: %{color: color}} = Logic.get_player(player_id) |> Repo.preload(:team)
-    %{penalties: previous_penalties, id: id} = Logic.get_team_by(%{color: color})
+
+    %{team: %{color: color, id: id, penalties: previous_penalties}} =
+      Logic.get_player(player_id) |> Repo.preload(:team)
 
     response = handle_team_penalty(id, amount, socket)
 
