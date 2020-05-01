@@ -23,4 +23,13 @@ defmodule WebLudoWeb.Channels.LobbyChannelTest do
 
     assert_reply ref, :error, %{message: "'name' parameter is required to create a game"}
   end
+
+  test "create game replies with a host token" do
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+    ref = push(socket, "create_game", %{name: "game name"})
+
+    assert_reply ref, :ok, %{host_token: _token} = params
+  end
 end

@@ -1,5 +1,6 @@
 defmodule WebLudoWeb.LobbyChannel do
   alias WebLudo.Logic
+  alias WebLudoWeb.HostAuth
 
   use WebLudoWeb, :channel
 
@@ -26,7 +27,8 @@ defmodule WebLudoWeb.LobbyChannel do
 
     case Logic.create_game_with_initial_state(code, name) do
       {:ok, game} ->
-        {:reply, {:ok, %{code: game.code}}, socket}
+        host_token = HostAuth.get_token(game)
+        {:reply, {:ok, %{code: game.code, host_token: host_token}}, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:reply, {:error, %{type: "ValidationError", details: format_errors(changeset.errors)}},
