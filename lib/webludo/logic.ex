@@ -937,8 +937,6 @@ defmodule WebLudo.Logic do
     team_count = length(teams_with_players)
 
     if team_count >= Constants.min_team_count() do
-      {:ok, game} = update_game(game, %{has_started: true})
-
       random_colors =
         Constants.team_colors()
         |> Enum.map(fn c -> {c, :rand.uniform_real()} end)
@@ -961,6 +959,11 @@ defmodule WebLudo.Logic do
             create_piece(game, %{team_color: team.color, position_index: i, area: :home})
         end)
       end)
+
+      random_index = :rand.uniform(team_count) - 1
+
+      {:ok, game} =
+        update_game(game, %{has_started: true, current_team: Enum.at(teams, random_index).color})
 
       {:ok, preload_game(game, force: true)}
     else
