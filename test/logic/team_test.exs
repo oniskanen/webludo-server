@@ -30,6 +30,12 @@ defmodule WebLudo.Logic.TeamTest do
     assert %{can_be_started: false} = game
   end
 
+  test "game with 4 teams with players can be started" do
+    game = TestHelpers.game_fixture()
+
+    assert %{can_be_started: true} = game
+  end
+
   test "initial game contains 4 empty teams" do
     {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
 

@@ -1,6 +1,7 @@
 defmodule WebLudo.TestHelpers do
   alias WebLudo.Logic
   alias WebLudo.Repo
+  alias WebLudo.Logic.Game
 
   def game_fixture(attrs \\ %{}) do
     {:ok, game} =
@@ -60,7 +61,7 @@ defmodule WebLudo.TestHelpers do
       })
 
     Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
-    game |> Repo.preload(:teams) |> Repo.preload(players: [:team]) |> Repo.preload(:pieces)
+    preload_game(game) |> Repo.preload(players: [:team])
   end
 
   # NOTE: Doesn't account for duplicates
@@ -69,5 +70,16 @@ defmodule WebLudo.TestHelpers do
     set2 = MapSet.new(l2)
 
     set1 == set2
+  end
+
+  defp preload_game(game, opts \\ []) when is_list(opts) do
+    game =
+      game
+      |> Repo.preload(:pieces, opts)
+      |> Repo.preload(:players, opts)
+      |> Repo.preload([teams: :players], opts)
+
+    sorted_players = Enum.sort_by(game.players, fn p -> p.inserted_at end, NaiveDateTime)
+    %Game{game | players: sorted_players, can_be_started: Logic.can_be_started?(game)}
   end
 end

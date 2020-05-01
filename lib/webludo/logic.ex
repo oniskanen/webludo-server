@@ -760,7 +760,7 @@ defmodule WebLudo.Logic do
     Repo.get_by(Team, attrs)
   end
 
-  defp can_be_started?(%Game{} = game) do
+  def can_be_started?(%Game{} = game) do
     teams_with_players =
       game.teams
       |> Enum.map(fn team -> {team, length(team.players)} end)
