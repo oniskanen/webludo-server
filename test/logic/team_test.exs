@@ -19,9 +19,15 @@ defmodule WebLudo.Logic.TeamTest do
   end
 
   test "newly created game has not started" do
-    game = %Game{}
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
 
     assert %{has_started: false} = game
+  end
+
+  test "newly created game can not be started" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+
+    assert %{can_be_started: false} = game
   end
 
   test "initial game contains 4 empty teams" do

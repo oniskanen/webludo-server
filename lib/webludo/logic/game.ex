@@ -12,7 +12,8 @@ defmodule WebLudo.Logic.Game do
              :pieces,
              :roll,
              :roll_count,
-             :has_started
+             :has_started,
+             :can_be_started
            ]}
   schema "games" do
     field :code, :string
@@ -25,6 +26,7 @@ defmodule WebLudo.Logic.Game do
     field :roll, :integer
     field :roll_count, :integer
     field :has_started, :boolean, default: false
+    field :can_be_started, :boolean, virtual: true, default: false
     timestamps()
   end
 

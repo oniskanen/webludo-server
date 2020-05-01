@@ -760,6 +760,18 @@ defmodule WebLudo.Logic do
     Repo.get_by(Team, attrs)
   end
 
+  defp can_be_started?(%Game{} = game) do
+    teams_with_players =
+      game.teams
+      |> Enum.map(fn team -> {team, length(team.players)} end)
+      |> Enum.filter(fn {_t, count} -> count > 0 end)
+      |> Enum.map(fn {team, _c} -> team end)
+
+    team_count = length(teams_with_players)
+
+    team_count >= Constants.min_team_count()
+  end
+
   defp preload_game(game, opts \\ []) when is_list(opts) do
     game =
       game
@@ -768,7 +780,7 @@ defmodule WebLudo.Logic do
       |> Repo.preload([teams: :players], opts)
 
     sorted_players = Enum.sort_by(game.players, fn p -> p.inserted_at end, NaiveDateTime)
-    %Game{game | players: sorted_players}
+    %Game{game | players: sorted_players, can_be_started: can_be_started?(game)}
   end
 
   def get_game_by_code(code) do
