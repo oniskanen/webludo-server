@@ -1,7 +1,6 @@
 defmodule WebLudo.Logic.Constants do
   @team_colors [:red, :blue, :yellow, :green]
-  # @areas [:home, :play, :goal]
-  @starting_indices [0, 1, 2, 3]
+  @short_track_indices [0, 1, 2, 3]
 
   @team_order %{
     red: :blue,
@@ -9,9 +8,10 @@ defmodule WebLudo.Logic.Constants do
     yellow: :green,
     green: :red
   }
+
   def initial_pieces do
     for p <- @team_colors,
-        i <- @starting_indices,
+        i <- @short_track_indices,
         do: %{team_color: p, position_index: i, area: :home}
   end
 
@@ -52,9 +52,9 @@ defmodule WebLudo.Logic.Constants do
     4
   end
 
-  def goal_index_list do
-    [0, 1, 2, 3]
-  end
+  def start_index_list, do: @short_track_indices
+
+  def goal_index_list, do: @short_track_indices
 
   def piece_name(multiplier) do
     case multiplier do

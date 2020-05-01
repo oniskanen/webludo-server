@@ -923,9 +923,22 @@ defmodule WebLudo.Logic do
         |> Enum.sort_by(fn {_c, rand} -> rand end)
         |> Enum.map(fn {c, _r} -> c end)
 
-      0..(team_count - 1)
-      |> Enum.map(fn i -> {Enum.at(teams_with_players, i), Enum.at(random_colors, i)} end)
-      |> Enum.each(fn {team, color} -> {:ok, _team} = update_team(team, %{color: color}) end)
+      teams =
+        0..(team_count - 1)
+        |> Enum.map(fn i -> {Enum.at(teams_with_players, i), Enum.at(random_colors, i)} end)
+        |> Enum.map(fn {team, color} ->
+          {:ok, team} = update_team(team, %{color: color})
+          team
+        end)
+
+      teams
+      |> Enum.each(fn team ->
+        Constants.start_index_list()
+        |> Enum.each(fn i ->
+          {:ok, _piece} =
+            create_piece(game, %{team_color: team.color, position_index: i, area: :home})
+        end)
+      end)
 
       {:ok, preload_game(game, force: true)}
     else
