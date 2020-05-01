@@ -821,14 +821,6 @@ defmodule WebLudo.Logic do
     |> Repo.update()
   end
 
-  def update_player(player, team, attrs) do
-    player
-    |> Repo.preload(:team)
-    |> Player.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:team, team)
-    |> Repo.update()
-  end
-
   def update_team(team, attrs) do
     team
     |> Team.changeset(attrs)
@@ -905,7 +897,7 @@ defmodule WebLudo.Logic do
   end
 
   def join_team(%Game{} = game, %Team{} = team, %Player{} = player) do
-    {:ok, _player} = update_player(player, team, %{})
+    {:ok, _player} = update_player(player, %{team_id: team.id})
 
     preload_game(game, force: true)
   end

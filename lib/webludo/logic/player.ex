@@ -16,7 +16,7 @@ defmodule WebLudo.Logic.Player do
   @doc false
   def changeset(player, attrs) do
     player
-    |> cast(attrs, [:name])
+    |> cast(attrs, [:name, :team_id])
     |> validate_required([:name])
   end
 end
