@@ -743,6 +743,10 @@ defmodule WebLudo.Logic do
     {game, changes}
   end
 
+  def get_game(id) do
+    Repo.get(Game, id)
+  end
+
   def get_game_by(attrs) do
     game = Repo.get_by(Game, attrs)
 

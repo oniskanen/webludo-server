@@ -39,4 +39,18 @@ defmodule WebLudoWeb.Channels.GameSetupTest do
 
     assert Enum.any?(game.teams, &match?(%{id: ^team_id, players: [%{name: "Player 1"}]}, &1))
   end
+
+  test "host sending start_game message before 4 teams are created gets error reply" do
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+    ref = push(socket, "create_game", %{name: "game name"})
+
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+
+    {:ok, %{game: _game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
+
+    ref = push(socket, "start_game", %{host_token: host_token})
+    assert_reply ref, :error, %{message: "Cannot start game with less than 4 teams"}
+  end
 end

@@ -116,6 +116,22 @@ defmodule WebLudoWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("start_game", %{"host_token" => host_token}, socket) do
+    {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
+
+    game = Logic.get_game(game_id)
+
+    case Logic.start_game(game) do
+      {:ok, game} ->
+        actions = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+        {:reply, :ok, socket}
+
+      {:error, message} ->
+        {:reply, {:error, %{message: message}}, socket}
+    end
+  end
+
   def handle_in("game", _params, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
     {:reply, {:ok, game}, socket}
