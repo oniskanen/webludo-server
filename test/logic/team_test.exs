@@ -183,6 +183,12 @@ defmodule WebLudo.Logic.TeamTest do
     assert length(Enum.filter(pieces, fn p -> p.team_color == :green end)) == 4
   end
 
+  test "game that has not been started has current_team set to none" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+
+    assert game.current_team == :none
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO
