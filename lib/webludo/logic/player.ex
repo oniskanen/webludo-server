@@ -2,7 +2,7 @@ defmodule WebLudo.Logic.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, only: [:name]}
+  @derive {Jason.Encoder, only: [:name, :id, :team_id]}
 
   schema "players" do
     field :name, :string
