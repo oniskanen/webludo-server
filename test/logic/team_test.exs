@@ -63,6 +63,23 @@ defmodule WebLudo.Logic.TeamTest do
     assert player.team.id == team2.id
   end
 
+  test "a player can leave a team when game has not started" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+    game = Repo.preload(game, :teams)
+
+    [team1 | _tail] = game.teams
+
+    {:ok, player} = Logic.create_player(game, %{name: "Player 1"})
+
+    %{players: [player]} = Logic.join_team(game, team1, player)
+    %{players: [player]} = Logic.leave_team(game, player)
+
+    player = Repo.preload(player, :team, force: true)
+
+    assert player.team == nil
+    assert player.team_id == nil
+  end
+
   test "a game can be started" do
     {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
     game = Repo.preload(game, :teams)

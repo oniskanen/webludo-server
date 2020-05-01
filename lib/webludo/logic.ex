@@ -906,6 +906,12 @@ defmodule WebLudo.Logic do
     preload_game(game, force: true)
   end
 
+  def leave_team(%Game{} = game, %Player{} = player) do
+    {:ok, _player} = update_player(player, %{team_id: nil})
+
+    preload_game(game, force: true)
+  end
+
   # Host only
   def start_game(%Game{} = game) do
     game = preload_game(game)
