@@ -1,7 +1,7 @@
 defmodule WebLudoWeb.Channels.GameSetupTest do
   use WebLudoWeb.ChannelCase
 
-  test "a player can join a game when is has not started" do
+  test "a player can join a team when the game has not started" do
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
 
