@@ -12,7 +12,17 @@ defmodule WebLudoWeb.Channels.LobbyChannelTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: _code} = params
+    assert_reply ref, :ok, %{code: code} = params
+    assert String.length(code) == 8
+  end
+
+  test "create_game reply includes game name" do
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+    ref = push(socket, "create_game", %{name: "game name"})
+
+    assert_reply ref, :ok, %{name: "game name"} = params
   end
 
   test "create_game returns an error when no name given" do

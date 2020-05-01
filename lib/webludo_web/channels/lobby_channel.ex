@@ -25,10 +25,10 @@ defmodule WebLudoWeb.LobbyChannel do
   def handle_in("create_game", %{"name" => name}, socket) do
     code = generate_code()
 
-    case Logic.create_game_with_initial_state(code, name) do
+    case Logic.create_game_with_initial_state(name, code) do
       {:ok, game} ->
         host_token = HostAuth.get_token(game)
-        {:reply, {:ok, %{code: game.code, host_token: host_token}}, socket}
+        {:reply, {:ok, %{code: game.code, host_token: host_token, name: game.name}}, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:reply, {:error, %{type: "ValidationError", details: format_errors(changeset.errors)}},
