@@ -901,4 +901,9 @@ defmodule WebLudo.Logic do
 
     preload_game(game, force: true)
   end
+
+  # Host only
+  def start_game(%Game{} = game) do
+    update_game(game, %{has_started: true})
+  end
 end
