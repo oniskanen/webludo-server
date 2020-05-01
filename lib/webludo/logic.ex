@@ -908,11 +908,26 @@ defmodule WebLudo.Logic do
 
     teams_with_players =
       game.teams
-      |> Enum.map(fn t -> length(t.players) end)
-      |> Enum.filter(fn count -> count > 0 end)
+      |> Enum.map(fn team -> {team, length(team.players)} end)
+      |> Enum.filter(fn {_t, count} -> count > 0 end)
+      |> Enum.map(fn {team, _c} -> team end)
 
-    if length(teams_with_players) >= Constants.min_team_count() do
-      update_game(game, %{has_started: true})
+    team_count = length(teams_with_players)
+
+    if team_count >= Constants.min_team_count() do
+      {:ok, game} = update_game(game, %{has_started: true})
+
+      random_colors =
+        Constants.team_colors()
+        |> Enum.map(fn c -> {c, :rand.uniform_real()} end)
+        |> Enum.sort_by(fn {_c, rand} -> rand end)
+        |> Enum.map(fn {c, _r} -> c end)
+
+      0..(team_count - 1)
+      |> Enum.map(fn i -> {Enum.at(teams_with_players, i), Enum.at(random_colors, i)} end)
+      |> Enum.each(fn {team, color} -> {:ok, _team} = update_team(team, %{color: color}) end)
+
+      {:ok, preload_game(game, force: true)}
     else
       {:error, "Cannot start game with less than #{Constants.min_team_count()} teams"}
     end
