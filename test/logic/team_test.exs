@@ -153,4 +153,10 @@ defmodule WebLudo.Logic.TeamTest do
     assert length(Enum.filter(pieces, fn p -> p.team_color == :yellow end)) == 4
     assert length(Enum.filter(pieces, fn p -> p.team_color == :green end)) == 4
   end
+
+  @tag :skip
+  test "cannot join a team from another game" do
+    # TODO
+    assert false
+  end
 end
