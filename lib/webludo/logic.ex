@@ -761,7 +761,7 @@ defmodule WebLudo.Logic do
       game
       |> Repo.preload(:pieces, opts)
       |> Repo.preload(:players, opts)
-      |> Repo.preload(:teams, opts)
+      |> Repo.preload([teams: :players], opts)
 
     sorted_players = Enum.sort_by(game.players, fn p -> p.inserted_at end, NaiveDateTime)
     %Game{game | players: sorted_players}
@@ -904,6 +904,17 @@ defmodule WebLudo.Logic do
 
   # Host only
   def start_game(%Game{} = game) do
-    update_game(game, %{has_started: true})
+    game = preload_game(game)
+
+    teams_with_players =
+      game.teams
+      |> Enum.map(fn t -> length(t.players) end)
+      |> Enum.filter(fn count -> count > 0 end)
+
+    if length(teams_with_players) >= Constants.min_team_count() do
+      update_game(game, %{has_started: true})
+    else
+      {:error, "Cannot start game with less than #{Constants.min_team_count()} teams"}
+    end
   end
 end

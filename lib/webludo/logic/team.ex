@@ -23,6 +23,7 @@ defmodule WebLudo.Logic.Team do
     field :needs_hembo, :boolean, default: false
 
     belongs_to :game, WebLudo.Logic.Game
+    has_many :players, WebLudo.Logic.Player
 
     timestamps()
   end
