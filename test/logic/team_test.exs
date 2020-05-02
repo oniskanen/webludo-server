@@ -212,6 +212,31 @@ defmodule WebLudo.Logic.TeamTest do
     assert current_team != :none
   end
 
+  test "starting a game sets default team names to unnamed teams" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+    game = Repo.preload(game, :teams)
+
+    [team1, team2, team3, team4] = game.teams
+
+    {:ok, player1} = Logic.create_player(game, %{name: "Player 1"})
+    {:ok, player2} = Logic.create_player(game, %{name: "Player 2"})
+    {:ok, player3} = Logic.create_player(game, %{name: "Player 3"})
+    {:ok, player4} = Logic.create_player(game, %{name: "Player 4"})
+
+    Logic.join_team(game, team1, player1)
+    Logic.join_team(game, team2, player2)
+    Logic.join_team(game, team3, player3)
+    Logic.join_team(game, team4, player4)
+
+    game = Repo.preload(game, [teams: :players], force: true)
+    assert {:ok, %{teams: teams}} = Logic.start_game(game)
+
+    assert Enum.any?(teams, &match?(%{color: :red, name: "Red team"}, &1))
+    assert Enum.any?(teams, &match?(%{color: :blue, name: "Blue team"}, &1))
+    assert Enum.any?(teams, &match?(%{color: :yellow, name: "Yellow team"}, &1))
+    assert Enum.any?(teams, &match?(%{color: :green, name: "Green team"}, &1))
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO

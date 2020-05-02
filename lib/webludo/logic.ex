@@ -931,6 +931,10 @@ defmodule WebLudo.Logic do
     preload_game(game, force: true)
   end
 
+  defp get_team_default_name(color) do
+    "#{String.capitalize(to_string(color))} team"
+  end
+
   # Host only
   def start_game(%Game{} = game) do
     game = preload_game(game)
@@ -954,8 +958,14 @@ defmodule WebLudo.Logic do
         0..(team_count - 1)
         |> Enum.map(fn i -> {Enum.at(teams_with_players, i), Enum.at(random_colors, i)} end)
         |> Enum.map(fn {team, color} ->
-          {:ok, team} = update_team(team, %{color: color})
-          team
+          {:ok, updated_team} =
+            if Map.get(team, :name) == nil do
+              update_team(team, %{color: color, name: get_team_default_name(color)})
+            else
+              update_team(team, %{color: color})
+            end
+
+          updated_team
         end)
 
       teams
