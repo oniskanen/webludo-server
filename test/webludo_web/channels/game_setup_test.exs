@@ -40,6 +40,27 @@ defmodule WebLudoWeb.Channels.GameSetupTest do
     assert Enum.any?(game.teams, &match?(%{id: ^team_id, players: [%{name: "Player 1"}]}, &1))
   end
 
+  test "leave_team causes a game_updated broadcast" do
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+    ref = push(socket, "create_game", %{name: "game name"})
+
+    assert_reply ref, :ok, %{code: code, host_token: _token} = params
+
+    {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{code}", %{})
+
+    ref = push(socket, "join_game", %{name: "Player 1"})
+    assert_reply ref, :ok, %{token: token}
+    assert_broadcast "game_updated", %{}
+
+    push(socket, "leave_team", %{token: token})
+
+    assert_broadcast "game_updated", %{game: game}
+
+    assert Enum.all?(game.teams, &match?(%{players: []}, &1))
+  end
+
   test "host sending start_game message before 4 teams are created gets error reply" do
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
     {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})

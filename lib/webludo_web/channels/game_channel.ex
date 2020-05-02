@@ -116,6 +116,18 @@ defmodule WebLudoWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("leave_team", %{"token" => token}, socket) do
+    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
+    player = Logic.get_player(player_id)
+
+    game = Logic.leave_team(game, player)
+
+    actions = Logic.get_moves(game)
+    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+    {:reply, :ok, socket}
+  end
+
   def handle_in("start_game", %{"host_token" => host_token}, socket) do
     {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
 
