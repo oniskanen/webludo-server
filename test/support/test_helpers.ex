@@ -35,15 +35,25 @@ defmodule WebLudo.TestHelpers do
       attrs
       |> Enum.into(%{
         teams: [
-          %{color: :red},
-          %{color: :blue},
-          %{color: :green},
-          %{color: :yellow}
+          %{color: :red, sort_value: 1},
+          %{color: :blue, sort_value: 2},
+          %{color: :green, sort_value: 3},
+          %{color: :yellow, sort_value: 4}
         ]
       })
 
     teams =
-      Enum.map(teams, fn t ->
+      teams
+      |> Enum.map(fn t ->
+        current_sort = Map.get(t, :sort_value, nil)
+
+        if current_sort == nil do
+          Map.put(t, :sort_value, 0)
+        else
+          t
+        end
+      end)
+      |> Enum.map(fn t ->
         {:ok, team} = Logic.create_team(game, t)
         team
       end)

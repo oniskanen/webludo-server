@@ -36,12 +36,13 @@ defmodule WebLudo.Logic.TeamTest do
     assert %{can_be_started: true} = game
   end
 
-  test "initial game contains 4 empty teams" do
+  test "initial game contains 4 empty teams with a sort value" do
     {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
 
     assert %{teams: teams, players: players, current_team: :none} = game
     assert length(teams) == 4
     assert players == []
+    assert Enum.map(teams, fn t -> t.sort_value end) |> Enum.sort() == [1, 2, 3, 4]
   end
 
   test "a player can join a team when game has not started" do

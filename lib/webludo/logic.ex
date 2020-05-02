@@ -780,7 +780,14 @@ defmodule WebLudo.Logic do
       |> Repo.preload([teams: :players], opts)
 
     sorted_players = Enum.sort_by(game.players, fn p -> p.inserted_at end, NaiveDateTime)
-    %Game{game | players: sorted_players, can_be_started: can_be_started?(game)}
+    sorted_teams = Enum.sort_by(game.teams, fn t -> t.sort_value end)
+
+    %Game{
+      game
+      | teams: sorted_teams,
+        players: sorted_players,
+        can_be_started: can_be_started?(game)
+    }
   end
 
   def get_game_by_code(code) do
@@ -794,7 +801,7 @@ defmodule WebLudo.Logic do
     case create_game(%{name: name, code: code, current_team: :none}) do
       {:ok, game} ->
         1..4
-        |> Enum.each(fn _ -> {:ok, _team} = create_team(game, %{color: :none}) end)
+        |> Enum.each(fn i -> {:ok, _team} = create_team(game, %{color: :none, sort_value: i}) end)
 
         {:ok, preload_game(game)}
 

@@ -10,7 +10,8 @@ defmodule WebLudo.Logic.Team do
              :has_finished,
              :can_raise,
              :new_raising_round,
-             :id
+             :id,
+             :sort_value
            ]}
 
   schema "teams" do
@@ -21,6 +22,7 @@ defmodule WebLudo.Logic.Team do
     field :can_raise, :boolean, default: true
     field :new_raising_round, :boolean, default: false
     field :needs_hembo, :boolean, default: false
+    field :sort_value, :integer
 
     belongs_to :game, WebLudo.Logic.Game
     has_many :players, WebLudo.Logic.Player
@@ -38,7 +40,8 @@ defmodule WebLudo.Logic.Team do
       :has_finished,
       :can_raise,
       :new_raising_round,
-      :needs_hembo
+      :needs_hembo,
+      :sort_value
     ])
     |> validate_required([
       :color,
@@ -46,7 +49,8 @@ defmodule WebLudo.Logic.Team do
       :has_finished,
       :can_raise,
       :new_raising_round,
-      :needs_hembo
+      :needs_hembo,
+      :sort_value
     ])
     |> validate_number(:penalties, greater_than_or_equal_to: 0)
   end
