@@ -31,45 +31,6 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
     assert_broadcast "game_updated", %{game: %{players: [%{name: "Test Name"}]}}
   end
 
-  # Need to redo the join game logic. See Github issue #6
-  @tag :skip
-  test "4 players joining get different colors" do
-    game = TestHelpers.game_fixture(%{players: []})
-    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
-
-    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
-
-    ref = push(socket, "join_game", %{name: "Player 1"})
-    assert_reply ref, :ok, %{}
-
-    ref = push(socket, "join_game", %{name: "Player 2"})
-    assert_reply ref, :ok, %{}
-
-    ref = push(socket, "join_game", %{name: "Player 3"})
-    assert_reply ref, :ok, %{}
-
-    ref = push(socket, "join_game", %{name: "Player 4"})
-    assert_reply ref, :ok, %{}
-
-    ref = push(socket, "game", %{})
-    assert_reply ref, :ok, payload
-
-    player_names =
-      payload.players
-      |> Enum.map(fn p -> p.name end)
-
-    assert TestHelpers.list_contents_equal?(
-             ["Player 1", "Player 2", "Player 3", "Player 4"],
-             player_names
-           )
-
-    team_colors =
-      payload.players
-      |> Enum.map(fn p -> p.color end)
-
-    assert TestHelpers.list_contents_equal?([:red, :blue, :green, :yellow], team_colors)
-  end
-
   test "join game responds with a player token" do
     game = TestHelpers.game_fixture()
 
@@ -257,29 +218,6 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     assert [%{penalties: 0}, %{penalties: 0}, %{penalties: 0}] = teams
-  end
-
-  # Penalties are now per team, but we do need tests for a new player joining
-  @tag :skip
-  test "new player joining is assigned 0 penalties" do
-    game =
-      WebLudo.TestHelpers.game_fixture(%{
-        current_team: :red,
-        roll: 1,
-        pieces: [
-          %{team_color: :red, area: :play, position_index: 0},
-          %{team_color: :blue, area: :play, position_index: 1}
-        ]
-      })
-
-    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
-
-    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
-
-    # join_game(socket, "Player 1")
-
-    assert_broadcast "game_updated", %{game: %{players: players}}
-    assert Enum.any?(players, &match?(%{color: :red, name: "Player 1", penalties: 0}, &1))
   end
 
   test "sending a set penalty message sets the team penalty to provided value" do
