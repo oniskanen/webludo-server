@@ -4,13 +4,21 @@ defmodule WebLudo.TestHelpers do
   alias WebLudo.Logic.Game
 
   def game_fixture(attrs \\ %{}) do
+    get_game_fixture(attrs, true)
+  end
+
+  def setup_game_fixture(attrs \\ %{}) do
+    get_game_fixture(attrs, false)
+  end
+
+  defp get_game_fixture(attrs, start_game) do
     {:ok, game} =
       attrs
       |> Enum.into(%{
         name: "Test Game",
         code: "secret",
-        current_team: :red,
-        has_started: true
+        current_team: :none,
+        has_started: false
       })
       |> Logic.create_game()
 
@@ -36,10 +44,10 @@ defmodule WebLudo.TestHelpers do
       attrs
       |> Enum.into(%{
         teams: [
-          %{color: :red, sort_value: 1},
-          %{color: :blue, sort_value: 2},
-          %{color: :green, sort_value: 3},
-          %{color: :yellow, sort_value: 4}
+          %{color: :none, sort_value: 1},
+          %{color: :none, sort_value: 2},
+          %{color: :none, sort_value: 3},
+          %{color: :none, sort_value: 4}
         ]
       })
 
@@ -63,15 +71,41 @@ defmodule WebLudo.TestHelpers do
     0..3
     |> Enum.map(fn i -> {Enum.at(players, i), Enum.at(teams, i)} end)
     |> Enum.filter(fn {p, t} -> p != nil and t != nil end)
-    |> Enum.each(fn {player, team} -> Logic.join_team(game, team, player) end)
+    |> Enum.each(fn {player, team} -> {:ok, _game} = Logic.join_team(game, team, player) end)
 
-    %{pieces: pieces} =
-      attrs
-      |> Enum.into(%{
-        pieces: WebLudo.Logic.Constants.initial_pieces()
-      })
+    game =
+      if start_game do
+        %{pieces: pieces} =
+          attrs
+          |> Enum.into(%{
+            pieces: WebLudo.Logic.Constants.initial_pieces()
+          })
 
-    Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
+        Enum.each(pieces, fn p -> {:ok, _piece} = Logic.create_piece(game, p) end)
+
+        0..3
+        |> Enum.map(fn i -> {i, Enum.at(teams, i)} end)
+        |> Enum.filter(fn {_i, team} -> team != nil end)
+        # This will potentially assign duplicate colors if the test specifies teams with only some colors assigned
+        |> Enum.filter(fn {_i, team} -> team.color == :none or team.color == nil end)
+        |> Enum.map(fn {i, t} -> {Enum.at(WebLudo.Logic.Constants.team_colors(), i), t} end)
+        |> Enum.each(fn {c, t} -> Logic.update_team(t, %{color: c}) end)
+
+        {:ok, game} = Logic.update_game(game, %{has_started: true})
+
+        game =
+          if game.current_team == nil || game.current_team == :none do
+            {:ok, game} = Logic.update_game(game, %{current_team: :red})
+            game
+          else
+            game
+          end
+
+        game
+      else
+        game
+      end
+
     preload_game(game) |> Repo.preload(players: [:team])
   end
 

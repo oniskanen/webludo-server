@@ -109,7 +109,7 @@ defmodule WebLudoWeb.GameChannel do
     player = Logic.get_player(player_id)
     team = Logic.get_team(team_id)
 
-    game = Logic.join_team(game, team, player)
+    {:ok, game} = Logic.join_team(game, team, player)
 
     actions = Logic.get_moves(game)
     broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})

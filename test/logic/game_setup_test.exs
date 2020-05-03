@@ -33,7 +33,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "game with 4 teams with players can be started" do
-    game = TestHelpers.game_fixture(%{has_started: false})
+    game = TestHelpers.setup_game_fixture()
 
     assert %{can_be_started: true} = game
   end
@@ -48,11 +48,11 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "a player can join a team when game has not started" do
-    game = TestHelpers.game_fixture(%{has_started: false, players: []})
+    game = TestHelpers.setup_game_fixture(%{players: []})
     team = hd(game.teams)
     {:ok, player} = Logic.create_player(game, %{name: "Player 1"})
 
-    assert %{players: [player]} = Logic.join_team(game, team, player)
+    assert {:ok, %{players: [player]}} = Logic.join_team(game, team, player)
 
     player = Repo.preload(player, :team)
 
@@ -60,8 +60,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "a player can switch to another team when game has not started" do
-    game = TestHelpers.game_fixture(%{has_started: false})
-
+    game = TestHelpers.setup_game_fixture()
     [team1 | tail] = game.teams
     [team2 | _tail] = tail
 
@@ -75,8 +74,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "a player can leave a team when game has not started" do
-    game = TestHelpers.game_fixture(%{has_started: false})
-
+    game = TestHelpers.setup_game_fixture()
     [team1 | _tail] = game.teams
     [player] = team1.players
 
@@ -89,10 +87,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "a game can be started" do
-    game =
-      TestHelpers.game_fixture(%{
-        has_started: false
-      })
+    game = TestHelpers.setup_game_fixture()
 
     assert {:ok, game} = Logic.start_game(game)
 
@@ -102,14 +97,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   # TODO: Relax this to 1 or 2 teams as soon as the game logic supports <4 teams
   test "a game cannot be started with less than 4 teams with players" do
     game =
-      TestHelpers.game_fixture(%{
-        has_started: false,
-        teams: [
-          %{color: :red},
-          %{color: :blue},
-          %{color: :yellow},
-          %{color: :green}
-        ],
+      TestHelpers.setup_game_fixture(%{
         players: [
           %{name: "Player 1"}
         ]
@@ -122,16 +110,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "starting a game assigns colors to playing teams" do
-    game =
-      TestHelpers.game_fixture(%{
-        has_started: false,
-        teams: [
-          %{color: :none},
-          %{color: :none},
-          %{color: :none},
-          %{color: :none}
-        ]
-      })
+    game = TestHelpers.setup_game_fixture()
 
     assert {:ok, game} = Logic.start_game(game)
 
@@ -142,7 +121,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "starting a game creates 4 pieces in home for playing teams" do
-    game = TestHelpers.game_fixture(%{has_started: false, current_team: :none, pieces: []})
+    game = TestHelpers.setup_game_fixture()
 
     assert {:ok, %{pieces: pieces}} = Logic.start_game(game)
 
@@ -161,7 +140,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "starting a game sets current_team" do
-    game = TestHelpers.game_fixture(%{has_started: false, current_team: :none})
+    game = TestHelpers.setup_game_fixture()
 
     assert {:ok, %{current_team: current_team}} = Logic.start_game(game)
 
@@ -170,8 +149,7 @@ defmodule WebLudo.Logic.GameSetupTest do
 
   test "starting a game sets default team names to unnamed teams" do
     game =
-      TestHelpers.game_fixture(%{
-        has_started: false,
+      TestHelpers.setup_game_fixture(%{
         teams: [
           %{color: :red},
           %{color: :blue},
@@ -189,32 +167,32 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "cannot roll during setup" do
-    game = TestHelpers.game_fixture(%{has_started: false})
+    game = TestHelpers.setup_game_fixture()
 
     assert {:error, "Cannot roll during setup"} = Logic.set_roll(game, 6)
   end
 
   test "no moves are available during setup" do
-    game = TestHelpers.game_fixture(%{has_started: false, roll: 6})
+    game = TestHelpers.setup_game_fixture(%{roll: 6})
 
     assert [] = Logic.get_moves(game)
   end
 
   test "hembo cannot be called during setup" do
-    game = TestHelpers.game_fixture(%{has_started: false, roll: 6})
+    game = TestHelpers.setup_game_fixture()
     %{teams: teams} = game
 
     assert {:error, "Cannot call hembo during setup"} = Logic.jag_bor_i_hembo(game, hd(teams))
   end
 
   test "missed hembo cannot be called during setup" do
-    game = TestHelpers.game_fixture(%{has_started: false, roll: 6})
+    game = TestHelpers.setup_game_fixture()
 
     assert {:error, "Cannot call missed hembo during setup"} = Logic.call_missed_hembo(game, :red)
   end
 
   test "agree to new raise round cannot be called during setup" do
-    game = TestHelpers.game_fixture(%{has_started: false})
+    game = TestHelpers.setup_game_fixture()
     team = hd(game.teams)
 
     assert {:error, "Cannot agree to new raise round during setup"} =
@@ -225,6 +203,16 @@ defmodule WebLudo.Logic.GameSetupTest do
     game = TestHelpers.game_fixture()
 
     assert {:error, "Cannot start an ongoing game"} = Logic.start_game(game)
+  end
+
+  test "cannot join a team when game has started" do
+    game = TestHelpers.game_fixture()
+
+    team = hd(game.teams)
+    [player] = team.players
+
+    assert {:error, "Cannot join a team when game is ongoing"} =
+             Logic.join_team(game, team, player)
   end
 
   @tag :skip

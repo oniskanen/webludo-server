@@ -943,10 +943,14 @@ defmodule WebLudo.Logic do
     {:ok, Repo.preload(game, :teams, force: true), penalties}
   end
 
-  def join_team(%Game{} = game, %Team{} = team, %Player{} = player) do
+  def join_team(%Game{has_started: true}, _team, _player) do
+    {:error, "Cannot join a team when game is ongoing"}
+  end
+
+  def join_team(%Game{has_started: false} = game, %Team{} = team, %Player{} = player) do
     {:ok, _player} = update_player(player, %{team_id: team.id})
 
-    preload_game(game, force: true)
+    {:ok, preload_game(game, force: true)}
   end
 
   def leave_team(%Game{} = game, %Player{} = player) do
