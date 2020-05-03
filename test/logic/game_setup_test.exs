@@ -256,6 +256,12 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert {:error, "Cannot call hembo during setup"} = Logic.jag_bor_i_hembo(game, hd(teams))
   end
 
+  test "missed hembo cannot be called during setup" do
+    game = TestHelpers.game_fixture(%{has_started: false, roll: 6})
+
+    assert {:error, "Cannot call missed hembo during setup"} = Logic.call_missed_hembo(game, :red)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO

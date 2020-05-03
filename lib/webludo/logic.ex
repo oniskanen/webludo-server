@@ -901,6 +901,10 @@ defmodule WebLudo.Logic do
     game
   end
 
+  def call_missed_hembo(%Game{has_started: false}, _color) do
+    {:error, "Cannot call missed hembo during setup"}
+  end
+
   def call_missed_hembo(%Game{teams: teams} = game, color) do
     team = Enum.find(teams, fn t -> t.color == color end)
 
