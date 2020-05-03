@@ -232,7 +232,7 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id) |> Repo.preload(:team)
 
-    {game, penalties} = Logic.jag_bor_i_hembo(game, player.team)
+    {:ok, game, penalties} = Logic.jag_bor_i_hembo(game, player.team)
     moves = Logic.get_moves(game)
 
     broadcast!(socket, "game_updated", %{game: game, actions: moves})

@@ -914,6 +914,10 @@ defmodule WebLudo.Logic do
     end
   end
 
+  def jag_bor_i_hembo(%Game{has_started: false}, _team) do
+    {:error, "Cannot call hembo during setup"}
+  end
+
   def jag_bor_i_hembo(%Game{} = game, %Team{color: color} = team) do
     penalties =
       if team.needs_hembo do
@@ -924,7 +928,7 @@ defmodule WebLudo.Logic do
         [%{team_color: color, amount: 1}]
       end
 
-    {Repo.preload(game, :teams, force: true), penalties}
+    {:ok, Repo.preload(game, :teams, force: true), penalties}
   end
 
   def join_team(%Game{} = game, %Team{} = team, %Player{} = player) do

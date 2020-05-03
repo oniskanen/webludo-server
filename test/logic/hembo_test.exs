@@ -89,7 +89,7 @@ defmodule WebLudo.Logic.HemboTest do
 
     team = Enum.find(game.teams, &match?(%{color: :red}, &1))
 
-    {game, penalties} = Logic.jag_bor_i_hembo(game, team)
+    {:ok, game, penalties} = Logic.jag_bor_i_hembo(game, team)
     assert %{teams: [%{color: :red, penalties: 2, needs_hembo: false}]} = game
     assert [%{amount: 1, team_color: :red}] = penalties
   end
@@ -102,7 +102,7 @@ defmodule WebLudo.Logic.HemboTest do
     game = TestHelpers.game_fixture(attrs)
     team = Enum.find(game.teams, &match?(%{color: :red}, &1))
 
-    {game, penalties} = Logic.jag_bor_i_hembo(game, team)
+    {:ok, game, penalties} = Logic.jag_bor_i_hembo(game, team)
     assert %{teams: [%{color: :red, penalties: 1, needs_hembo: false}]} = game
     assert [] = penalties
   end
