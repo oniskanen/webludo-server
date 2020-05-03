@@ -880,10 +880,10 @@ defmodule WebLudo.Logic do
 
   def agree_to_new_raise(
         %Game{} = game,
-        %Team{can_raise: can_raise} = team,
+        %Team{can_raise: false} = team,
         new_raising_round
       )
-      when is_boolean(new_raising_round) and not can_raise do
+      when is_boolean(new_raising_round) do
     update_team(team, %{new_raising_round: new_raising_round})
     game = Repo.preload(game, :teams, force: true)
 
