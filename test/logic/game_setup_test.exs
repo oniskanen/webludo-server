@@ -262,6 +262,14 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert {:error, "Cannot call missed hembo during setup"} = Logic.call_missed_hembo(game, :red)
   end
 
+  test "agree to new raise round cannot be called during setup" do
+    game = TestHelpers.game_fixture(%{has_started: false})
+    team = hd(game.teams)
+
+    assert {:error, "Cannot agree to new raise round during setup"} =
+             Logic.agree_to_new_raise(game, team, true)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO

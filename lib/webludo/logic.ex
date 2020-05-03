@@ -878,6 +878,10 @@ defmodule WebLudo.Logic do
     Repo.preload(game, :teams, force: true)
   end
 
+  def agree_to_new_raise(%Game{has_started: false}, _team, _new_raising_round) do
+    {:error, "Cannot agree to new raise round during setup"}
+  end
+
   def agree_to_new_raise(
         %Game{} = game,
         %Team{can_raise: false} = team,
