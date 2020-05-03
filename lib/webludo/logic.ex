@@ -114,12 +114,12 @@ defmodule WebLudo.Logic do
     {:error, "Cannot roll during setup"}
   end
 
-  def set_roll(%Game{roll: previous_roll} = game, roll)
+  def set_roll(%Game{roll: previous_roll, has_started: true} = game, roll)
       when previous_roll == 0 or previous_roll == nil do
     set_roll_internal(game, roll)
   end
 
-  def set_roll(%Game{} = game, roll) do
+  def set_roll(%Game{has_started: true} = game, roll) do
     moves = get_moves(game)
 
     if Enum.any?(moves, &match?(%{type: "move"}, &1)) do
@@ -546,8 +546,12 @@ defmodule WebLudo.Logic do
     game |> Repo.preload(:teams, force: true)
   end
 
+  def execute_move(%Game{has_started: false}, _move) do
+    {:error, "Cannot execute move during setup"}
+  end
+
   def execute_move(
-        %Game{current_team: current_team} = game,
+        %Game{current_team: current_team, has_started: true} = game,
         %Move{type: type} = move
       ) do
     piece = get_piece(move.piece_id)
