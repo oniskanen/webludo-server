@@ -52,7 +52,8 @@ defmodule WebLudo.Logic.GameSetupTest do
     team = hd(game.teams)
     {:ok, player} = Logic.create_player(game, %{name: "Player 1"})
 
-    assert {:ok, %{players: [player]}} = Logic.join_team(game, team, player)
+    assert {:ok, %{players: [player]}} =
+             Logic.join_team(Repo.preload(game, :players, force: true), team, player)
 
     player = Repo.preload(player, :team)
 
@@ -223,9 +224,17 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert {:error, "Cannot leave a team when game is ongoing"} = Logic.leave_team(game, player)
   end
 
-  @tag :skip
   test "cannot join a team from another game" do
-    # TODO
-    assert false
+    game = TestHelpers.setup_game_fixture()
+    player = hd(game.players)
+
+    other_game = TestHelpers.setup_game_fixture(%{name: "Game 2", code: "secret2"})
+    other_team = hd(other_game.teams)
+
+    assert {:error, "Cannot join a team from another game"} =
+             Logic.join_team(other_game, other_team, player)
+
+    assert {:error, "Cannot join a team from another game"} =
+             Logic.join_team(game, other_team, player)
   end
 end

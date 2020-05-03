@@ -952,9 +952,16 @@ defmodule WebLudo.Logic do
   end
 
   def join_team(%Game{has_started: false} = game, %Team{} = team, %Player{} = player) do
-    {:ok, _player} = update_player(player, %{team_id: team.id})
+    game = game |> Repo.preload([:teams, :players])
 
-    {:ok, preload_game(game, force: true)}
+    if Enum.any?(game.teams, fn t -> t.id == team.id end) and
+         Enum.any?(game.players, fn p -> p.id == player.id end) do
+      {:ok, _player} = update_player(player, %{team_id: team.id})
+
+      {:ok, preload_game(game, force: true)}
+    else
+      {:error, "Cannot join a team from another game"}
+    end
   end
 
   def leave_team(%Game{has_started: true}, _player) do
