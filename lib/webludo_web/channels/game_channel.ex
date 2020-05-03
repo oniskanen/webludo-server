@@ -121,7 +121,7 @@ defmodule WebLudoWeb.GameChannel do
     {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
     player = Logic.get_player(player_id)
 
-    game = Logic.leave_team(game, player)
+    {:ok, game} = Logic.leave_team(game, player)
 
     actions = Logic.get_moves(game)
     broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})

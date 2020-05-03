@@ -953,10 +953,14 @@ defmodule WebLudo.Logic do
     {:ok, preload_game(game, force: true)}
   end
 
-  def leave_team(%Game{} = game, %Player{} = player) do
+  def leave_team(%Game{has_started: true}, _player) do
+    {:error, "Cannot leave a team when game is ongoing"}
+  end
+
+  def leave_team(%Game{has_started: false} = game, %Player{} = player) do
     {:ok, _player} = update_player(player, %{team_id: nil})
 
-    preload_game(game, force: true)
+    {:ok, preload_game(game, force: true)}
   end
 
   defp get_team_default_name(color) do

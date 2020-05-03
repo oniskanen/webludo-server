@@ -215,6 +215,14 @@ defmodule WebLudo.Logic.GameSetupTest do
              Logic.join_team(game, team, player)
   end
 
+  test "cannot leave a team when game has started" do
+    game = TestHelpers.game_fixture()
+
+    player = hd(game.players)
+
+    assert {:error, "Cannot leave a team when game is ongoing"} = Logic.leave_team(game, player)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO
