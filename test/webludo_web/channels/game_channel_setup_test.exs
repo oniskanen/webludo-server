@@ -1,4 +1,4 @@
-defmodule WebLudoWeb.Channels.GameSetupTest do
+defmodule WebLudoWeb.Channels.GameChannelSetupTest do
   use WebLudoWeb.ChannelCase
 
   test "a player can join a team when the game has not started" do
