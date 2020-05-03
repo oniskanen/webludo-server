@@ -9,7 +9,8 @@ defmodule WebLudo.TestHelpers do
       |> Enum.into(%{
         name: "Test Game",
         code: "secret",
-        current_team: :red
+        current_team: :red,
+        has_started: true
       })
       |> Logic.create_game()
 

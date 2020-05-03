@@ -110,6 +110,10 @@ defmodule WebLudo.Logic do
     end
   end
 
+  def set_roll(%Game{has_started: false}, _roll) do
+    {:error, "Cannot roll during setup"}
+  end
+
   def set_roll(%Game{roll: previous_roll} = game, roll)
       when previous_roll == 0 or previous_roll == nil do
     set_roll_internal(game, roll)

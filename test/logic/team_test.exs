@@ -237,6 +237,12 @@ defmodule WebLudo.Logic.TeamTest do
     assert Enum.any?(teams, &match?(%{color: :green, name: "Green team"}, &1))
   end
 
+  test "cannot roll during setup" do
+    {:ok, game} = Logic.create_game_with_initial_state("Test Game", "secret")
+
+    assert {:error, "Cannot roll during setup"} = Logic.set_roll(game, 6)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO
