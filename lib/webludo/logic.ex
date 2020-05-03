@@ -959,8 +959,12 @@ defmodule WebLudo.Logic do
     "#{String.capitalize(to_string(color))} team"
   end
 
+  def start_game(%Game{has_started: true}) do
+    {:error, "Cannot start an ongoing game"}
+  end
+
   # Host only
-  def start_game(%Game{} = game) do
+  def start_game(%Game{has_started: false} = game) do
     game = preload_game(game)
 
     teams_with_players =

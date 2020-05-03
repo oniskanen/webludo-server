@@ -221,6 +221,12 @@ defmodule WebLudo.Logic.GameSetupTest do
              Logic.agree_to_new_raise(game, team, true)
   end
 
+  test "cannot start an ongoing game" do
+    game = TestHelpers.game_fixture()
+
+    assert {:error, "Cannot start an ongoing game"} = Logic.start_game(game)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO
