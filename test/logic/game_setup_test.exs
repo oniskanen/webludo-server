@@ -1,5 +1,5 @@
 # TODO: Move tests that do not deal with teams to game_test
-defmodule WebLudo.Logic.TeamTest do
+defmodule WebLudo.Logic.GameSetupTest do
   use ExUnit.Case
 
   alias WebLudo.TestHelpers
