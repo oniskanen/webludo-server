@@ -323,6 +323,10 @@ defmodule WebLudo.Logic do
     end
   end
 
+  def get_moves(%Game{has_started: false}) do
+    []
+  end
+
   def get_moves(%Game{roll: roll, current_team: current_team} = game)
       when roll in 1..6 do
     game = game |> Repo.preload(:pieces) |> Repo.preload(:players)
@@ -330,11 +334,11 @@ defmodule WebLudo.Logic do
     get_available_moves_for_team_with_roll(game, roll, current_team)
   end
 
-  def get_moves(%Game{roll: nil} = _game) do
+  def get_moves(%Game{roll: nil}) do
     []
   end
 
-  def get_moves(%Game{roll: 0} = _game) do
+  def get_moves(%Game{roll: 0}) do
     []
   end
 

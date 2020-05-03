@@ -243,6 +243,12 @@ defmodule WebLudo.Logic.TeamTest do
     assert {:error, "Cannot roll during setup"} = Logic.set_roll(game, 6)
   end
 
+  test "no moves are available during setup" do
+    game = TestHelpers.game_fixture(%{has_started: false, roll: 6})
+
+    assert [] = Logic.get_moves(game)
+  end
+
   @tag :skip
   test "cannot join a team from another game" do
     # TODO
