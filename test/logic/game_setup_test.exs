@@ -31,7 +31,7 @@ defmodule WebLudo.Logic.GameSetupTest do
   end
 
   test "game with 4 teams with players can be started" do
-    game = TestHelpers.game_fixture()
+    game = TestHelpers.game_fixture(%{has_started: false})
 
     assert %{can_be_started: true} = game
   end

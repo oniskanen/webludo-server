@@ -768,7 +768,11 @@ defmodule WebLudo.Logic do
     Repo.get_by(Team, attrs)
   end
 
-  def can_be_started?(%Game{} = game) do
+  def can_be_started?(%Game{has_started: true}) do
+    false
+  end
+
+  def can_be_started?(%Game{has_started: false} = game) do
     teams_with_players =
       game.teams
       |> Enum.map(fn team -> {team, length(team.players)} end)
