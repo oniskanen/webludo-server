@@ -87,6 +87,12 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert player.team_id == nil
   end
 
+  test "the players can be scrambled" do
+    game = TestHelpers.setup_game_fixture()
+
+    assert {:ok, %{players: players}} = Logic.scramble_players(game)
+  end
+
   test "a game can be started" do
     game = TestHelpers.setup_game_fixture()
 

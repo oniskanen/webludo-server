@@ -6,6 +6,7 @@ defmodule WebLudo.Logic do
   alias WebLudo.Logic.Game
   alias WebLudo.Logic.Player
   alias WebLudo.Logic.Team
+  alias WebLudo.Random
 
   def create_game(attrs) do
     %Game{}
@@ -1033,5 +1034,20 @@ defmodule WebLudo.Logic do
     else
       {:error, "Cannot start game with less than #{Constants.min_team_count()} teams"}
     end
+  end
+
+  # Host only
+  def scramble_players(%Game{teams: teams, has_started: false} = game) do
+    participating_players = Enum.flat_map(teams, fn t -> t.players end)
+
+    randomized_groups = Random.even_grouping(participating_players, length(teams))
+
+    0..(length(teams) - 1)
+    |> Enum.map(fn i -> {Enum.at(teams, i), Enum.at(randomized_groups, i)} end)
+    |> Enum.each(fn {team, players} ->
+      Enum.each(players, fn p -> join_team(game, team, p) end)
+    end)
+
+    {:ok, preload_game(game, force: true)}
   end
 end
