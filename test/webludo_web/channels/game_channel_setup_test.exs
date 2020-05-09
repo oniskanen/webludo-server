@@ -150,4 +150,45 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     assert game.has_started
   end
+
+  test "host sending scramble_players message after 4 teams are created sends game_updated broadcast" do
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    {:ok, _reply, socket} = subscribe_and_join(socket, "lobby", %{})
+
+    ref = push(socket, "create_game", %{name: "game name"})
+
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+
+    {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
+
+    ref = push(socket, "join_game", %{name: "Player 1"})
+    assert_reply ref, :ok, %{token: token1}
+    assert_broadcast "game_updated", %{}
+
+    ref = push(socket, "join_game", %{name: "Player 2"})
+    assert_reply ref, :ok, %{token: token2}
+    assert_broadcast "game_updated", %{}
+
+    ref = push(socket, "join_game", %{name: "Player 3"})
+    assert_reply ref, :ok, %{token: token3}
+    assert_broadcast "game_updated", %{}
+
+    ref = push(socket, "join_game", %{name: "Player 4"})
+    assert_reply ref, :ok, %{token: token4}
+    assert_broadcast "game_updated", %{}
+
+    [team1, team2, team3, team4] = game.teams
+
+    push(socket, "join_team", %{token: token1, team_id: team1.id})
+    assert_broadcast "game_updated", %{}
+    push(socket, "join_team", %{token: token2, team_id: team2.id})
+    assert_broadcast "game_updated", %{}
+    push(socket, "join_team", %{token: token3, team_id: team3.id})
+    assert_broadcast "game_updated", %{}
+    push(socket, "join_team", %{token: token4, team_id: team4.id})
+    assert_broadcast "game_updated", %{}
+
+    push(socket, "scramble_players", %{host_token: host_token})
+    assert_broadcast "game_updated", %{game: game}
+  end
 end
