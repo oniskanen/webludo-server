@@ -237,6 +237,12 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
       player_id: hd(team4.players).id
     })
 
-    assert_broadcast "game_updated", %{game: game}
+    assert_broadcast "game_updated", %{game: %{teams: teams}}
+
+    team1 = teams |> Enum.find(fn t -> t.id == team1.id end)
+    team4 = teams |> Enum.find(fn t -> t.id == team4.id end)
+
+    assert length(team1.players) == 2
+    assert length(team4.players) == 0
   end
 end
