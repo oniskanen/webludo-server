@@ -467,4 +467,42 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
       message: "The Red team raises!"
     }
   end
+
+  test "new raising round causes an announcement" do
+    game =
+      TestHelpers.game_fixture(%{
+        teams: [
+          %{color: :red, can_raise: false},
+          %{color: :blue, can_raise: false, new_raising_round: true},
+          %{color: :yellow, can_raise: false, new_raising_round: true},
+          %{color: :green, can_raise: false, new_raising_round: true}
+        ],
+        pieces: [
+          %{team_color: :red, area: :goal, position_index: 0},
+          %{team_color: :blue, area: :goal, position_index: 0},
+          %{team_color: :yellow, area: :goal, position_index: 0},
+          %{team_color: :green, area: :goal, position_index: 0}
+        ],
+        roll: 6,
+        current_team: :red
+      })
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+
+    assert {:ok, %{actions: actions} = reply, socket} =
+             subscribe_and_join(socket, "games:#{game.code}", %{})
+
+    player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
+
+    token = Auth.get_token(player)
+
+    push(socket, "new_raising_round", %{
+      token: token,
+      agree: true
+    })
+
+    assert_broadcast "announcement", %{
+      message: "All teams agreed to a new raising round!"
+    }
+  end
 end
