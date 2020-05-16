@@ -251,6 +251,10 @@ defmodule WebLudoWeb.GameChannel do
     game = Logic.agree_to_new_raise(game, team, agree)
     moves = Logic.get_moves(game)
 
+    if Enum.all?(game.teams, fn t -> t.can_raise end) do
+      announce("All teams agreed to a new raising round!", socket)
+    end
+
     broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
     {:reply, :ok, socket}

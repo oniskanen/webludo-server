@@ -73,5 +73,5 @@ defmodule WebLudo.Logic.Constants do
     end
   end
 
-  def min_team_count, do: 4
+  def min_team_count, do: 1
 end

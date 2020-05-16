@@ -101,16 +101,13 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert game.has_started
   end
 
-  # TODO: Relax this to 1 or 2 teams as soon as the game logic supports <4 teams
-  test "a game cannot be started with less than 4 teams with players" do
+  test "a game cannot be started without a team with players" do
     game =
       TestHelpers.setup_game_fixture(%{
-        players: [
-          %{name: "Player 1"}
-        ]
+        players: []
       })
 
-    assert {:error, "Cannot start game with less than 4 teams"} = Logic.start_game(game)
+    assert {:error, "Cannot start game without a team with players"} = Logic.start_game(game)
 
     game = Repo.get(Game, game.id)
     assert not game.has_started
@@ -242,5 +239,19 @@ defmodule WebLudo.Logic.GameSetupTest do
 
     assert {:error, "Cannot join a team from another game"} =
              Logic.join_team(game, other_team, player)
+  end
+
+  test "starting a game with less than 4 teams removes the empty teams" do
+    game =
+      TestHelpers.setup_game_fixture(%{
+        players: [
+          %{name: "Player 1"},
+          %{name: "Player 2"}
+        ]
+      })
+
+    {:ok, game} = Logic.start_game(game)
+
+    assert length(game.teams) == 2
   end
 end
