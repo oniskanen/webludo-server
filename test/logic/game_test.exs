@@ -226,7 +226,10 @@ defmodule WebLudo.Logic.GameTest do
     attrs = %{
       current_team: :red,
       roll: 1,
-      pieces: [%{area: :goal, position_index: 0, team_color: :red}]
+      pieces: [
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :home, position_index: 0, team_color: :blue}
+      ]
     }
 
     game = TestHelpers.game_fixture(attrs)
@@ -314,7 +317,8 @@ defmodule WebLudo.Logic.GameTest do
         %{area: :home, position_index: 0, team_color: :red},
         %{area: :home, position_index: 1, team_color: :red},
         %{area: :home, position_index: 2, team_color: :red},
-        %{area: :home, position_index: 3, team_color: :red}
+        %{area: :home, position_index: 3, team_color: :red},
+        %{area: :home, position_index: 0, team_color: :blue}
       ]
     }
 
@@ -373,7 +377,8 @@ defmodule WebLudo.Logic.GameTest do
       roll: nil,
       roll_count: 0,
       pieces: [
-        %{area: :play, position_index: 27, team_color: :red}
+        %{area: :play, position_index: 27, team_color: :red},
+        %{area: :home, position_index: 0, team_color: :blue}
       ]
     }
 
@@ -881,5 +886,29 @@ defmodule WebLudo.Logic.GameTest do
     {%{teams: teams}, _changes} = Logic.execute_move(game, move)
 
     assert Enum.any?(teams, &match?(%{has_finished: false, color: :red}, &1))
+  end
+
+  test "next team gets assigned correctly when playing with only red, blue and yellow teams" do
+    attrs = %{
+      current_team: :yellow,
+      roll: 4,
+      roll_count: 1,
+      pieces: [
+        %{area: :play, position_index: 1, team_color: :yellow},
+        %{area: :play, position_index: 2, team_color: :blue},
+        %{area: :play, position_index: 3, team_color: :red}
+      ],
+      teams: [
+        %{color: :yellow, name: "Yellow team"},
+        %{color: :blue, name: "Blue team"},
+        %{color: :red, name: "Red team"}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    next_team = Logic.get_next_team(game)
+
+    assert next_team == :red
   end
 end

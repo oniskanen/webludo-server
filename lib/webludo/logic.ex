@@ -37,14 +37,17 @@ defmodule WebLudo.Logic do
   defp has_movable_pieces?(%Game{} = game, color) do
     game = Repo.preload(game, :pieces)
 
-    goal_piece_indices =
+    team_pieces =
       game.pieces
       |> Enum.filter(fn p -> p.team_color == color end)
+
+    goal_piece_indices =
+      team_pieces
       |> Enum.filter(fn p -> p.area == :goal end)
       |> Enum.map(fn p -> p.position_index end)
       |> Enum.sort()
 
-    goal_piece_indices != Enum.to_list(0..3)
+    length(team_pieces) > 0 and goal_piece_indices != Enum.to_list(0..3)
   end
 
   defp has_movable_pieces_in_play?(%Game{current_team: current_team} = game) do
@@ -387,7 +390,7 @@ defmodule WebLudo.Logic do
     end
   end
 
-  defp get_next_team(%Game{roll: roll} = game) do
+  def get_next_team(%Game{roll: roll} = game) do
     next_team_candidate =
       case roll do
         6 -> game.current_team
