@@ -72,7 +72,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
     {:ok, %{game: _game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
     ref = push(socket, "start_game", %{host_token: host_token})
-    assert_reply ref, :error, %{message: "Cannot start game with less than 4 teams"}
+    assert_reply ref, :error, %{message: "Cannot start game without a team with players"}
   end
 
   test "host sending start_game message after 4 teams are created gets ok reply" do

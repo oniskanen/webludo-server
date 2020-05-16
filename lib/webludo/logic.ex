@@ -870,6 +870,10 @@ defmodule WebLudo.Logic do
     |> Repo.update()
   end
 
+  def delete_team(team) do
+    Repo.delete!(team)
+  end
+
   def set_team_penalty(%Game{} = game, team_id, amount) do
     case update_team(get_team(team_id), %{penalties: amount}) do
       {:ok, _team} ->
@@ -999,6 +1003,7 @@ defmodule WebLudo.Logic do
     team_count = length(teams_with_players)
 
     if team_count >= Constants.min_team_count() do
+      # TODO: In 2 team games, assign teams opposite one another
       random_colors =
         Constants.team_colors()
         |> Enum.map(fn c -> {c, :rand.uniform_real()} end)
@@ -1019,6 +1024,17 @@ defmodule WebLudo.Logic do
           updated_team
         end)
 
+      teams_without_players =
+        game.teams
+        |> Enum.map(fn team -> {team, length(team.players)} end)
+        |> Enum.filter(fn {_t, count} -> count == 0 end)
+        |> Enum.map(fn {team, _c} -> team end)
+
+      teams_without_players
+      |> Enum.each(fn t ->
+        delete_team(t)
+      end)
+
       teams
       |> Enum.each(fn team ->
         Constants.start_index_list()
@@ -1035,7 +1051,7 @@ defmodule WebLudo.Logic do
 
       {:ok, preload_game(game, force: true)}
     else
-      {:error, "Cannot start game with less than #{Constants.min_team_count()} teams"}
+      {:error, "Cannot start game without a team with players"}
     end
   end
 
