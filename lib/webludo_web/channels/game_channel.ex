@@ -157,6 +157,23 @@ defmodule WebLudoWeb.GameChannel do
     end
   end
 
+  def handle_in(
+        "assign_team",
+        %{"host_token" => host_token, "team_id" => team_id, "player_id" => player_id},
+        socket
+      ) do
+    {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
+
+    game = Logic.get_game(game_id) |> Repo.preload([:players, teams: :players])
+    player = Enum.find(game.players, fn p -> p.id == player_id end)
+    team = Enum.find(game.teams, fn t -> t.id == team_id end)
+
+    {:ok, game} = Logic.join_team(game, team, player)
+    actions = Logic.get_moves(game)
+    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+    {:reply, :ok, socket}
+  end
+
   def handle_in("game", _params, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
     {:reply, {:ok, game}, socket}
