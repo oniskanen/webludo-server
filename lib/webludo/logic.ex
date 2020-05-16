@@ -457,8 +457,10 @@ defmodule WebLudo.Logic do
         piece_id: piece.id,
         target_area: :home,
         target_index: first_free_home_index,
+        target_multiplier: 1,
         start_area: piece.area,
-        start_index: piece.position_index
+        start_index: piece.position_index,
+        start_multiplier: piece.multiplier
       }
     ]
 
@@ -676,8 +678,10 @@ defmodule WebLudo.Logic do
               %{
                 start_area: p.area,
                 start_index: p.position_index,
+                start_multiplier: p.multiplier,
                 piece_id: p.id,
                 target_area: :goal,
+                target_multiplier: 1,
                 target_index: 0
               }
             end)
