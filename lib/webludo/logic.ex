@@ -263,7 +263,7 @@ defmodule WebLudo.Logic do
       length(current_team_home_pieces) > 0 ->
         []
 
-      length(goal_pieces) < Constants.team_count() ->
+      length(goal_pieces) < length(teams) ->
         []
 
       true ->

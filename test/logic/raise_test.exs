@@ -39,6 +39,35 @@ defmodule WebLudo.Logic.RaiseTest do
     assert Enum.any?(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
   end
 
+  test "a team can raise when playing with less than 4 teams" do
+    attrs = %{
+      current_team: :red,
+      roll: 6,
+      roll_count: 1,
+      teams: [
+        %{color: :red},
+        %{color: :yellow},
+        %{color: :green}
+      ],
+      pieces: [
+        %{area: :goal, position_index: 0, team_color: :red},
+        %{area: :play, position_index: 1, team_color: :red},
+        %{area: :play, position_index: 2, team_color: :red},
+        %{area: :play, position_index: 3, team_color: :red},
+        %{area: :goal, position_index: 0, team_color: :yellow},
+        %{area: :goal, position_index: 0, team_color: :green}
+      ]
+    }
+
+    game = TestHelpers.game_fixture(attrs)
+
+    moves = Logic.get_moves(game)
+
+    assert 4 = length(moves)
+
+    assert Enum.any?(moves, &match?(%{target_index: 0, target_area: :play, type: "raise"}, &1))
+  end
+
   test "a team raising has their opponents' pieces move to first free home space and own piece to start space" do
     attrs = %{
       current_team: :red,
