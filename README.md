@@ -17,7 +17,17 @@ To start your Phoenix server: `mix phx.server`
 
 The server now runs in [`localhost:4000`](http://localhost:4000). There is no built-in browser interface, but running [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) locally works well.
 
-## Production deployment
+## Local server in Docker
+
+Run `docker-compose -f docker-compose.dev.yml up` to run a Postgres container and the backend container simultaneously. This will also automatically run migrations.
+
+## Production build
+
+To ensure the build environment matches the server, we build the production releases in Docker. The future Linode VM hosting the production backend is planned to run Debian 10.
+
+Run `docker build -t elixir-debian:latest -f build.Dockerfile .` to create a Docker image that can be used to build the production release.
+
+## Production deployment (Gigalixir)
 
 The production instance can be found at https://webludo-api.oni.dev. Deployment is done through Gigalixir.
 
