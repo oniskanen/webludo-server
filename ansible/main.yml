@@ -9,6 +9,12 @@
 - name: Install Packages
   import_playbook: playbooks/install-packages.yml
 
+- name: Application Deployment Setup
+  import_playbook: playbooks/application-deployment-setup.yml
+
+- name: Install Postgres
+  import_playbook: playbooks/postgres.yml
+
 - name: Configure Certbot
   import_playbook: playbooks/lets-encrypt.yml
 

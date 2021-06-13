@@ -1,0 +1,20 @@
+---
+- hosts: application
+  vars:
+    - packages:
+      # Scans system access logs and bans IPs that show malicious signs
+      - fail2ban
+      # For reverse proxy into our application
+      - nginx
+
+  remote_user: root
+
+  tasks:
+  - name: install postgres + postgres packages
+    apt:
+      update_cache: yes
+      state: present
+      name:
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
