@@ -1,0 +1,45 @@
+---
+- hosts: webludo-prod
+
+  remote_user: root
+
+  tasks:
+    - name: Create Deploy User
+      user:
+        name: '{{ username }}'
+        createhome: yes
+        state: present
+        shell: /bin/bash
+      register: deployuser
+
+    - name: Disable password for deploy on creation
+      # this will set the password to something untypable and random essentialy
+      # preventing password login for this user
+      shell: /usr/bin/passwd -l '{{ username }}'
+      # this line tells Ansible to only run this task if the deployuser we
+      # defined above has changed
+      when: deployuser.changed
+
+    - name: Deploy SSH Key
+      authorized_key:
+        user: '{{ username }}'
+        # you would need to change this line to point to your public key
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        state: present
+
+    - name: Disable Password Authentication
+      lineinfile:
+        # completely disables password authentication for ssh, so make sure your
+        # root user is set up to connect with a key, not a password!
+        dest: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: "PasswordAuthentication no"
+        state: present
+        backup: yes
+      notify: restart ssh
+
+  handlers:
+    - name: restart ssh
+      service:
+        name: sshd
+        state: restarted

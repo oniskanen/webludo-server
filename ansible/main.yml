@@ -1,0 +1,7 @@
+---
+- hosts: application
+
+  remote_user: root
+
+- name: Configure Machine Login
+  import_playbook: playbooks/configure-login.yml
