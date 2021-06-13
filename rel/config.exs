@@ -45,6 +45,7 @@ environment :prod do
     |> :crypto.hash(cookie)
     |> Base.encode16()
     |> String.to_atom()
+  end
 
   set cookie: prod_cookie.()
   set vm_args: "rel/vm.args"
