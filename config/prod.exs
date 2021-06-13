@@ -14,6 +14,13 @@ config :webludo, WebLudoWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
   check_origin: ["//localhost:*", "//webludo.netlify.com", "//webludo.katris.dev"]
 
+config :webludo, WebLudo.Repo,
+  username: System.get_env("PGUSER"),
+  password: System.get_env("PGPASSWORD"),
+  database: System.get_env("PGDATABASE"),
+  hostname: System.get_env("PGHOST"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
 # Do not print debug messages in production
 config :logger, level: :info
 
