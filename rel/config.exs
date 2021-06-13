@@ -31,13 +31,22 @@ environment :dev do
   # dev mode.
   set dev_mode: true
   set include_erts: false
-  set cookie: :"wpFRY3QJgfpn%b(ejJVfWwDM<7nB]c9BJhuh_xp2B2|13f]`6u56&p94WXLPAGx%"
+  set cookie: System.get_env("WEBLUDO_COOKIE")
 end
 
 environment :prod do
   set include_erts: true
   set include_src: false
-  set cookie: :"[FtcT0E!>PLv^sOj4>|>:3]x43J]@0&_8w(xfsv2CmYcqZtMfN.q@]=tcIc:p_jJ"
+
+  prod_cookie = fn ->
+    cookie = System.get_env("WEBLUDO_COOKIE") || :crypto.strong_rand_bytes(64)
+
+    :sha256
+    |> :crypto.hash(cookie)
+    |> Base.encode16()
+    |> String.to_atom()
+
+  set cookie: prod_cookie.()
   set vm_args: "rel/vm.args"
 end
 
