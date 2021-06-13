@@ -1,0 +1,29 @@
+---
+- hosts: application
+  vars:
+    - packages:
+      # Scans system access logs and bans IPs that show malicious signs
+      - fail2ban
+      # For reverse proxy into our application
+      - nginx
+
+  remote_user: root
+
+  tasks:
+    - name: Update APT package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        state: present
+        pkg: "{{ packages }}"
+
+  roles:
+    - role: jnv.unattended-upgrades
+      unattended_origins_patterns:
+      - 'origin=Ubuntu,archive=${distro_codename}-security'
+      unattended_automatic_reboot: true
+      unattended_automatic_reboot_time: '09:00'
+      unattended_mail: "{{ admin_email }}"

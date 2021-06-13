@@ -1,5 +1,5 @@
 ---
-- hosts: webludo-prod
+- hosts: application
 
   remote_user: root
 

@@ -5,3 +5,9 @@
 
 - name: Configure Machine Login
   import_playbook: playbooks/configure-login.yml
+
+- name: Install Packages
+  import_playbook: playbooks/install-packages.yml
+
+- name: Configure Certbot
+  import_playbook: playbooks/lets-encrypt.yml
