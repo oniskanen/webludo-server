@@ -56,7 +56,14 @@ defmodule WebLudo.MixProject do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      ansible: &run_ansible/1
     ]
+  end
+
+  defp run_ansible(_) do
+    Mix.shell().cmd(
+      "cd ansible/ && ANSIBLE_FORCE_COLOR=True ansible-playbook main.yml"
+    )
   end
 end
