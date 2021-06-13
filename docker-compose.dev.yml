@@ -4,26 +4,16 @@ services:
   phoenix:
     build:
         context: .
-    environment:
-      # Variables to connect to our Postgres server
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGDATABASE: webludo
-      PGPORT: 5432
-      # Hostname of our Postgres container
-      PGHOST: db
+    env_file:
+      - ./env/app.env.dev
     ports:
       - "4000:4000"
     depends_on:
       - db
   db:
     image: postgres
-    environment:
-      # Set user/password for Postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      # Set a path where Postgres should store the data
-      PGDATA: /var/lib/postgresql/data/pgdata
+    env_file:
+      - ./env/db.env.dev
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
