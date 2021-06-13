@@ -1,2 +1,5 @@
 ---
+database_user: webludo
 database_password: "{{ secret_database_password }}"
+database_name: "{{ app_name }}"
+database_host: localhost

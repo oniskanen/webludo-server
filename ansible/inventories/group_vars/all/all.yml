@@ -1,5 +1,12 @@
 ---
 username: deploy
-app_name: webludo-prod
+app_name: webludo
 domain: new-webludo-api.oni.dev
 admin_email: webludo-admin@oni.dev
+app_version: "0.1.0"
+release_name: "{{app_name}}-{{app_version}}"
+release_dir: "../rel/artifacts/"
+release_archive_path: "{{release_dir}}{{release_name}}.tar.gz"
+remote_release_dir: "~/rel/artifacts/"
+remote_release_archive_path: "{{remote_release_dir}}{{release_name}}.tar.gz"
+remote_release_artifact_path: "{{remote_release_dir}}bin/{{ app_name }}"

@@ -18,3 +18,19 @@
         - postgresql
         - postgresql-contrib
         - libpq-dev
+
+  - name: create postgres user
+    postgresql_user:
+      name: "{{database_user}}"
+      password: "{{database_password}}"
+      role_attr_flags: CREATEDB,SUPERUSER
+      state: present
+    become_user: postgres
+    become: yes
+
+  - name: create database
+    postgresql_db:
+      name: "{{database_name}}"
+      encoding: "UTF-8"
+    become_user: postgres
+    become: yes
