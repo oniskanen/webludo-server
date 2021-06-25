@@ -6,6 +6,7 @@
       - fail2ban
       # For reverse proxy into our application
       - nginx
+      - python3-pip
 
   remote_user: root
 

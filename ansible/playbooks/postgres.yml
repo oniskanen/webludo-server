@@ -19,6 +19,10 @@
         - postgresql-contrib
         - libpq-dev
 
+  - name: install psycopg2
+    pip:
+      name: psycopg2
+
   - name: create postgres user
     postgresql_user:
       name: "{{database_user}}"
