@@ -243,6 +243,6 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
     team4 = teams |> Enum.find(fn t -> t.id == team4.id end)
 
     assert length(team1.players) == 2
-    assert length(team4.players) == 0
+    assert Enum.empty?(team4.players)
   end
 end
