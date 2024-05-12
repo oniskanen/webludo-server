@@ -398,7 +398,7 @@ defmodule WebLudoWeb.Channels.AnnouncementTest do
 
     token = Auth.get_token(player)
 
-    move = hd(actions)
+    move = Enum.find(actions, &match?(%{target_index: 0, target_area: :play}, &1))
 
     push(socket, "action", %{token: token, type: "move", move: Map.from_struct(move)})
 
