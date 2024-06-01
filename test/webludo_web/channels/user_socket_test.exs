@@ -3,6 +3,6 @@ defmodule WebLudoWeb.Channels.UserSocketTest do
   alias WebLudoWeb.UserSocket
 
   test "socket anonymous connection" do
-    assert {:ok, socket} = connect(UserSocket, %{})
+    assert {:ok, _socket} = connect(UserSocket, %{})
   end
 end

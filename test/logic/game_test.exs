@@ -268,7 +268,7 @@ defmodule WebLudo.Logic.GameTest do
     game = TestHelpers.game_fixture(attrs)
 
     assert {:ok, game} = Logic.set_roll(game, 1)
-    assert {:error, message} = Logic.set_roll(game, 1)
+    assert {:error, _message} = Logic.set_roll(game, 1)
   end
 
   test "roll results do not carry between teams" do

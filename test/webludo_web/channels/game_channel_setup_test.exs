@@ -7,7 +7,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: _token} = params
+    assert_reply ref, :ok, %{code: code, host_token: _token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -24,7 +24,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: _token} = params
+    assert_reply ref, :ok, %{code: code, host_token: _token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -46,7 +46,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: _token} = params
+    assert_reply ref, :ok, %{code: code, host_token: _token} = _params
 
     {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -67,7 +67,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = _params
 
     {:ok, %{game: _game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -81,7 +81,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -114,7 +114,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -157,7 +157,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -189,7 +189,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
     assert_broadcast "game_updated", %{}
 
     push(socket, "scramble_players", %{host_token: host_token})
-    assert_broadcast "game_updated", %{game: game}
+    assert_broadcast "game_updated", %{game: %{}}
   end
 
   test "host sending assign_team message sends game_updated broadcast" do
@@ -198,7 +198,7 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
 
     ref = push(socket, "create_game", %{name: "game name"})
 
-    assert_reply ref, :ok, %{code: code, host_token: host_token} = params
+    assert_reply ref, :ok, %{code: code, host_token: host_token} = _params
 
     {:ok, %{game: game}, socket} = subscribe_and_join(socket, "games:#{code}", %{})
 
@@ -243,6 +243,6 @@ defmodule WebLudoWeb.Channels.GameChannelSetupTest do
     team4 = teams |> Enum.find(fn t -> t.id == team4.id end)
 
     assert length(team1.players) == 2
-    assert length(team4.players) == 0
+    assert Enum.empty?(team4.players)
   end
 end

@@ -38,7 +38,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
     ref = push(socket, "join_game", %{name: "Player 5"})
-    assert_reply ref, :ok, %{token: token}
+    assert_reply ref, :ok, %{token: _token}
   end
 
   test "join game responds with a player id" do
@@ -48,7 +48,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game.code}", %{})
     ref = push(socket, "join_game", %{name: "Player 5"})
-    assert_reply ref, :ok, %{id: id}
+    assert_reply ref, :ok, %{id: _id}
   end
 
   test "player not in turn cannot roll die" do
@@ -153,7 +153,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -180,7 +180,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -214,7 +214,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{game: %{teams: teams}} = reply, socket} =
+    assert {:ok, %{game: %{teams: teams}} = _reply, _socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     assert [%{penalties: 0}, %{penalties: 0}, %{penalties: 0}] = teams
@@ -318,7 +318,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -349,7 +349,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -375,7 +375,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: _actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -396,7 +396,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: _actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -424,7 +424,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: _actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
@@ -452,7 +452,7 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
 
-    assert {:ok, %{actions: actions} = reply, socket} =
+    assert {:ok, %{actions: _actions} = _reply, socket} =
              subscribe_and_join(socket, "games:#{game.code}", %{})
 
     player = Enum.find(game.players, &match?(%{team: %{color: :red}}, &1))
