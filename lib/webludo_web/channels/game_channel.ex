@@ -166,9 +166,7 @@ defmodule WebLudoWeb.GameChannel do
 
         if match?({:reply, :ok, _}, response) do
           announce(
-            "The #{String.capitalize(to_string(color))} team fixed their penalty value to #{amount} (used to be #{
-              previous_penalties
-            }).",
+            "The #{String.capitalize(to_string(color))} team fixed their penalty value to #{amount} (used to be #{previous_penalties}).",
             socket
           )
         end
@@ -291,9 +289,7 @@ defmodule WebLudoWeb.GameChannel do
             broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
             announce(
-              "The #{String.capitalize(to_string(team.color))} team missed calling hembo. Penalty to the #{
-                String.capitalize(to_string(team.color))
-              } team.",
+              "The #{String.capitalize(to_string(team.color))} team missed calling hembo. Penalty to the #{String.capitalize(to_string(team.color))} team.",
               socket
             )
 
@@ -406,33 +402,25 @@ defmodule WebLudoWeb.GameChannel do
     case penalties do
       [%{team: color, amount: 1, type: "eat"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} team piece eaten! Penalty to the #{
-            String.capitalize(to_string(color))
-          } team.",
+          "#{String.capitalize(to_string(color))} team piece eaten! Penalty to the #{String.capitalize(to_string(color))} team.",
           socket
         )
 
       [%{team: color, amount: amount, eaten: eaten, eater: eater, type: "eat"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} team #{eaten} eaten by a #{eater}! #{amount} penalties to the #{
-            String.capitalize(to_string(color))
-          } team.",
+          "#{String.capitalize(to_string(color))} team #{eaten} eaten by a #{eater}! #{amount} penalties to the #{String.capitalize(to_string(color))} team.",
           socket
         )
 
       [%{team: color, amount: 1, type: "mine"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} team walks into a mine! Penalty to the #{
-            String.capitalize(to_string(color))
-          } team.",
+          "#{String.capitalize(to_string(color))} team walks into a mine! Penalty to the #{String.capitalize(to_string(color))} team.",
           socket
         )
 
       [%{team: color, amount: amount, eaten: eaten, eater: eater, type: "mine"}] ->
         announce(
-          "#{String.capitalize(to_string(color))} team walks a #{eaten} into a #{eater} mine! #{
-            amount
-          } penalties to the #{String.capitalize(to_string(color))} team.",
+          "#{String.capitalize(to_string(color))} team walks a #{eaten} into a #{eater} mine! #{amount} penalties to the #{String.capitalize(to_string(color))} team.",
           socket
         )
 
