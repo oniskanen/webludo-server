@@ -124,6 +124,65 @@ defmodule WebLudo.Logic.GameSetupTest do
     assert Enum.any?(game.teams, fn t -> t.color == :green end)
   end
 
+  @opposite_pairs [MapSet.new([:red, :yellow]), MapSet.new([:blue, :green])]
+
+  defp two_team_fixture do
+    TestHelpers.setup_game_fixture(%{players: [%{name: "P1"}, %{name: "P2"}]})
+  end
+
+  defp two_team_colors_ordered(game) do
+    game.teams
+    |> Enum.sort_by(& &1.sort_value)
+    |> Enum.map(& &1.color)
+  end
+
+  test "two-team game always assigns an opposite-color pair" do
+    :rand.seed(:exsss, {1, 2, 3})
+
+    for _ <- 1..30 do
+      {:ok, game} = Logic.start_game(two_team_fixture())
+
+      colors = MapSet.new(Enum.map(game.teams, & &1.color))
+
+      assert colors in @opposite_pairs,
+             "Expected an opposite-color pair, got #{inspect(MapSet.to_list(colors))}"
+    end
+  end
+
+  test "two-team game reaches all four ordered configurations over many trials" do
+    :rand.seed(:exsss, {1, 2, 3})
+
+    seen =
+      Enum.reduce_while(1..200, MapSet.new(), fn _i, acc ->
+        {:ok, game} = Logic.start_game(two_team_fixture())
+        acc = MapSet.put(acc, two_team_colors_ordered(game))
+        if MapSet.size(acc) == 4, do: {:halt, acc}, else: {:cont, acc}
+      end)
+
+    expected =
+      MapSet.new([
+        [:red, :yellow],
+        [:yellow, :red],
+        [:blue, :green],
+        [:green, :blue]
+      ])
+
+    assert seen == expected
+  end
+
+  test "three-team game still uses three distinct colors from the four" do
+    game =
+      TestHelpers.setup_game_fixture(%{
+        players: [%{name: "P1"}, %{name: "P2"}, %{name: "P3"}]
+      })
+
+    assert {:ok, game} = Logic.start_game(game)
+
+    colors = MapSet.new(Enum.map(game.teams, & &1.color))
+    assert MapSet.size(colors) == 3
+    assert MapSet.subset?(colors, MapSet.new([:red, :blue, :yellow, :green]))
+  end
+
   test "starting a game creates 4 pieces in home for playing teams" do
     game = TestHelpers.setup_game_fixture()
 
