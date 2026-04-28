@@ -23,45 +23,66 @@ loopback only — never expose the port on a public interface.
   exe.dev custom-domain mapping).
 - A local clone of this repo to copy commands from.
 
-## 1. VM bootstrap
+## 1. System packages
 
-Install packages and the Erlang/Elixir toolchain. The Erlang Solutions apt
-repo tracks recent versions; stock distro packages typically lag too far for
-the toolchain pinned in `.tool-versions`.
+Install build dependencies for Erlang plus Postgres. The Erlang/Elixir
+toolchain itself is installed via asdf in step 4 — the Erlang Solutions
+apt repo does not currently serve Ubuntu 24.04 (`noble`), which is what
+exe.dev provisions.
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential git curl gnupg lsb-release \
-  libssl-dev libncurses-dev postgresql postgresql-contrib
-
-# Erlang Solutions apt source
-curl -fsSL https://binaries2.erlang-solutions.com/GPG-KEY-pmanager.asc \
-  | sudo gpg --dearmor -o /usr/share/keyrings/erlang-solutions.gpg
-echo "deb [signed-by=/usr/share/keyrings/erlang-solutions.gpg] https://binaries2.erlang-solutions.com/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/ $(lsb_release -cs) contrib" \
-  | sudo tee /etc/apt/sources.list.d/erlang-solutions.list
-sudo apt update
-sudo apt install -y esl-erlang elixir
+sudo apt install -y build-essential autoconf m4 \
+  libncurses-dev libssl-dev libwxgtk3.2-dev libgl1-mesa-dev libglu1-mesa-dev \
+  libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils \
+  git curl unzip postgresql postgresql-contrib
 ```
-
-Verify the versions match `.tool-versions` at the repo root:
-
-```bash
-elixir --version    # expect Elixir 1.19.x / Erlang/OTP 28
-```
-
-If Erlang Solutions is behind, fall back to asdf — `.tool-versions` will
-drive the install.
 
 ## 2. Application user and directories
 
 ```bash
-sudo useradd --system --home /opt/webludo --shell /usr/sbin/nologin webludo
+sudo useradd --system --home /opt/webludo --shell /bin/bash webludo
 sudo mkdir -p /opt/webludo /etc/webludo
 sudo chown webludo:webludo /opt/webludo
 sudo chown root:webludo /etc/webludo && sudo chmod 750 /etc/webludo
 ```
 
-## 3. Postgres role and database
+The user has `/bin/bash` so the `sudo -iu webludo` invocations below
+work. See [Optional hardening](#optional-hardening) for locking the
+account down once the deploy is stable.
+
+## 3. Clone the repo
+
+```bash
+sudo -u webludo git clone https://github.com/oniskanen/webludo-server.git /opt/webludo/repo
+```
+
+## 4. Toolchain via asdf
+
+The repo's `.tool-versions` pins Elixir 1.19.5 / Erlang 28.5. Install
+asdf as the `webludo` user, then build the pinned toolchain (Erlang
+compiles from source, ~15 min on a typical VM).
+
+```bash
+sudo -iu webludo bash -c '
+  git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.1 &&
+  echo ". ~/.asdf/asdf.sh" >> ~/.bashrc &&
+  . ~/.asdf/asdf.sh &&
+  asdf plugin add erlang &&
+  asdf plugin add elixir &&
+  cd /opt/webludo/repo &&
+  asdf install
+'
+```
+
+Verify:
+
+```bash
+sudo -iu webludo bash -c 'cd /opt/webludo/repo && elixir --version'
+# expect Elixir 1.19.5 / Erlang/OTP 28
+```
+
+## 5. Postgres role and database
 
 ```bash
 sudo -u postgres psql <<'SQL'
@@ -72,10 +93,10 @@ SQL
 
 Pick a strong password; you will paste it into `webludo.env` next.
 
-## 4. Env file
+## 6. Env file
 
 ```bash
-sudo cp deploy/.env.example /etc/webludo/webludo.env
+sudo cp /opt/webludo/repo/deploy/.env.example /etc/webludo/webludo.env
 sudo chown root:webludo /etc/webludo/webludo.env
 sudo chmod 640 /etc/webludo/webludo.env
 sudo -e /etc/webludo/webludo.env
@@ -84,19 +105,17 @@ sudo -e /etc/webludo/webludo.env
 Fill in:
 
 - `DATABASE_URL` — `ecto://webludo:<password>@localhost/webludo_prod`
-- `SECRET_KEY_BASE` — generate with `mix phx.gen.secret` (any host with
-  Elixir works, including the VM after step 1).
+- `SECRET_KEY_BASE` — generate with the one-liner below (`mix phx.gen.secret`
+  needs the dev-only deps that a `--only prod` checkout does not fetch).
 - `PHX_HOST` — `webludo-api.oni.dev`.
-- `PORT` — `4000` (must match the exe.dev edge mapping in step 8).
-
-## 5. Clone the repo
+- `PORT` — `4000` (must match the exe.dev edge mapping in step 9).
 
 ```bash
-sudo -u webludo git clone https://github.com/oniskanen/webludo-server.git /opt/webludo/repo
-cd /opt/webludo/repo
+sudo -iu webludo bash -c \
+  'elixir -e ":crypto.strong_rand_bytes(64) |> Base.url_encode64(padding: false) |> IO.puts"'
 ```
 
-## 6. Build the release
+## 7. Build the release
 
 Run as the `webludo` user so build artefacts are owned correctly.
 
@@ -110,7 +129,7 @@ sudo -iu webludo bash -c '
 '
 ```
 
-## 7. First-run migrations
+## 8. First-run migrations
 
 ```bash
 sudo -iu webludo bash -c '
@@ -122,7 +141,7 @@ sudo -iu webludo bash -c '
 `set -a` exports the env vars to the eval subprocess. The release task
 applies all pending migrations and exits.
 
-## 8. Systemd unit and edge mapping
+## 9. Systemd unit and edge mapping
 
 ```bash
 sudo cp /opt/webludo/repo/deploy/webludo.service /etc/systemd/system/webludo.service
@@ -135,7 +154,12 @@ In the exe.dev console, map the custom domain `webludo-api.oni.dev` to
 port `4000` of this VM (refer to exe.dev docs for the current console
 flow). TLS provisioning is automatic.
 
-## 9. Verify
+**Toggle the domain to public.** exe.dev mappings default to private mode,
+which intercepts requests with the exe.dev login wall (`307 → /__exe.dev/login`).
+For an API and websocket, the domain has to be set to public in the same
+console panel.
+
+## 10. Verify
 
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" https://webludo-api.oni.dev/socket/websocket
@@ -196,3 +220,22 @@ sudo -iu webludo bash -c '
 
 `<version>` is the timestamp prefix on the migration filename in
 `priv/repo/migrations/`.
+
+## Optional hardening
+
+The `webludo` user is created with `/bin/bash` so the `sudo -iu webludo`
+invocations above work. Once the deploy is stable, you can lock the
+account down further:
+
+```bash
+sudo passwd -l webludo                              # disable password login
+sudo usermod -s /usr/sbin/nologin webludo           # no interactive shell
+```
+
+After switching the shell to `nologin`, replace `sudo -iu webludo bash -c
+'...'` with `sudo -u webludo bash -lc '. ~/.asdf/asdf.sh && ...'` (or
+explicit `env` invocations) — `sudo -i` requires a real login shell on
+the target user, which `nologin` is not.
+
+If `sshd` is configured locally, also set `DenyUsers webludo` in
+`/etc/ssh/sshd_config` so the account cannot accept inbound SSH.
