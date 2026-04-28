@@ -17,36 +17,45 @@ defmodule WebLudoWeb.GameChannel do
   end
 
   def handle_in("action", %{"token" => token, "type" => "roll"}, socket) do
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    player = Logic.get_player(player_id) |> Repo.preload(:team)
-    current_team = game.current_team
+      {:ok, {game, player}} ->
+        current_team = game.current_team
 
-    case current_team == player.team.color do
-      false ->
-        {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
+        case current_team == player.team.color do
+          false ->
+            {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
 
-      true ->
-        num = :rand.uniform(6)
+          true ->
+            num = :rand.uniform(6)
 
-        case Logic.set_roll(game, num) do
-          {:ok, game} ->
-            actions = Logic.get_moves(game)
-            broadcast!(socket, "roll", %{result: num})
-            broadcast!(socket, "game_updated", %{game: game, actions: actions})
-            {:reply, :ok, socket}
+            case Logic.set_roll(game, num) do
+              {:ok, game} ->
+                actions = Logic.get_moves(game)
+                broadcast!(socket, "roll", %{result: num})
+                broadcast!(socket, "game_updated", %{game: game, actions: actions})
+                {:reply, :ok, socket}
 
-          {:error, message} ->
-            {:reply, {:error, %{error: message}}, socket}
+              {:error, message} ->
+                {:reply, {:error, %{error: message}}, socket}
+            end
         end
     end
   end
 
   def handle_in("action", %{"token" => token, "type" => "move", "move" => move}, socket) do
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-    player = Logic.get_player(player_id) |> Repo.preload(:team)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
+
+      {:ok, {game, player}} ->
+        handle_move_action(game, player, move, socket)
+    end
+  end
+
+  defp handle_move_action(game, player, move, socket) do
     current_team = game.current_team
 
     case current_team == player.team.color do
@@ -104,56 +113,66 @@ defmodule WebLudoWeb.GameChannel do
   end
 
   def handle_in("join_team", %{"team_id" => team_id, "token" => token}, socket) do
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
-    team = Logic.get_team(team_id)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    {:ok, game} = Logic.join_team(game, team, player)
+      {:ok, {game, player}} ->
+        team = Logic.get_team(team_id)
+        {:ok, game} = Logic.join_team(game, team, player)
 
-    actions = Logic.get_moves(game)
-    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
-    {:reply, :ok, socket}
-  end
-
-  def handle_in("leave_team", %{"token" => token}, socket) do
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
-
-    {:ok, game} = Logic.leave_team(game, player)
-
-    actions = Logic.get_moves(game)
-    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
-    {:reply, :ok, socket}
-  end
-
-  def handle_in("start_game", %{"host_token" => host_token}, socket) do
-    {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
-
-    game = Logic.get_game(game_id)
-
-    case Logic.start_game(game) do
-      {:ok, game} ->
         actions = Logic.get_moves(game)
         broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
         {:reply, :ok, socket}
+    end
+  end
 
-      {:error, message} ->
-        {:reply, {:error, %{message: message}}, socket}
+  def handle_in("leave_team", %{"token" => token}, socket) do
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
+
+      {:ok, {game, player}} ->
+        {:ok, game} = Logic.leave_team(game, player)
+
+        actions = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+        {:reply, :ok, socket}
+    end
+  end
+
+  def handle_in("start_game", %{"host_token" => host_token}, socket) do
+    case authorize_host(host_token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
+
+      {:ok, game} ->
+        case Logic.start_game(game) do
+          {:ok, game} ->
+            actions = Logic.get_moves(game)
+            broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+            {:reply, :ok, socket}
+
+          {:error, message} ->
+            {:reply, {:error, %{message: message}}, socket}
+        end
     end
   end
 
   def handle_in("scramble_players", %{"host_token" => host_token}, socket) do
-    {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
+    case authorize_host(host_token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    game = Logic.get_game(game_id) |> Repo.preload(teams: :players)
-
-    case Logic.scramble_players(game) do
       {:ok, game} ->
-        actions = Logic.get_moves(game)
-        broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
-        {:reply, :ok, socket}
+        game = Repo.preload(game, teams: :players)
+
+        case Logic.scramble_players(game) do
+          {:ok, game} ->
+            actions = Logic.get_moves(game)
+            broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+            {:reply, :ok, socket}
+        end
     end
   end
 
@@ -162,16 +181,20 @@ defmodule WebLudoWeb.GameChannel do
         %{"host_token" => host_token, "team_id" => team_id, "player_id" => player_id},
         socket
       ) do
-    {:ok, game_id} = WebLudoWeb.HostAuth.get_game_id(host_token)
+    case authorize_host(host_token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    game = Logic.get_game(game_id) |> Repo.preload([:players, teams: :players])
-    player = Enum.find(game.players, fn p -> p.id == player_id end)
-    team = Enum.find(game.teams, fn t -> t.id == team_id end)
+      {:ok, game} ->
+        game = Repo.preload(game, [:players, teams: :players])
+        player = Enum.find(game.players, fn p -> p.id == player_id end)
+        team = Enum.find(game.teams, fn t -> t.id == team_id end)
 
-    {:ok, game} = Logic.join_team(game, team, player)
-    actions = Logic.get_moves(game)
-    broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
-    {:reply, :ok, socket}
+        {:ok, game} = Logic.join_team(game, team, player)
+        actions = Logic.get_moves(game)
+        broadcast!(socket, "game_updated", %{game: game, changes: [], actions: actions})
+        {:reply, :ok, socket}
+    end
   end
 
   def handle_in("game", _params, socket) do
@@ -180,60 +203,67 @@ defmodule WebLudoWeb.GameChannel do
   end
 
   def handle_in("set_penalty", %{"amount" => amount, "token" => token}, socket) do
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    %{team: %{color: color, id: id, penalties: previous_penalties}} =
-      Logic.get_player(player_id) |> Repo.preload(:team)
+      {:ok, {_game, %{team: %{color: color, id: id, penalties: previous_penalties}}}} ->
+        response = handle_team_penalty(id, amount, socket)
 
-    response = handle_team_penalty(id, amount, socket)
+        if match?({:reply, :ok, _}, response) do
+          announce(
+            "The #{String.capitalize(to_string(color))} team fixed their penalty value to #{amount} (used to be #{
+              previous_penalties
+            }).",
+            socket
+          )
+        end
 
-    if match?({:reply, :ok, _}, response) do
-      announce(
-        "The #{String.capitalize(to_string(color))} team fixed their penalty value to #{amount} (used to be #{
-          previous_penalties
-        }).",
-        socket
-      )
+        response
     end
-
-    response
   end
 
   def handle_in("decrement_penalty", %{"token" => token}, socket) do
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id) |> Repo.preload(:team)
-    team = player.team
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    response = handle_team_penalty(team.id, team.penalties - 1, socket)
+      {:ok, {_game, player}} ->
+        team = player.team
+        response = handle_team_penalty(team.id, team.penalties - 1, socket)
 
-    case team.penalties - 1 do
-      0 ->
-        announce(
-          "#{String.capitalize(to_string(team.color))} team finished a penalty. That's their last one!",
-          socket
-        )
+        case team.penalties - 1 do
+          0 ->
+            announce(
+              "#{String.capitalize(to_string(team.color))} team finished a penalty. That's their last one!",
+              socket
+            )
 
-      new_amount ->
-        announce(
-          "#{String.capitalize(to_string(team.color))} team finished a penalty. #{new_amount} more to go!",
-          socket
-        )
+          new_amount ->
+            announce(
+              "#{String.capitalize(to_string(team.color))} team finished a penalty. #{new_amount} more to go!",
+              socket
+            )
+        end
+
+        response
     end
-
-    response
   end
 
   def handle_in("chat", %{"token" => token, "message" => message}, socket) do
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    broadcast!(socket, "chat", %{
-      message: message,
-      player: player.name,
-      timestamp: DateTime.now!("Etc/UTC")
-    })
+      {:ok, {_game, player}} ->
+        broadcast!(socket, "chat", %{
+          message: message,
+          player: player.name,
+          timestamp: DateTime.now!("Etc/UTC")
+        })
 
-    {:reply, :ok, socket}
+        {:reply, :ok, socket}
+    end
   end
 
   def handle_in(
@@ -242,78 +272,115 @@ defmodule WebLudoWeb.GameChannel do
         socket
       )
       when is_boolean(agree) do
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id) |> Repo.preload(:team)
-    team = player.team
+      {:ok, {game, player}} ->
+        team = player.team
 
-    game = Logic.agree_to_new_raise(game, team, agree)
-    moves = Logic.get_moves(game)
+        game = Logic.agree_to_new_raise(game, team, agree)
+        moves = Logic.get_moves(game)
 
-    if Enum.all?(game.teams, fn t -> t.can_raise end) do
-      announce("All teams agreed to a new raising round!", socket)
+        if Enum.all?(game.teams, fn t -> t.can_raise end) do
+          announce("All teams agreed to a new raising round!", socket)
+        end
+
+        broadcast!(socket, "game_updated", %{game: game, actions: moves})
+
+        {:reply, :ok, socket}
     end
-
-    broadcast!(socket, "game_updated", %{game: game, actions: moves})
-
-    {:reply, :ok, socket}
   end
 
   def handle_in("jag_bor_i_hembo", %{"token" => token}, socket) do
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
 
-    {:ok, player_id} = WebLudoWeb.Auth.get_player_id(token)
-    player = Logic.get_player(player_id) |> Repo.preload(:team)
-
-    {:ok, game, penalties} = Logic.jag_bor_i_hembo(game, player.team)
-    moves = Logic.get_moves(game)
-
-    broadcast!(socket, "game_updated", %{game: game, actions: moves})
-
-    announce(
-      "The #{String.capitalize(to_string(player.team.color))} team says \"Jag bor i hembo\".",
-      socket
-    )
-
-    case penalties do
-      [%{amount: 1, team_color: color}] ->
-        announce(
-          "Incorrect hembo! The #{String.capitalize(to_string(color))} team gets a penalty.",
-          socket
-        )
-
-      _ ->
-        nil
-    end
-
-    {:reply, :ok, socket}
-  end
-
-  def handle_in("call_missed_hembo", %{"token" => token, "team" => teamColorString}, socket) do
-    {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
-
-    {:ok, _player_id} = WebLudoWeb.Auth.get_player_id(token)
-
-    team = game.teams |> Enum.find(fn t -> to_string(t.color) == teamColorString end)
-
-    case Logic.call_missed_hembo(game, team.color) do
-      {:ok, game} ->
+      {:ok, {game, player}} ->
+        {:ok, game, penalties} = Logic.jag_bor_i_hembo(game, player.team)
         moves = Logic.get_moves(game)
+
         broadcast!(socket, "game_updated", %{game: game, actions: moves})
 
         announce(
-          "The #{String.capitalize(to_string(team.color))} team missed calling hembo. Penalty to the #{
-            String.capitalize(to_string(team.color))
-          } team.",
+          "The #{String.capitalize(to_string(player.team.color))} team says \"Jag bor i hembo\".",
           socket
         )
 
-        {:reply, :ok, socket}
+        case penalties do
+          [%{amount: 1, team_color: color}] ->
+            announce(
+              "Incorrect hembo! The #{String.capitalize(to_string(color))} team gets a penalty.",
+              socket
+            )
 
-      {:error, message} ->
-        {:reply, {:error, %{message: message}}, socket}
+          _ ->
+            nil
+        end
+
+        {:reply, :ok, socket}
     end
+  end
+
+  def handle_in("call_missed_hembo", %{"token" => token, "team" => teamColorString}, socket) do
+    case authorize_player(token, socket) do
+      :unauthorized ->
+        unauthorized_reply(socket)
+
+      {:ok, {game, _player}} ->
+        team = game.teams |> Enum.find(fn t -> to_string(t.color) == teamColorString end)
+
+        case Logic.call_missed_hembo(game, team.color) do
+          {:ok, game} ->
+            moves = Logic.get_moves(game)
+            broadcast!(socket, "game_updated", %{game: game, actions: moves})
+
+            announce(
+              "The #{String.capitalize(to_string(team.color))} team missed calling hembo. Penalty to the #{
+                String.capitalize(to_string(team.color))
+              } team.",
+              socket
+            )
+
+            {:reply, :ok, socket}
+
+          {:error, message} ->
+            {:reply, {:error, %{message: message}}, socket}
+        end
+    end
+  end
+
+  # Verifies the player token, looks up the player (with :team preloaded),
+  # and confirms the player belongs to the game on this channel. Returns
+  # `{:ok, {game, player}}` or `:unauthorized` for any failure mode (bad
+  # token, unknown player, wrong game) — single opaque error to avoid
+  # leaking which step failed.
+  defp authorize_player(token, socket) do
+    with {:ok, game} <- Logic.get_game_by_code(socket.assigns.code),
+         {:ok, player_id} <- WebLudoWeb.Auth.get_player_id(token),
+         %{} = player <- Logic.get_player(player_id) |> Repo.preload(:team),
+         true <- player.game_id == game.id do
+      {:ok, {game, player}}
+    else
+      _ -> :unauthorized
+    end
+  end
+
+  # Verifies the host token and confirms it was minted for the game on
+  # this channel.
+  defp authorize_host(host_token, socket) do
+    with {:ok, game} <- Logic.get_game_by_code(socket.assigns.code),
+         {:ok, host_game_id} <- WebLudoWeb.HostAuth.get_game_id(host_token),
+         true <- host_game_id == game.id do
+      {:ok, game}
+    else
+      _ -> :unauthorized
+    end
+  end
+
+  defp unauthorized_reply(socket) do
+    {:reply, {:error, %{error: "Unauthorized"}}, socket}
   end
 
   defp announce(message, socket) do
