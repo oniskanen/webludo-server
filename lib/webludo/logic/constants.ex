@@ -2,6 +2,10 @@ defmodule WebLudo.Logic.Constants do
   @team_colors [:red, :blue, :yellow, :green]
   @short_track_indices [0, 1, 2, 3]
 
+  # Pairs of colors whose home spaces are 14 apart on the 28-space track —
+  # i.e. directly across the board from one another.
+  @opposite_color_pairs [{:red, :yellow}, {:blue, :green}]
+
   @team_order %{
     red: :blue,
     blue: :yellow,
@@ -38,6 +42,10 @@ defmodule WebLudo.Logic.Constants do
 
   def team_colors do
     @team_colors
+  end
+
+  def opposite_color_pairs do
+    @opposite_color_pairs
   end
 
   def next_team(color) do

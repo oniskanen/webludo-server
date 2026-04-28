@@ -1008,12 +1008,15 @@ defmodule WebLudo.Logic do
     team_count = length(teams_with_players)
 
     if team_count >= Constants.min_team_count() do
-      # TODO: In 2 team games, assign teams opposite one another
       random_colors =
-        Constants.team_colors()
-        |> Enum.map(fn c -> {c, :rand.uniform_real()} end)
-        |> Enum.sort_by(fn {_c, rand} -> rand end)
-        |> Enum.map(fn {c, _r} -> c end)
+        case team_count do
+          2 ->
+            {a, b} = Enum.random(Constants.opposite_color_pairs())
+            Enum.shuffle([a, b])
+
+          _ ->
+            Enum.shuffle(Constants.team_colors())
+        end
 
       teams =
         0..(team_count - 1)
