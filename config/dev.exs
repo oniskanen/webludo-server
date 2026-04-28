@@ -16,6 +16,8 @@ config :webludo, WebLudo.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :webludo, WebLudoWeb.Endpoint,
+  secret_key_base:
+    "8Pq92jawpMQF3X4HGq9dOORYeDM-vSZiXKK25vXwNrmbp5A-BcBLi0FHyEC67X6_zC5xiP5WQn-9udWRx9Sviw",
   http: [port: 4000],
   https: [
     port: 4001,

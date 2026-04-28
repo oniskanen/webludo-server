@@ -11,9 +11,10 @@ config :webludo,
   ecto_repos: [WebLudo.Repo]
 
 # Configures the endpoint
+# secret_key_base is set per-environment: dev/test in their respective
+# config files, prod in config/runtime.exs from SECRET_KEY_BASE.
 config :webludo, WebLudoWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "FLOYVRiQYbMc68sZSHmfExMRzIyI7thxEYwddsHPw3xlvFSQHNPCngM5G3H3Iazp",
   render_errors: [view: WebLudoWeb.ErrorView, accepts: ~w(html json)],
   pubsub_server: WebLudo.PubSub,
   live_view: [signing_salt: "SC1OdLtr"]
