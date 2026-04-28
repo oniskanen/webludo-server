@@ -6,6 +6,11 @@ defmodule WebLudo.Logic.Constants do
   # i.e. directly across the board from one another.
   @opposite_color_pairs [{:red, :yellow}, {:blue, :green}]
 
+  # Every atom that may legally appear in an EctoAtom-typed column. The
+  # whitelist guards against atom-table-leak DoS via String.to_atom on
+  # arbitrary input. Update this when a new color or area is added.
+  @valid_atoms @team_colors ++ [:none, :home, :play, :goal, :center]
+
   @team_order %{
     red: :blue,
     blue: :yellow,
@@ -46,6 +51,10 @@ defmodule WebLudo.Logic.Constants do
 
   def opposite_color_pairs do
     @opposite_color_pairs
+  end
+
+  def valid_atoms do
+    @valid_atoms
   end
 
   def next_team(color) do
