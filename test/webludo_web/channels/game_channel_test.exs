@@ -462,4 +462,37 @@ defmodule WebLudoWeb.Channels.GameChannelTest do
 
     assert_reply ref, :error, %{message: "The blue team does not need to call hembo"}
   end
+
+  test "player token from a different game is rejected" do
+    game_a = WebLudo.TestHelpers.game_fixture(%{code: "game_a", current_team: :red})
+    game_b = WebLudo.TestHelpers.game_fixture(%{code: "game_b", current_team: :red})
+
+    player_a = Enum.find(game_a.players, &match?(%{team: %{color: :red}}, &1))
+    token_a = Auth.get_token(player_a)
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game_b.code}", %{})
+
+    ref = push(socket, "action", %{token: token_a, type: "roll"})
+
+    assert_reply ref, :error, _
+    refute_broadcast "roll", _
+  end
+
+  test "host token for a different game is rejected" do
+    game_a = WebLudo.TestHelpers.setup_game_fixture(%{code: "game_a"})
+    game_b = WebLudo.TestHelpers.setup_game_fixture(%{code: "game_b"})
+
+    host_token_a = WebLudoWeb.HostAuth.get_token(game_a)
+
+    {:ok, socket} = connect(WebLudoWeb.UserSocket, %{})
+    assert {:ok, _reply, socket} = subscribe_and_join(socket, "games:#{game_b.code}", %{})
+
+    ref = push(socket, "start_game", %{host_token: host_token_a})
+
+    assert_reply ref, :error, _
+
+    # Game A must not be started by an action sent through game B's channel.
+    refute WebLudo.Repo.get!(WebLudo.Logic.Game, game_a.id).has_started
+  end
 end
