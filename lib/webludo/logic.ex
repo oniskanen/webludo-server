@@ -797,7 +797,8 @@ defmodule WebLudo.Logic do
   end
 
   defp preload_game(game, opts \\ []) when is_list(opts) do
-    game =
+    %Game{} =
+      game =
       game
       |> Repo.preload(:pieces, opts)
       |> Repo.preload(:players, opts)
