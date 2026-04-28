@@ -1,3 +1,8 @@
+# LOCAL DEVELOPMENT ONLY.
+# Production deploys use mix release + systemd on an exe.dev VM —
+# see deploy/README.md. Bring up the db service alone with
+# `docker compose -f docker-compose.dev.yml up -d db` if you only
+# need Postgres for `mix test` or local iex sessions.
 version: '3'
 
 services:

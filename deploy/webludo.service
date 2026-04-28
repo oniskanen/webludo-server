@@ -1,0 +1,19 @@
+[Unit]
+Description=WebLudo Phoenix release
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=webludo
+Group=webludo
+WorkingDirectory=/opt/webludo/repo
+EnvironmentFile=/etc/webludo/webludo.env
+ExecStart=/opt/webludo/repo/_build/prod/rel/webludo/bin/webludo start
+ExecStop=/opt/webludo/repo/_build/prod/rel/webludo/bin/webludo stop
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
