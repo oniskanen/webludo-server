@@ -15,4 +15,5 @@ defmodule WebLudoWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
+  plug WebLudoWeb.UpgradeRequired
 end
