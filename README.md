@@ -1,29 +1,24 @@
 # Webludo
 
-This project is a Phoenix server that handles running a game of beer-Ludo ("Kalja-Kimble"). The API is based on Phoenix channels. A Postgres-based persistence layer is included for longer games. See [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) for the corresponding web client. The current version of the game can be played at https://webludo.katris.dev/
+This project is a Phoenix server that handles running a game of beer-Ludo ("Kalja-Kimble"). The API is based on Phoenix channels. A Postgres-based persistence layer is included for longer games. See [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) for the corresponding web client. The current version of the game can be played at https://webludo.katris.dev/.
 
 ## Initial local setup
 
-Steps to setup the project the first time:
+Steps to set up the project the first time:
 
-- Clone the repository
-- Install dependencies with `mix deps.get`
-- Ensure that a local Postgres database is running and the settings in `config/dev.exs` match your local setup
-- Create and migrate your database with `mix ecto.setup`
+- Clone the repository.
+- Install dependencies with `mix deps.get`.
+- Either point at a local Postgres matching `config/dev.exs`, or start one with `docker compose -f docker-compose.dev.yml up -d db`.
+- Create and migrate the database with `mix ecto.setup`.
 
 ## Local server
 
-To start your Phoenix server: `mix phx.server`
+Start the Phoenix server with `mix phx.server`. It listens on [`localhost:4000`](http://localhost:4000). There is no built-in browser interface — run [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) locally to interact with it.
 
-The server now runs in [`localhost:4000`](http://localhost:4000). There is no built-in browser interface, but running [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) locally works well.
+## Tests
 
-## Production deployment
+`mix test` creates and migrates the test database, then runs the ExUnit suite.
 
-The production instance can be found at https://webludo-api.oni.dev. Deployment is done through Gigalixir.
+## Production
 
-1. Deploy by running `git push gigalixir master`
-2. (If migrations are needed:) `gigalixir ps:migrate` to run missing database migrations
-
-## Accessing production server logs
-
-You can tail the production server logs by running `gigalixir logs`
+The production instance runs on an exe.dev VM at https://webludo-api.oni.dev. Deploy steps, env-file layout, systemd unit, migrations, and rollback are documented in [`deploy/README.md`](deploy/README.md). Tail logs with `sudo journalctl -u webludo`.
