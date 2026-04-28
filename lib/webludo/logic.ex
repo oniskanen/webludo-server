@@ -560,6 +560,13 @@ defmodule WebLudo.Logic do
         %Game{current_team: current_team, has_started: true} = game,
         %Move{type: type} = move
       ) do
+    {:ok, result} =
+      Repo.transaction(fn -> execute_move_inner(game, current_team, move, type) end)
+
+    result
+  end
+
+  defp execute_move_inner(game, current_team, %Move{} = move, type) do
     piece = get_piece(move.piece_id)
 
     game = game |> Repo.preload(:pieces) |> Repo.preload(:players)

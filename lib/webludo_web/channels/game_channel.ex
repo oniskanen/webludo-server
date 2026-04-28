@@ -55,52 +55,6 @@ defmodule WebLudoWeb.GameChannel do
     end
   end
 
-  defp handle_move_action(game, player, move, socket) do
-    current_team = game.current_team
-
-    case current_team == player.team.color do
-      false ->
-        {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
-
-      true ->
-        moves = Logic.get_moves(game)
-
-        case moves do
-          [] ->
-            {:reply, {:error, %{message: "No moves available"}}, socket}
-
-          moves ->
-            validated_move = Enum.find(moves, fn m -> m.piece_id == move["piece_id"] end)
-
-            case validated_move do
-              nil ->
-                {:reply, {:error, %{message: "Not a valid move"}}, socket}
-
-              m ->
-                {game, changes} = Logic.execute_move(game, m)
-
-                penalties = Map.get(changes, :penalties, [])
-                game = Logic.apply_penalties(game, penalties)
-
-                handle_penalty_announcement(penalties, socket)
-
-                finishing_teams = Map.get(changes, :finishing_teams, [])
-                handle_finish_announcement(finishing_teams, socket)
-
-                multiplied_piece = Map.get(changes, :doubled, %{})
-                handle_multiplied_announcement(multiplied_piece, socket)
-
-                raise_info = Map.get(changes, :raise, %{})
-                handle_raise_announcement(raise_info, socket)
-
-                broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
-
-                {:reply, :ok, socket}
-            end
-        end
-    end
-  end
-
   def handle_in("join_game", %{"name" => name}, socket) do
     {:ok, game} = Logic.get_game_by_code(socket.assigns.code)
     {:ok, player} = Logic.create_player(game, %{name: name})
@@ -347,6 +301,52 @@ defmodule WebLudoWeb.GameChannel do
 
           {:error, message} ->
             {:reply, {:error, %{message: message}}, socket}
+        end
+    end
+  end
+
+  defp handle_move_action(game, player, move, socket) do
+    current_team = game.current_team
+
+    case current_team == player.team.color do
+      false ->
+        {:reply, {:error, %{error: "It is the #{current_team} team's turn"}}, socket}
+
+      true ->
+        moves = Logic.get_moves(game)
+
+        case moves do
+          [] ->
+            {:reply, {:error, %{message: "No moves available"}}, socket}
+
+          moves ->
+            validated_move = Enum.find(moves, fn m -> m.piece_id == move["piece_id"] end)
+
+            case validated_move do
+              nil ->
+                {:reply, {:error, %{message: "Not a valid move"}}, socket}
+
+              m ->
+                {game, changes} = Logic.execute_move(game, m)
+
+                penalties = Map.get(changes, :penalties, [])
+                game = Logic.apply_penalties(game, penalties)
+
+                handle_penalty_announcement(penalties, socket)
+
+                finishing_teams = Map.get(changes, :finishing_teams, [])
+                handle_finish_announcement(finishing_teams, socket)
+
+                multiplied_piece = Map.get(changes, :doubled, %{})
+                handle_multiplied_announcement(multiplied_piece, socket)
+
+                raise_info = Map.get(changes, :raise, %{})
+                handle_raise_announcement(raise_info, socket)
+
+                broadcast!(socket, "game_updated", %{game: game, changes: changes, actions: []})
+
+                {:reply, :ok, socket}
+            end
         end
     end
   end
