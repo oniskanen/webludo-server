@@ -3,7 +3,13 @@ import Config
 # Origins allowed to open the websocket. The host (PHX_HOST) is set in
 # config/runtime.exs from the environment.
 config :webludo, WebLudoWeb.Endpoint,
-  check_origin: ["//localhost:*", "//webludo.netlify.com", "//webludo.katris.dev"]
+  check_origin: [
+    "//localhost:*",
+    "//webludo.netlify.com",
+    "//webludo.katris.dev",
+    "//webludo.oni.dev",
+    "//daemon-king.exe.xyz"
+  ]
 
 # Do not print debug messages in production
 config :logger, level: :info
