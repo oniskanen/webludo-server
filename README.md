@@ -1,6 +1,6 @@
 # Webludo
 
-This project is a Phoenix server that handles running a game of beer-Ludo ("Kalja-Kimble"). The API is based on Phoenix channels. A Postgres-based persistence layer is included for longer games. See [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) for the corresponding web client. The current version of the game can be played at https://webludo.katris.dev/.
+This project is a Phoenix server that handles running a game of beer-Ludo ("Kalja-Kimble"). The API is based on Phoenix channels. A Postgres-based persistence layer is included for longer games. See [the Preact frontend project](https://github.com/katrimarika/kimble-frontend) for the corresponding web client. The primary deployment of the frontend is at https://webludo.katris.dev/; while a config issue there is being resolved, https://webludo.oni.dev/ is the current playable URL.
 
 ## Initial local setup
 

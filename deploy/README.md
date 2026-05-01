@@ -166,8 +166,10 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://webludo-api.oni.dev/socket/web
 ```
 
 A `400` or `426` is expected — the websocket endpoint rejects plain HTTP
-upgrade attempts but proves the path is wired end to end. The frontend at
-`https://webludo.katris.dev` should now connect.
+upgrade attempts but proves the path is wired end to end. The frontend
+should now connect: the primary deployment at `https://webludo.katris.dev`
+or, while a config issue there is being resolved, the fallback at
+`https://webludo.oni.dev`.
 
 ## Subsequent deploys
 
