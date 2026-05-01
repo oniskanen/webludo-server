@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Phoenix API server for a multiplayer Beer-Ludo (Finnish "Kimble") game. Live at `https://webludo-api.oni.dev`. Frontend at `https://webludo.katris.dev` lives in a separate repo (`katrimarika/kimble-frontend`) and is out of scope here.
+Phoenix API server for a multiplayer Beer-Ludo (Finnish "Kimble") game. Live at `https://webludo-api.oni.dev`. Frontend lives in a separate repo (`katrimarika/kimble-frontend`) — out of scope here. Primary deployment is `https://webludo.katris.dev`; while a config issue there is being resolved, `https://webludo.oni.dev` is the current active URL.
 
 ## Architecture
 
